@@ -37,7 +37,9 @@ class RoleMidleware
         // if($request->user()==null){
         // dd($request->user()->role);
         // $user = $request->user();
+        // dd($request->path());
         // dd(in_array($request->user()->status, $roles));
+        // dd((in_array($request->path(), ['user/preferensi/save', 'question-new-user'])));
         if (!$user) {
             return redirect('/Login')->with('fail', ['Akses Ditolak', 'Anda Belum Login, Silahkan login terlebih dahulu!']);
             // abort(403, 'Anda belum login.');
@@ -46,12 +48,9 @@ class RoleMidleware
             // return redirect('/')->with('fail',['AKSES DITOLAK!','Halaman ini']);
             abort(403, 'Halaman ini tidak bisa diakses oleh Role anda saat ini');
         }
-        else if(session('account')!='admin' && $request->path()!='question-new-user'){
+        else if(session('account')!='admin' && (!in_array($request->path(), ['user/preferensi/save', 'question-new-user']))){
             if(session('account')['preferensi_user']==null){
                 return redirect('/question-new-user');
-            }
-            else{
-                dd('masuk');
             }
         }
         // dd('udh masuk');
