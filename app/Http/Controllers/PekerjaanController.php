@@ -195,29 +195,42 @@ class PekerjaanController extends Controller
 
     public function getThe20ies()
     {
-        $all = Pekerjaan::all();
         $result = [];
-
-        foreach ($all as $kerja) {
-            $decimal = $this->cosineSimilarityPercent(
-                json_encode($kerja),
-                json_encode(session('account')->preferensi_user)
-            );
-
-            if (count($result) < 15) {
-                $result[$kerja->id] = $decimal;
-            } else {
-                $minVal = min($result);
-                $minKey = array_search($minVal, $result);
-
-                if ($decimal > $minVal) {
-                    unset($result[$minKey]); // hapus yang terkecil
+        $all = Pekerjaan::all();
+        if (session()->has('account')){//apabila sudah login
+    
+            foreach ($all as $kerja) {
+                //cek hasil CSP
+                $decimal = $this->cosineSimilarityPercent(
+                    json_encode($kerja),
+                    json_encode(session('account')->preferensi_user)
+                );
+    
+                //membatasi jumlah pekerjaan disarankan
+                if (count($result) < 15) {
                     $result[$kerja->id] = $decimal;
                 }
+                //jika sudah mencapai jumlah, maka cut yg paling kecil didalam array
+                else {
+                    //angka berapa yg paling kecil dalam array
+                    $minimal_value = min($result);
+                    //cari keynya dari angka paling kecil
+                    $key_minimal_value = array_search($minimal_value, $result);
+                    
+                    //cek jika hasil CSP lebih besar dr minimal value maka ganti
+                    if ($decimal > $minimal_value) {
+                        unset($result[$key_minimal_value]);// hapus yang terkecil
+                        $result[$kerja->id] = $decimal;//ganti isi array
+                    }
+                }
             }
+            (arsort($result));//urutkan array dari yg terbesar ke terkecil
+            // dd($result);
         }
-        (arsort($result));
-        // dd($result);
+        else{
+            // $result = $all;
+            // dd($result,'belum');
+        }
 
         return ($result);
     }
