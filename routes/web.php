@@ -11,16 +11,6 @@ use App\Http\Controllers\TopUpController;
 use App\Models\Users;
 use Illuminate\Support\Facades\Auth;
 
-
-// Route::get('/', function () {
-//     return view('welcome');
-// });
-
-// Route::get('/cek', [PekerjaanController::class, 'cosineSimilarityPercent']);
-// Route::resource('kerja', PekerjaanController::class);
-
-
-
 //DEWA
 Route::get('/', function () {
     return redirect('/Index');
@@ -33,6 +23,11 @@ Route::get('/Index', [HomeController::class, 'index'])->name('home');
 Route::get('/Login', [HomeController::class, 'Login']);
 Route::get('/Register', [HomeController::class, 'Register']);
 Route::get('/Logout', [UsersController::class, 'logout']);
+Route::get('/NotAllowed', function(){
+    $nama_halaman = 'Akses Ditolak';
+    $active_navbar = 'none';
+    return view('Dewa.NotAllowedPage', compact('nama_halaman','active_navbar'));
+});
 
 
 
