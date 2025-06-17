@@ -21,22 +21,36 @@ class DatabaseSeeder extends Seeder
         //     SideJobSeeder::class,
         // ]);
 
-        Users::factory()->count(40)->create();
-
-        Users::factory()->create([
-            'email' => 'admin@admin',
-            'role'=>'admin',
-        ]);
-        Users::factory()->create([
-            'email' => 'user@user',
-            'role'=>'user',
-        ]);
-        Users::factory()->create([
-            'email' => 'mitra@mitra',
-            'role'=>'mitra',
+        // Create admin user
+        Users::create([
+            'nama' => 'admin',
+            'email' => 'admin@example.com',
+            'role' => 'admin',
+            'isAdmin' => 1,
+            'password' => bcrypt('admin1234'),
         ]);
 
-        Users::factory()->count(20)->create();
+        // Create user1, user2, user3
+        for ($i = 1; $i <= 3; $i++) {
+            Users::create([
+                'nama' => 'user' . $i,
+                'email' => 'user' . $i . '@example.com',
+                'role' => 'user',
+                'isAdmin' => 0,
+                'password' => bcrypt('user1234'),
+            ]);
+        }
+
+        // Create owner1, owner2, owner3
+        for ($i = 1; $i <= 3; $i++) {
+            Users::create([
+                'nama' => 'owner' . $i,
+                'email' => 'owner' . $i . '@example.com',
+                'role' => 'mitra',
+                'isAdmin' => 0,
+                'password' => bcrypt('owner1234'),
+            ]);
+        }
 
 
         $hobi_offline = [
@@ -98,6 +112,20 @@ class DatabaseSeeder extends Seeder
             ]);
         }
         $path = database_path('seeders/sql/pekerjaans_mass_insert_final.sql');
-        DB::unprepared(File::get($path));
+        
+        // Read the SQL content
+        $sqlContent = File::get($path);
+        
+        // Replace invalid user IDs with valid ones (1-7)
+        // This ensures foreign key constraints are satisfied
+        $validUserIds = [1, 2, 3, 4, 5, 6, 7];
+        
+        // Use regex to find and replace the pembuat column values
+        $sqlContent = preg_replace_callback('/(\', )(\d+)(, NOW\(\), NOW\(\)\))/', function($matches) use ($validUserIds) {
+            $randomUserId = $validUserIds[array_rand($validUserIds)];
+            return $matches[1] . $randomUserId . $matches[3];
+        }, $sqlContent);
+        
+        DB::unprepared($sqlContent);
     }
 }
