@@ -49,7 +49,7 @@
                 </div>
                 <div>
                     <p class="text-xs text-gray-500">Total saldo Anda</p>
-                    <p class="text-xl font-bold text-gray-800">Rp {{ number_format(session('account')->dompet, 0, ',', '.') }}</p>
+                    <p class="text-xl font-bold text-gray-800" data-balance>Rp {{ number_format($user->dompet, 0, ',', '.') }}</p>
                 </div>
             </div>
         </div>

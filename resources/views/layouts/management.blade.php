@@ -240,6 +240,7 @@
         </div>
     </div>
 
+    <script src="{{ asset('js/balance-update.js') }}"></script>
     @stack('scripts')
 </body>
 </html>
