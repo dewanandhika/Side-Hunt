@@ -182,10 +182,14 @@ class TopUpController extends Controller
                         $user = $lockedPayment->user;
                         $user->increment('dompet', $lockedPayment->amount);
                         
+                        // Update session with fresh user data
+                        $freshUser = $user->fresh();
+                        session(['account' => $freshUser]);
+                        
                         return response()->json([
                             'status' => 'success',
                             'message' => 'Pembayaran berhasil! Saldo Anda telah ditambahkan.',
-                            'new_balance' => $user->fresh()->dompet
+                            'new_balance' => $freshUser->dompet
                         ]);
                     }
                     
@@ -285,6 +289,12 @@ class TopUpController extends Controller
                     ($previousStatus !== 'paid' && $previousStatus !== 'settled')) {
                     $user = $payment->user;
                     $user->increment('dompet', $payment->amount);
+                    
+                    // Update session with fresh user data if this user is currently logged in
+                    if (session('account') && session('account')->id == $user->id) {
+                        $freshUser = $user->fresh();
+                        session(['account' => $freshUser]);
+                    }
                 }
             }
         } catch (\Exception $e) {

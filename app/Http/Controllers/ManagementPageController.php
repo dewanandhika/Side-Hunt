@@ -21,13 +21,22 @@ class ManagementPageController extends Controller
 
     public function dashboard()
     {
-        $totalPekerjaans = Pekerjaan::where('pembuat', session('account')['id'])
+        $user = session('account');
+        $totalPekerjaans = Pekerjaan::where('pembuat', $user['id'])
                   ->where('is_active', '1')
                   ->count();
         $totalPekerja = 20;
         
+        // Get fresh user data from database to ensure balance is current
+        $currentUser = Users::find($user['id']);
         
-        return view('manajemen.dashboard', compact( 'totalPekerjaans','totalPekerja'));
+        // Update session with fresh data if balance is different
+        if ($currentUser && $currentUser->dompet != $user->dompet) {
+            session(['account' => $currentUser]);
+            $user = $currentUser;
+        }
+        
+        return view('manajemen.dashboard', compact('totalPekerjaans','totalPekerja', 'user'));
     }
 
     // --- Fitur Manajemen Utama ---
