@@ -243,7 +243,7 @@ class UsersController extends Controller
             return redirect('/Login')->with('success',['Email berhasil diverifikasi', 'silahkan login']);
         }
         else{
-            return redirect()->back()->with('fail', ['Kode Verifikasi Salah, silahkan input ulang']);
+            return redirect()->back()->with('fail', ['Kode Verifikasi Salah', 'silahkan input ulang']);
         }
     }
 

@@ -161,3 +161,6 @@ Route::middleware(['role:user|mitra'])->group(function () {
 // Route::get('/sidejob/edit/{id}', [SideJobController::class, 'editAdmin'])->name('admin.sidejob.edit');
 
 // });
+
+
+require __DIR__.'/auth.php';

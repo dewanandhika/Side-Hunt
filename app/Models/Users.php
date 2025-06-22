@@ -7,10 +7,12 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Contracts\Auth\Authenticatable as AuthenticatableContract;
 use Illuminate\Auth\Authenticatable;
 use Illuminate\Notifications\Notifiable;
+use Namu\WireChat\Traits\Chatable;
+use Illuminate\Contracts\Auth\MustVerifyEmail;
 
 class Users extends Model implements AuthenticatableContract
 {
-    use HasFactory, Notifiable, Authenticatable;
+    use HasFactory, Notifiable, Authenticatable, Chatable;
     // use HasFactory, Notifiable;
     protected $table = 'users'; // pastikan ini eksplisit
 
@@ -66,6 +68,15 @@ class Users extends Model implements AuthenticatableContract
     {
         return $this->belongsToMany(Users::class, 'pelamars');
     }
+    public function hasVerifiedEmail(): bool
+    {
+        return !is_null($this->email_verified_at);
+    }
+
+    public function getDisplayNameAttribute(): ?string
+    {
+      return $this->nama ?? 'user';
+    }
 
     public function payments()
     {
@@ -80,5 +91,38 @@ class Users extends Model implements AuthenticatableContract
     public function isAdmin(): bool
     {
         return $this->role == 'mitra';
+    }
+
+    public function searchChatables(string $query)
+    {
+     $searchableFields = ['nama'];
+     return Users::where(function ($queryBuilder) use ($searchableFields, $query) {
+        foreach ($searchableFields as $field) {
+                $queryBuilder->orWhere($field, 'LIKE', '%'.$query.'%');
+        }
+      })
+        ->limit(20)
+        ->get();
+    }
+
+    public function getCoverUrlAttribute(): ?string
+    {
+      return $this->avatar_url ?? null;
+    }
+
+    public function getProfileUrlAttribute(): ?string
+    {
+        //belum ada
+      return route('profile', ['id' => $this->id]);
+    }
+
+    public function canCreateGroups(): bool
+    {
+      return $this->hasVerifiedEmail();
+    }
+
+    public function canCreateChats(): bool
+    {
+     return $this->hasVerifiedEmail();
     }
 }

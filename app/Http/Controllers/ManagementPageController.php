@@ -6,7 +6,6 @@ use App\Models\Pekerjaan;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth; // Jika Anda memerlukan info Auth
 use App\Models\Transaksi;
-use App\Models\User;
 use App\Models\Payment; // add Payment import
 use App\Models\Users;
 
