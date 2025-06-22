@@ -135,8 +135,12 @@
                         <li class="nav-item dropdown position-relative">
                             <a class="nav-link d-flex w-auto justify-content-start align-content-center flex-row gap-1 {{{($active_navbar=='Beri Lowongan Kerja')? 'active':''}}}"
                                 href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false">
-                                <p>Pekerjaan</p>
-                                <i class="bi bi-caret-down-fill"></i>
+                                <div class="w-auto h-50 d-flex justify-content-center align-items-center">
+                                    <p>Pekerjaan</p>
+                                </div>
+                                <div class="w-auto h-50 d-flex justify-content-center align-items-center">
+                                    <i class="bi bi-caret-down-fill"></i>
+                                </div>
                             </a>
                             <ul class="dropdown-menu normal ms-4 ms-md-0 bg-darker hover-bg-dark">
                                 <li><a class="dropdown-item" href="#">
