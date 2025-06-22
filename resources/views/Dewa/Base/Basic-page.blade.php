@@ -1,4 +1,5 @@
 @vite(['resources/js/app.js'])
+
 <!doctype html>
 <html lang="{{ str_replace('_', '-', app()->getLocale()) }}">
 
@@ -32,6 +33,7 @@
     <!-- Scripts -->
     @vite(['resources/sass/app.scss', 'resources/js/app.js'])
     @yield('css')
+    
 
 </head>
 <style>
@@ -55,7 +57,7 @@
                 <div class="d-flex flex-row gap-2">
                     <div class="d-flex d-md-none">
                         <button type="button" class="btn bg-transparent" data-bs-toggle="offcanvas"
-                            data-bs-target="#staticBackdropChat" aria-controls="staticBackdropChat">
+                            data-bs-target="#staticBackdropChat" onclick="window.location.href='/chats'" aria-controls="staticBackdropChat">
                             <i class="bi bi-chat-right-text-fill text-white"></i>
                         </button>
                     </div>
@@ -114,7 +116,7 @@
                         <div class="d-none d-md-flex">
                             <button type="button" class="btn bg-transparent" data-bs-toggle="offcanvas"
                                 data-bs-target="#staticBackdropChat" aria-controls="staticBackdropChat">
-                                <i class="bi bi-chat-left-text-fill text-white"></i>
+                                <i class="bi bi-chat-left-text-fill text-white" onclick="window.location.href='/chats'"></i>
                             </button>
                         </div>
 
@@ -192,41 +194,6 @@
                 </div>
             </div>
         </nav>
-        <div class="SpecialChat offcanvas offcanvas-end" data-bs-backdrop="static" tabindex="-1" id="staticBackdropChat"
-            aria-labelledby="staticBackdropChatLabel">
-            <div class="offcanvas-header bg-prim-me d-flex flex-column w-100">
-                <div class="d-flex flex-row justify-content-between w-100">
-                    <h5 class="offcanvas-title text-white" id="staticBackdropChatLabel">Chats</h5>
-                    <button type="button" class="btn-close" data-bs-dismiss="offcanvas" aria-label="Close"></button>
-                </div>
-                <div class="d-flex flex-row justify-content-center w-100">
-                    <button class="btn bg-transparent text-white">Dilamar</button>
-                    <button class="btn bg-transparent text-white">Pelamar</button>
-                </div>
-            </div>
-            <div class="offcanvas-body d-flex flex-row">
-                <div class="d-flex flex-column w-25 h-100">
-                    <div>
-                        @for($i=0;$i<5;$i++) <div>
-                            Nama PT
-                    </div>
-                    @endfor
-                </div>
-            </div>
-            <div class="d-flex flex-column w-75 h-100">
-                <div>
-                    Nama Penerima
-                </div>
-                <div class="d-flex flex-grow-1 flex-column justify-content-between">
-                    <div class="bodyChat">
-                        text
-                    </div>
-                    <div class="SpaceChat ">
-                        <input type="text">
-                    </div>
-                </div>
-            </div>
-        </div>
     </div>
     @yield('add-onn')
     <div class="main-content">
