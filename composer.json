@@ -10,7 +10,7 @@
         "laravel/framework": "^11.0",
         "laravel/sanctum": "^4.0",
         "laravel/tinker": "^2.8",
-        "munafio/chatify": "*",
+        "namu/wirechat": "^0.2.10",
         "xendit/xendit-php": "^7.0"
     },
     "require-dev": {

@@ -13,12 +13,21 @@ class VerificationCodeMail extends Mailable
 {
     use Queueable, SerializesModels;
 
+    public $code;
     /**
      * Create a new message instance.
      */
-    public function __construct()
+    public function __construct($code)
     {
-        //
+        $this->code = $code;
+    }
+
+    public function build()
+    {
+         $serverUrl = request()->getSchemeAndHttpHost();
+        return $this->subject('Your Verification Code')
+            ->view('Dewa.User.VerificationCodeToEmail')
+            ->with(['code' => $this->code,'server_url'=>$serverUrl]);
     }
 
     /**
@@ -34,12 +43,12 @@ class VerificationCodeMail extends Mailable
     /**
      * Get the message content definition.
      */
-    public function content(): Content
-    {
-        return new Content(
-            view: 'view.name',
-        );
-    }
+    // public function content(): Content
+    // {
+    //     return new Content(
+    //         view: 'view.name',
+    //     );
+    // }
 
     /**
      * Get the attachments for the message.

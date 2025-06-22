@@ -11,6 +11,9 @@ use Illuminate\Foundation\Auth\AuthenticatesUsers;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
 use Laravel\Ui\Presets\React;
+use App\Mail\VerificationCodeMail;
+use Illuminate\Support\Facades\Mail;
+
 // use User;
 
 class UsersController extends Controller
@@ -41,35 +44,11 @@ class UsersController extends Controller
     public function showAdmin($id)
     {
         $user = Users::findOrFail($id);
-        $jobs = SideJob::where('pembuat', $id)->get();
+        $jobs = Pekerjaan::where('pembuat', $id)->get();
         return view('admin.users.profile', compact('user', 'jobs'));
     }
 
-    // public function create(): View
-    // {
-    //     return view('admin.users.create');
-    // }
-
-    // public function store(Request $request): RedirectResponse
-    // {
-    //     $request->validate([
-    //         'nama' => ['required', 'string', 'max:255'],
-    //         'email' => ['required', 'string', 'email', 'max:255', 'unique:users'],
-    //         'alamat' => ['required', 'string', 'max:255'],
-    //         'telpon' => ['required', 'string', 'numeric'],
-    //         'password' => ['required', 'string', 'min:8', 'confirmed'],
-    //     ]);
-    //     Users::create([
-    //         'nama' => $request['nama'],
-    //         'email' => $request['email'],
-    //         'alamat' => $request['alamat'],
-    //         'telpon' => $request['telpon'],
-    //         'password' => Hash::make($request['password']),
-    //     ]);
-    //     return redirect()->back()->with(['success' => 'User berhasil tersimpan']);
-    // }
-
-    public function edit(string $id): View
+    public function edit(string $id)
     {
         $user = Users::findorfail($id);
 
@@ -77,7 +56,7 @@ class UsersController extends Controller
     }
 
     //Cara code untuk ubah data
-    public function update(Request $request, $id): RedirectResponse
+    public function update(Request $request, $id)
     {
         $request->validate([
             'nama' => ['required', 'string', 'max:255'],
@@ -98,7 +77,7 @@ class UsersController extends Controller
         return redirect()->route('admin.index')->with(['success' => 'Data berhasil diubah']);
     }
 
-    public function destroy($id): RedirectResponse
+    public function destroy($id)
     {
         $user = Users::findorfail($id);
         $user->delete();
@@ -120,23 +99,23 @@ class UsersController extends Controller
         // dd(Hash::check($req->password,$user->password));
         if ($user) {
             if ($user && Hash::check($req->password, $user->password)) {
-                if (Auth::attempt($credentials)) {
-                    session(['account' => $user]);
-                    // dd(session('account'));
+                if ($user->email_verified_at != null) {
+                    if (Auth::attempt($credentials)) {
+                        session(['account' => $user]);
+                        // dd(session('account'));
 
-                    // dd('masuk');
-                    if (session('account')->preferensi_user == null) {
-                        return redirect('/question-new-user')->with('success', ['Izin Mengganggu waktunya sebentar', 'Isi Data Terlebih Dahulu']);
-                    } else {
-                        return redirect('/Index')->with('success', ['Sukses', 'Login Berhasil']);
+                        // dd('masuk');
+                        if (session('account')->preferensi_user == null) {
+                            return redirect('/question-new-user')->with('success', ['Izin Mengganggu waktunya sebentar', 'Isi Data Terlebih Dahulu']);
+                        } else {
+                            return redirect('/Index')->with('success', ['Sukses', 'Login Berhasil']);
+                        }
                     }
+                } else {
+                    return redirect('/Verify-Email')->with([
+                        'fail' => ['Login Gagal', 'Email belum diverifikasi, silahkan buka email anda kemudian lakukan verifikasi terlebih dahulu, lalu login kembali'],
+                    ])->withInput();
                 }
-                // }
-                // else{
-                //     return back()->withErrors([
-                //         'message' => '0, Email atau password salah',
-                //     ])->withInput();
-                // }
             } else {
                 return back()->with([
                     'fail' => ['Login Gagal', 'Password salah'],
@@ -209,10 +188,62 @@ class UsersController extends Controller
         // dd('masuk');
         $data['password'] = Hash::make($req->password);
         $data['nama'] = $req['nama-depan'] . ' ' . $req['nama-belakang'];
-        if (Users::create($data)) {
-            return redirect()->back()->with('success', ['Registrasi Berhasil', 'Akun anda berhasil didaftarkan, Silahkan Login']);
+        $save_user = Users::create($data);
+        if ($save_user) {
+            $verificationCode = $this->sendVerificationCode($data['email']);
+            if ($verificationCode != false) {
+                $save_user->VerificationCode = $verificationCode;
+                $save_user->save();
+                return redirect('/Verify-Email')->with('success', ['Registrasi Berhasil', 'Akun anda berhasil didaftarkan, Jangan lupa Cek Email untuk verifikasi lalu silahkan Login']);
+            } else {
+                return redirect()->back()->with('fail', ['Registrasi Gagal', 'Email tidak ditemukan']);
+            }
         } else {
             return redirect()->back()->with('fail', ['Registrasi Gagal', 'Maaf Terjadi Kesalahan dalam penyimpanan data']);
+        }
+    }
+
+    function sendVerificationCode($email)
+    {
+        $code = rand(100000, 999999);
+        if (Mail::to($email)->send(new VerificationCodeMail($code))) {
+            return $code;
+        } else {
+            return false;
+        }
+    }
+
+    function verify_view(){
+        $active_navbar = 'Verifikasi Email';
+        $nama_halaman = 'Verifikasi Email';
+       
+        return view('Dewa.User.ToVerifyEmail',compact('active_navbar','nama_halaman'));
+    }
+
+    function submit_verify_email(Request $req){
+        $req->validate([
+
+            'kode_verifikasi' => 'required|string|max:10',
+            'email' => 'required|string|max:60',
+        ], [
+            'kode_verifikasi.required' => 'Kode Verifikasi Wajib diisi.',
+            'kode_verifikasi.string' => 'Nama harus berupa Angka.',
+            'kode_verifikasi.max' => 'Nama maksimal 10 karakter.',
+
+            'email.required' => 'Kode Verifikasi Wajib diisi.',
+            'email.string' => 'Nama harus berupa string.',
+            'email.max' => 'Nama maksimal 10 karakter.',
+        ]);
+
+     
+        $user = Users::where('email', $req->email)->first();
+        if($user->VerificationCode==$req->kode_verifikasi){
+            $user->email_verified_at = now();
+            $user->save();
+            return redirect('/Login')->with('success',['Email berhasil diverifikasi', 'silahkan login']);
+        }
+        else{
+            return redirect()->back()->with('fail', ['Kode Verifikasi Salah, silahkan input ulang']);
         }
     }
 
@@ -252,7 +283,7 @@ class UsersController extends Controller
     {
         // dd($req);
         // dd(session('account')->id);
-        $user = Users::findOrFail(session('account')->id);
+        $user = Users::findOrFail(session('account')['id']);
         $user->nama = $req->nama;
         $user->alamat = $req->alamat;
         $user->telpon = $req->telpon;
@@ -267,7 +298,7 @@ class UsersController extends Controller
     function save_preverensi(Request $request)
     {
         $alal = $request->json()->all();
-        $user = Users::findOrFail(session('account')->id);
+        $user = Users::findOrFail(session('account')['id']);
         $user->preferensi_user = json_encode($request->except('_token'));
         if ($user->save()) {
             session(['account' => $user]);

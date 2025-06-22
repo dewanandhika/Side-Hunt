@@ -52,12 +52,20 @@
                     </div>
 
                 </a>
+                <div class="d-flex flex-row gap-2">
+                    <div class="d-flex d-md-none">
+                        <button type="button" class="btn bg-transparent" data-bs-toggle="offcanvas"
+                            data-bs-target="#staticBackdropChat" aria-controls="staticBackdropChat">
+                            <i class="bi bi-chat-right-text-fill text-white"></i>
+                        </button>
+                    </div>
+                    <button class="navbar-toggler" type="button" data-bs-toggle="collapse"
+                        data-bs-target="#navbarSupportedContent" aria-controls="navbarSupportedContent"
+                        aria-expanded="false" aria-label="Toggle navigation">
+                        <span class="navbar-toggler-icon"></span>
+                    </button>
 
-                <button class="navbar-toggler" type="button" data-bs-toggle="collapse"
-                    data-bs-target="#navbarSupportedContent" aria-controls="navbarSupportedContent"
-                    aria-expanded="false" aria-label="Toggle navigation">
-                    <span class="navbar-toggler-icon"></span>
-                </button>
+                </div>
 
                 <div class="collapse h-auto normal navbar-collapse slide-down flex-column flex-md-row gap-3 gap-md-0"
                     id="navbarSupportedContent">
@@ -103,6 +111,12 @@
                                     </a></li>
                             </ul>
                         </div>
+                        <div class="d-none d-md-flex">
+                            <button type="button" class="btn bg-transparent" data-bs-toggle="offcanvas"
+                                data-bs-target="#staticBackdropChat" aria-controls="staticBackdropChat">
+                                <i class="bi bi-chat-left-text-fill text-white"></i>
+                            </button>
+                        </div>
 
                         @endif
                     </ul>
@@ -123,8 +137,8 @@
                         @if(session()->has('account'))
                         @if(session('account')->role=='mitra')
                         <li class="nav-item ">
-                            <a class="nav-link {{{($active_navbar=='Management')? 'active':''}}}"
-                                aria-current="page" href="/management/">
+                            <a class="nav-link {{{($active_navbar=='Management')? 'active':''}}}" aria-current="page"
+                                href="/management/">
                                 <p>Management</p>
                             </a>
                         </li>
@@ -178,36 +192,72 @@
                 </div>
             </div>
         </nav>
-        @yield('add-onn')
-        <div class="main-content">
-            @yield('content')
-        </div>
-
-
-        <div class="bottom mt-4">
-            <div class="semi-bottom normal">
-                <div class="container bottom">
-                    <div>
-                        <p>Email</p>
-                        <p>sidehunt@gmail.com</p>
-                    </div>
-
-                    <div>
-                        <p>Phone</p>
-                        <p>0895339385652</p>
-                    </div>
-                    <div class="lebih-panjang">
-                        <p>Addresss</p>
-                        <p>Jl. RE Martadinata, Kali Nangkaan, Dabasah, Kec. Bondowoso, Kab. Bondowoso, Jawa Timur 68211
-                        </p>
-                    </div>
-
+        <div class="SpecialChat offcanvas offcanvas-end" data-bs-backdrop="static" tabindex="-1" id="staticBackdropChat"
+            aria-labelledby="staticBackdropChatLabel">
+            <div class="offcanvas-header bg-prim-me d-flex flex-column w-100">
+                <div class="d-flex flex-row justify-content-between w-100">
+                    <h5 class="offcanvas-title text-white" id="staticBackdropChatLabel">Chats</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="offcanvas" aria-label="Close"></button>
+                </div>
+                <div class="d-flex flex-row justify-content-center w-100">
+                    <button class="btn bg-transparent text-white">Dilamar</button>
+                    <button class="btn bg-transparent text-white">Pelamar</button>
                 </div>
             </div>
-            <div class="copyright">
-                <p>@Copyright 2025</p>
+            <div class="offcanvas-body d-flex flex-row">
+                <div class="d-flex flex-column w-25 h-100">
+                    <div>
+                        @for($i=0;$i<5;$i++) <div>
+                            Nama PT
+                    </div>
+                    @endfor
+                </div>
+            </div>
+            <div class="d-flex flex-column w-75 h-100">
+                <div>
+                    Nama Penerima
+                </div>
+                <div class="d-flex flex-grow-1 flex-column justify-content-between">
+                    <div class="bodyChat">
+                        text
+                    </div>
+                    <div class="SpaceChat ">
+                        <input type="text">
+                    </div>
+                </div>
             </div>
         </div>
+    </div>
+    @yield('add-onn')
+    <div class="main-content">
+        @yield('content')
+    </div>
+
+
+    <div class="bottom mt-4">
+        <div class="semi-bottom normal">
+            <div class="container bottom">
+                <div>
+                    <p>Email</p>
+                    <p>sidehunt@gmail.com</p>
+                </div>
+
+                <div>
+                    <p>Phone</p>
+                    <p>0895339385652</p>
+                </div>
+                <div class="lebih-panjang">
+                    <p>Addresss</p>
+                    <p>Jl. RE Martadinata, Kali Nangkaan, Dabasah, Kec. Bondowoso, Kab. Bondowoso, Jawa Timur 68211
+                    </p>
+                </div>
+
+            </div>
+        </div>
+        <div class="copyright">
+            <p>@Copyright 2025</p>
+        </div>
+    </div>
 
     </div>
 </body>

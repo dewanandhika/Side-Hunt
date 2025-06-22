@@ -21,6 +21,8 @@ Route::get('/', function () {
 Route::get('/', [HomeController::class, 'index'])->name('home');
 Route::get('/Index', [HomeController::class, 'index'])->name('home');
 Route::get('/Login', [HomeController::class, 'Login']);
+Route::get('/Verify-Email', [UsersController::class, 'verify_view']);
+Route::post('/verify_email', [UsersController::class, 'submit_verify_email']);
 Route::get('/Register', [HomeController::class, 'Register']);
 Route::get('/Logout', [UsersController::class, 'logout']);
 Route::get('/NotAllowed', function(){
