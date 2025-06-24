@@ -14,7 +14,7 @@ return new class extends Migration
         Schema::create('pekerjaans', function (Blueprint $table) {
             $table->id()->restrictOnDelete()->autoIncrement();
             $table->string('nama');
-            $table->string('deskripsi');
+            $table->longText('deskripsi');
             // $table->date('tanggal_buat');
             $table->string('alamat');
             $table->string('koordinat');

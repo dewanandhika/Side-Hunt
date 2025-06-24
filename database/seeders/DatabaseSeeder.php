@@ -112,7 +112,7 @@ class DatabaseSeeder extends Seeder
                 'nama' => ucwords($i)
             ]);
         }
-        $path = database_path('seeders/sql/pekerjaans_mass_insert_final.sql');
+        $path = database_path('seeders/sql/pekerjaans_mass_insert_updated.sql');
         
         // Read the SQL content
         $sqlContent = File::get($path);

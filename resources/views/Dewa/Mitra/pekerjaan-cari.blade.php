@@ -77,36 +77,8 @@
             </div>
         </div>
     </div>
-    <!-- <div class="result d-flex w-100 d-flex mt-5 flex-column row">
-        Hasil Pencarian,
-        <div class="w-100 justify-content-center align-items-center d-flex ">
-            <div class="row g-3 border-3 border-black shadow mt-0 rounded-4 p-3 pt-0 row d-flex flex-wrap justify-content-start justify-content-md-start align-items-start"
-                style="min-height: 43vh; width: fit-content; max-width: fit-content; min-width: 100%;">
-                @for($i=20;$i>1;$i--)
-                <div class="col-12 col-md-6 col-lg-3">
-                    <a href=""
-                        class=" w-100 h-100 job text-decoration-none d-flex flex-row p-0 gap-0 rounded-2 align-items-center justify-content-between"
-                        style="">
-                        <div class="rounded-start-2 justify-content-start align-items-center"
-                            style="width: 40%; min-width: 40%; height: 100%;">
-                            <img class="rounded-start-2" src="{{ auto_asset('Dewa/img/f4030acf172260f3241cad5f4527a7d8.jpg') }}"
-                                style="width: 100%; height: 100%;  object-fit: cover;" alt="">
-                        </div>
-                        <div class="d-flex flex-column justify-content-center text-truncate align-items-start gap-0 flex-grow-1 h-100 p-2"
-                            style=" max-width: 100%;">
-                            <p class="clear-p fw-bolder text-truncate w-100" style="font-size: 12px; color: #2E2D2C;">
-                                Potong
-                                Rumput ksdaksjdkjasbdkjasbdkmasbndmanb</p>
-                            <p class="clear-p  opacity-50" style="font-size: 10px; color: #2E2D2C;">5 Jam yang lalu</p>
-                            <p class="clear-p opacity-50" style="font-size: 10px; color: #2E2D2C;">1,4 km</p>
-                        </div>
-                    </a>
-                </div>
-                @endfor
-            </div>
-        </div>
-    </div> -->
     <div class="result d-flex w-100 d-flex mt-5 flex-column row">
+        @if(count($match)!=0)
         Pekerjaan Disarankan,
         <div class="w-100 justify-content-center align-items-center d-flex ">
             <div class="row g-3 border-3 border-black shadow mt-0 rounded-4 p-3 pt-0 row d-flex flex-wrap justify-content-start justify-content-md-start align-items-start"
@@ -136,6 +108,41 @@
                 @endforeach
             </div>
         </div>
+        @else
+        <h5>
+            Berdasarkan data yang kamu isi di preferensi user, Belum ada Pekerjaan yang cocok untukmu
+        </h5>
+        <p>tapi jangan sedih berikut pekerjaan yang sedang diminati oleh kebanyakan user</p>
+
+        <div class="w-100 justify-content-center align-items-center d-flex ">
+            <div class="row g-3 border-3 border-black shadow mt-0 rounded-4 p-3 pt-0 row d-flex flex-wrap justify-content-start justify-content-md-start align-items-start"
+                style="min-height: 43vh; width: fit-content; max-width: fit-content; min-width: 100%;">
+                @foreach($match as $key => $value)
+                <div class="col-12 col-md-6 col-lg-3">
+                    <a href="{{{$key}}}"
+                        class=" w-100 h-100 job text-decoration-none d-flex flex-row p-0 gap-0 rounded-2 align-items-center justify-content-between"
+                        style="">
+                        <div class="rounded-start-2 justify-content-start align-items-center"
+                            style="width: 40%; min-width: 40%; height: 100%;">
+                            <img class="rounded-start-2"
+                                src="{{ auto_asset('Dewa/img/f4030acf172260f3241cad5f4527a7d8.jpg') }}"
+                                style="width: 100%; height: 100%;  object-fit: cover;" alt="">
+                        </div>
+                        <div class="d-flex flex-column justify-content-center text-truncate align-items-start gap-0 flex-grow-1 h-100 p-2"
+                            style=" max-width: 100%;">
+                            <p class="clear-p fw-bolder text-truncate w-100" style="font-size: 12px; color: #2E2D2C;">
+                                {{{$all[$key-1]['nama']}}}</p>
+                            <p class="clear-p  opacity-50" style="font-size: 10px; color: #2E2D2C;">5 Jam yang lalu</p>
+                            <p class="clear-p opacity-50" style="font-size: 10px; color: #2E2D2C;">
+                                {{{hitungJarak($all[$key-1]['longitude'], $all[$key-1]['langitude'],
+                                session('account')['longitude'], session('account')['langitude'])}}}</p>
+                        </div>
+                    </a>
+                </div>
+                @endforeach
+            </div>
+        </div>
+        @endif
     </div>
 
 </div>
