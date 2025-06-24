@@ -124,6 +124,13 @@ Route::middleware(['role:user|mitra'])->group(function () {
     });
 });
 
+Route::get('/cekkossaine',function(){
+    return view('Dewa.cekcossaine');
+});
+
+Route::post('/CekKos', [PekerjaanController::class, 'ForTest']);
+
+
 
 //Only Mitra
 

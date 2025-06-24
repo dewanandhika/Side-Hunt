@@ -156,58 +156,170 @@ class PekerjaanController extends Controller
     }
     function cosineSimilarityPercent($text1, $text2)
     {
-        // 1. Hitung frekuensi kata dari masing-masing teks
-        $words1 = array_count_values(str_word_count(strtolower($text1), 1));
-        $words2 = array_count_values(str_word_count(strtolower($text2), 1));
+        // Normalize: lowercase and remove extra spaces
+        $text1 = strtolower(trim($text1));
+        $text2 = strtolower(trim($text2));
 
-        // 2. Gabungkan semua kata unik dari kedua teks
-        $allWords = array_unique(array_merge(array_keys($words1), array_keys($words2)));
+        // Create n-grams
+        $ngrams1 = $this->getCharacterNgrams($text1, 2);
+        $ngrams2 = $this->getCharacterNgrams($text2, 2);
 
-        // 3. Bangun vektor BoW untuk kedua teks
+        // Count frequency of each n-gram
+        $freq1 = array_count_values($ngrams1);
+        $freq2 = array_count_values($ngrams2);
+
+        // Union of keys
+        $allKeys = array_unique(array_merge(array_keys($freq1), array_keys($freq2)));
+
+        // Vectorize both n-gram sets
         $vec1 = [];
         $vec2 = [];
 
-        foreach ($allWords as $word) {
-            $vec1[] = $words1[$word] ?? 0;
-            $vec2[] = $words2[$word] ?? 0;
+        foreach ($allKeys as $key) {
+            $vec1[] = isset($freq1[$key]) ? $freq1[$key] : 0;
+            $vec2[] = isset($freq2[$key]) ? $freq2[$key] : 0;
         }
 
-        // 4. Hitung dot product dan magnitude dari vektor
+        // Cosine similarity
         $dotProduct = 0;
-        $magnitude1 = 0;
-        $magnitude2 = 0;
+        $mag1 = 0;
+        $mag2 = 0;
 
         for ($i = 0; $i < count($vec1); $i++) {
             $dotProduct += $vec1[$i] * $vec2[$i];
-            $magnitude1 += $vec1[$i] ** 2;
-            $magnitude2 += $vec2[$i] ** 2;
+            $mag1 += pow($vec1[$i], 2);
+            $mag2 += pow($vec2[$i], 2);
         }
 
-        // 5. Jika salah satu vektor nol (kosong), hasil 0%
-        if ($magnitude1 == 0 || $magnitude2 == 0) {
-            return 0.0;
-        }
+        if ($mag1 == 0 || $mag2 == 0) return 0.0;
 
-        // 6. Hitung cosine similarity dan ubah ke persen
-        $similarity = $dotProduct / (sqrt($magnitude1) * sqrt($magnitude2));
-        return round($similarity * 100, 2); // Misal 0.75 → 75.00%
+        $similarity = $dotProduct / (sqrt($mag1) * sqrt($mag2));
+        return round($similarity * 100, 2); // Convert to percent
     }
+
+    function ForTest(Request $request)
+    {
+        $this->runTests();
+        return $this->cosineSimilarity($request->text1, $request->text2);
+    }
+
+    public function cosineSimilarity($text1, $text2)
+    {
+        $tokens1 = $this->preprocess($text1);
+        $tokens2 = $this->preprocess($text2);
+
+        $vocab = $this->fuzzyUnion($tokens1, $tokens2);
+        $vec1 = array_fill_keys($vocab, 0);
+        $vec2 = array_fill_keys($vocab, 0);
+
+        foreach ($tokens1 as $t1) {
+            $match = $this->fuzzyMatch($t1, $vocab);
+            if ($match) $vec1[$match]++;
+        }
+
+        foreach ($tokens2 as $t2) {
+            $match = $this->fuzzyMatch($t2, $vocab);
+            if ($match) $vec2[$match]++;
+        }
+
+        $dot = 0;
+        $mag1 = 0;
+        $mag2 = 0;
+        foreach ($vocab as $term) {
+            $dot += $vec1[$term] * $vec2[$term];
+            $mag1 += pow($vec1[$term], 2);
+            $mag2 += pow($vec2[$term], 2);
+        }
+
+        if ($mag1 == 0 || $mag2 == 0) return 0.0;
+        return round(($dot / (sqrt($mag1) * sqrt($mag2))) * 100, 2);
+    }
+
+    private function preprocess($text)
+    {
+        $text = strtolower($text);
+        $text = preg_replace('/[^a-z\s]/', '', $text);
+        $words = preg_split('/\s+/', $text);
+
+        $stopwords = ['aku', 'saya', 'yang', 'untuk', 'dengan', 'secara', 'atau', 'ke', 'dari', 'bisa', 'adalah', 'itu', 'ini', 'dan', 'biasanya', 'sebagai'];
+
+        return array_values(array_filter(array_diff($words, $stopwords)));
+    }
+
+    private function fuzzyMatch($token, $vocab)
+    {
+        foreach ($vocab as $v) {
+            similar_text($token, $v, $percent);
+            if ($percent >= 80.0) return $v;
+        }
+        return null;
+    }
+
+    private function fuzzyUnion($tokens1, $tokens2)
+    {
+        $combined = array_merge($tokens1, $tokens2);
+        $result = [];
+
+        foreach ($combined as $token) {
+            if (!$this->fuzzyMatch($token, $result)) {
+                $result[] = $token;
+            }
+        }
+
+        return $result;
+    }
+
+    // Tambahkan fungsi ini untuk menjalankan 3 pengujian langsung
+    public function runTests()
+    {
+        echo "1. 'program' vs 'programmer': " . $this->cosineSimilarity("program", "programmer") . "%\n\n";
+
+        echo "2. kerja vs kurir: " . $this->cosineSimilarity(
+            "Aku bisa coding, biasanya aku program sesuatu",
+            "Kurir Barang Mengantarkan barang dari penjual ke pembeli."
+        ) . "%\n\n";
+
+        echo "3. kerja vs freelance programmer: " . $this->cosineSimilarity(
+            "Aku bisa coding, biasanya aku program sesuatu",
+            "Programmer Lepas Mengembangkan aplikasi atau website secara freelance."
+        ) . "%\n\n";
+    }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
     public function getThe20ies()
     {
         $result = [];
         $all = Pekerjaan::all();
-        if (session()->has('account')){//apabila sudah login
-    
+        if (session()->has('account')) { //apabila sudah login
+
             foreach ($all as $kerja) {
                 //cek hasil CSP
-                $decimal = $this->cosineSimilarityPercent(
-                    json_encode($kerja),
-                    json_encode(session('account')->preferensi_user)
+                // dd(
+                //     json_decode(session('account')->preferensi_user)->deskripsi,
+                //     json_decode($all[6])->nama . " " . json_decode($all[6])->deskripsi
+                // );
+                $decimal = $this->cosineSimilarity(
+                    json_encode(json_decode($kerja)->nama . " " . json_decode($kerja)->deskripsi),
+                    json_encode(json_decode(session('account')->preferensi_user)->deskripsi)
                 );
-    
+                // echo "<br> ".json_decode(session('account')->preferensi_user)->deskripsi."n dg <br>".json_decode($kerja)->nama . " <br>" . json_decode($kerja)->deskripsi." Hasilnya: ".$decimal."<br>";
+
                 //membatasi jumlah pekerjaan disarankan
-                if (count($result) < 15) {
+                if (count($result) < 20) {
                     $result[$kerja->id] = $decimal;
                 }
                 //jika sudah mencapai jumlah, maka cut yg paling kecil didalam array
@@ -216,23 +328,26 @@ class PekerjaanController extends Controller
                     $minimal_value = min($result);
                     //cari keynya dari angka paling kecil
                     $key_minimal_value = array_search($minimal_value, $result);
-                    
+
                     //cek jika hasil CSP lebih besar dr minimal value maka ganti
                     if ($decimal > $minimal_value) {
-                        unset($result[$key_minimal_value]);// hapus yang terkecil
-                        $result[$kerja->id] = $decimal;//ganti isi array
+                        unset($result[$key_minimal_value]); // hapus yang terkecil
+                        $result[$kerja->id] = $decimal; //ganti isi array
                     }
                 }
             }
-            (arsort($result));//urutkan array dari yg terbesar ke terkecil
+            $filtered = array_filter($result, function ($value) {
+                return $value != 0.0;
+            });
+            // dd($filtered);
+            (arsort($result)); //urutkan array dari yg terbesar ke terkecil
             // dd($result);
-        }
-        else{
+        } else {
             // $result = $all;
             // dd($result,'belum');
         }
 
-        return ($result);
+        return ($filtered);
     }
 
     function hitungJarak($lat1, $lon1, $lat2, $lon2)

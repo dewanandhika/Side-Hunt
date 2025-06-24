@@ -113,7 +113,7 @@
                 style="min-height: 43vh; width: fit-content; max-width: fit-content; min-width: 100%;">
                 @foreach($match as $key => $value)
                 <div class="col-12 col-md-6 col-lg-3">
-                    <a href="{{{$all[$key]['id']}}}"
+                    <a href="{{{$key}}}"
                         class=" w-100 h-100 job text-decoration-none d-flex flex-row p-0 gap-0 rounded-2 align-items-center justify-content-between"
                         style="">
                         <div class="rounded-start-2 justify-content-start align-items-center"
@@ -125,10 +125,10 @@
                         <div class="d-flex flex-column justify-content-center text-truncate align-items-start gap-0 flex-grow-1 h-100 p-2"
                             style=" max-width: 100%;">
                             <p class="clear-p fw-bolder text-truncate w-100" style="font-size: 12px; color: #2E2D2C;">
-                                {{{$all[$key]['nama']}}}</p>
+                                {{{$all[$key-1]['nama']}}}</p>
                             <p class="clear-p  opacity-50" style="font-size: 10px; color: #2E2D2C;">5 Jam yang lalu</p>
                             <p class="clear-p opacity-50" style="font-size: 10px; color: #2E2D2C;">
-                                {{{hitungJarak($all[$key]['longitude'], $all[$key]['langitude'],
+                                {{{hitungJarak($all[$key-1]['longitude'], $all[$key-1]['langitude'],
                                 session('account')['longitude'], session('account')['langitude'])}}}</p>
                         </div>
                     </a>
