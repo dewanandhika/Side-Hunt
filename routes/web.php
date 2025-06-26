@@ -25,6 +25,8 @@ Route::get('/Verify-Email', [UsersController::class, 'verify_view']);
 Route::post('/verify_email', [UsersController::class, 'submit_verify_email']);
 Route::get('/Register', [HomeController::class, 'Register']);
 Route::get('/Logout', [UsersController::class, 'logout']);
+Route::get('/Pekerjaan/{id}', [PekerjaanController::class, 'view_pekerjaan']);
+
 Route::get('/NotAllowed', function(){
     $nama_halaman = 'Akses Ditolak';
     $active_navbar = 'none';

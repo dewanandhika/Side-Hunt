@@ -86,7 +86,7 @@
             @php
             $questions = [
             'job_distance' => ['label' => 'Jarak kerja yang Anda bersedia tempuh', 'options' => [
-            '0' => 'hanya remote',
+            '0 ' => 'hanya remote',
             '1' => 'kurang dari atau sama dengan 1 km',
             '2' => '1–5 km',
             '3' => '6–10 km',
@@ -149,7 +149,8 @@
 
 
                 <label for="" class="form-label"> Deskripsikan Dirimu</label>
-                <textarea name="deskripsi" id="" class="shadow-sm form-control mb-3" placeholder="Beri gambaran kepada kami anda orang yang seperti apa, bisa kebiasaan, pekerjaan, dan hal yang disukai"></textarea>
+                <textarea name="deskripsi" id="" class="shadow-sm form-control mb-3"
+                    placeholder="Beri gambaran kepada kami anda orang yang seperti apa, bisa kebiasaan, pekerjaan, dan hal yang disukai"></textarea>
             </div>
 
             @foreach ($questions as $name => $q)
@@ -180,18 +181,30 @@
                                     3)</label>
                             </div>
                             <div class="dropdown-list p-3 overflow-y-hidden">
-                                <input type="text" class="form-control mb-2"
+                                <!-- Input manual -->
+                                <input type="text" name="kriteria_manual" class="form-control mb-2"
                                     placeholder="Tulis disini jika tidak ada, format: text, text, text">
+
+                                <!-- Input search -->
                                 <input type="text" class="form-control mb-3" oninput="SearchSelect()"
                                     placeholder="Cari Kriteria..." id="searchKriteria">
 
+                                <!-- Tombol Reset -->
+                                <div class="text-end mb-2">
+                                    <button type="button" class="btn btn-sm btn-outline-danger"
+                                        onclick="resetCheckboxes()">
+                                        Reset Checkbox
+                                    </button>
+                                </div>
+
+                                <!-- List kriteria -->
                                 <ul class="list-unstyled mb-0 overflow-y-scroll"
                                     style="height: 18vh; min-height: 18vh; max-height: 18vh;">
                                     @foreach($kriteria as $k)
                                     <li class="mb-2">
                                         <div class="form-check">
                                             <input class="form-check-input" type="checkbox" name="kriteria{{ $k->id }}"
-                                                value="{{ $k->id.' '.$k->nama }}" name="AL" id="kriteria{{ $k->id }}">
+                                                value="{{ $k->nama }}" id="kriteria{{ $k->id }}">
                                             <label class="form-check-label" for="kriteria{{ $k->id }}">
                                                 {{ $k->nama }}
                                             </label>
@@ -200,6 +213,7 @@
                                     @endforeach
                                 </ul>
                             </div>
+
                         </div>
                     </div>
                 </div>
@@ -221,5 +235,11 @@
 @endsection
 
 @section('js')
+<script>
+    function resetCheckboxes() {
+        const checkboxes = document.querySelectorAll('.form-check-input');
+        checkboxes.forEach(cb => cb.checked = false);
+    }
+</script>
 
 @endsection

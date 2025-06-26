@@ -81,7 +81,7 @@
         @if(count($match)!=0)
         Pekerjaan Disarankan,
         <div class="w-100 justify-content-center align-items-center d-flex ">
-            <div class="row g-3 border-3 border-black shadow mt-0 rounded-4 p-3 pt-0 row d-flex flex-wrap justify-content-start justify-content-md-start align-items-start"
+            <div class="row g-3 border-3 border-black shadow mt-0 rounded-4 p-3 pt-0 row d-flex flex-grow-1 justify-content-start justify-content-md-start align-items-start"
                 style="min-height: 43vh; width: fit-content; max-width: fit-content; min-width: 100%;">
                 @foreach($match as $key => $value)
                 <div class="col-12 col-md-6 col-lg-3">

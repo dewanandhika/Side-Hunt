@@ -21,12 +21,20 @@ class PekerjaanController extends Controller
 
         return view("Dewa.Mitra.pekerjaan-cari", compact("active_navbar", 'nama_halaman', 'all', 'match'));
     }
+
+
     public function create()
     {
         $active_navbar = 'Beri Lowongan Kerja';
         $nama_halaman = 'Tambah Pekerjaan';
         $kriteria = KriteriaJob::all();
         return view("Dewa.Mitra.pekerjaan-add", compact("active_navbar", 'nama_halaman', 'kriteria'));
+    }
+
+    public function view_pekerjaan($id){
+        $active_navbar = 'Cari Pekerjaan';
+        $nama_halaman = 'Lihat Pekerjaan';
+        return view ('Dewa.Mitra.pekerjaan-lihat', compact("active_navbar", 'nama_halaman'));
     }
 
     public function store(Request $request)
@@ -199,7 +207,7 @@ class PekerjaanController extends Controller
 
     function ForTest(Request $request)
     {
-        $this->runTests();
+        // $this->runTests();
         return $this->cosineSimilarity($request->text1, $request->text2);
     }
 
@@ -312,9 +320,13 @@ class PekerjaanController extends Controller
                 //     json_decode(session('account')->preferensi_user)->deskripsi,
                 //     json_decode($all[6])->nama . " " . json_decode($all[6])->deskripsi
                 // );
+                // $decimal = $this->cosineSimilarity(
+                //     json_encode(json_decode($kerja)->nama . " " . json_decode($kerja)->deskripsi),
+                //     json_encode(json_decode(session('account')->preferensi_user)->deskripsi)
+                // );
                 $decimal = $this->cosineSimilarity(
                     json_encode(json_decode($kerja)->nama . " " . json_decode($kerja)->deskripsi),
-                    json_encode(json_decode(session('account')->preferensi_user)->deskripsi)
+                    json_encode(json_decode(session('account')->preferensi_user)->deskripsi." ".implode(",",json_decode(session('account')->preferensi_user)->kriteria))
                 );
                 // echo "<br> ".json_decode(session('account')->preferensi_user)->deskripsi."n dg <br>".json_decode($kerja)->nama . " <br>" . json_decode($kerja)->deskripsi." Hasilnya: ".$decimal."<br>";
 

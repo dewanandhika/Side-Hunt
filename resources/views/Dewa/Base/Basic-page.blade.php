@@ -89,7 +89,7 @@
 
                             <div class="d-flex flex-row user gap-2 align-items-center justify-content-center"
                                 data-bs-toggle="dropdown" aria-expanded="false">
-                                <p class="m-0 p-0">Halo {{{explode(" ", session('account')['nama'])[0]}}},</p>
+                                <p class="m-0 p-0">({{{ucwords(session('account')['role'])}}}) Halo {{{explode(" ", session('account')['nama'])[0]}}}, </p>
                                 <svg width="30" height="29" viewBox="0 0 30 29" fill="none"
                                     xmlns="http://www.w3.org/2000/svg">
                                     <rect width="30" height="29" rx="14.5" fill="white" />

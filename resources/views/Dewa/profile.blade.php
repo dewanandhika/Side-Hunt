@@ -75,12 +75,13 @@ padding: 0;
         <div class="contform h-100 gap-3 d-flex flex-column justify-content-start" style="width: 90% !important;">
             <div class="d-flex justify-content-start flex-column w-50 align-content-center">
                 <label for="">Nama</label>
-                <input type="text" name="nama" class="rounded-2 px-2 w-100" id="" placeholder="John">
+                <input type="text" name="nama" class="rounded-2 px-2 w-100" value="{{{session('account')->nama}}}" id=""
+                    placeholder="John">
             </div>
             <div class="d-flex justify-content-start flex-column w-75 align-content-center">
                 <label for="">Alamat</label>
-                <input type="text" name="alamat" class="rounded-2 px-2 w-100" id=""
-                    placeholder="Jl, Pangsud V Mangundikaran, Nganjuk">
+                <input type="text" name="alamat" class="rounded-2 px-2 w-100" value="{{{session('account')->alamat}}}"
+                    id="" placeholder="Jl, Pangsud V Mangundikaran, Nganjuk">
             </div>
             <div class="d-flex justify-content-start flex-column w-100 align-content-center">
                 <label for="">Nomor Telepon</label>
@@ -100,8 +101,8 @@ padding: 0;
                     <input type="tel" name="telpon" class="rounded-2 px-2 w-100" id="" placeholder="84965454654654654">
                 </div>
             </div>
-            <div>
-                <label for="">Alamat Email</label>
+            <div class="opacity-75">
+                <label for="">Alamat Email (tidak bisa diubah)</label>
                 <p>Dewaaaaaaaaa@gmail.co.isos</p>
             </div>
             <div>
@@ -154,6 +155,31 @@ padding: 0;
                     </div>
 
                 </a>
+            </div>
+        </div>
+    </div>
+</div>
+<div class="container justify-content-center p-5 align-items-center text-white widthHeightFull">
+    <div class="card w-100 shadow-lg" style="max-width: 100%; width: 100%;">
+        <div class="card-body w-100">
+            <div class="d-flex flex-row justify-content-between align-items-center">
+                <h4 class="clear-p">Preferensi User</h4>
+                <button class="btn btn-light" onclick="window.location.href='/question-new-user'">Perbarui</button>
+            </div>
+            <hr>
+            <div class="mb-4">
+                <h5 class="mb-2">Deskripsi</h5>
+                <p class="card-text">
+                    {{{json_decode(session('account')->preferensi_user)->deskripsi}}}
+                </p>
+            </div>
+            <div>
+                <h5 class="mb-3">Keahlian</h5>
+                <div class="d-flex flex-wrap gap-2">
+                    @foreach(json_decode(session('account')->preferensi_user)->kriteria as $kriteria)
+                    <span class="badge w-auto text-wrap text-start fs-5 bg-prim-me">{{{ucwords($kriteria)}}}</span>
+                    @endforeach
+                </div>
             </div>
         </div>
     </div>

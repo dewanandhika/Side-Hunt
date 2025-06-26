@@ -13,6 +13,7 @@ use Illuminate\Support\Facades\Hash;
 use Laravel\Ui\Presets\React;
 use App\Mail\VerificationCodeMail;
 use Illuminate\Support\Facades\Mail;
+use Illuminate\Support\Arr;
 
 // use User;
 
@@ -58,6 +59,7 @@ class UsersController extends Controller
     //Cara code untuk ubah data
     public function update(Request $request, $id)
     {
+        // dd($request);
         $request->validate([
             'nama' => ['required', 'string', 'max:255'],
             'email' => ['required', 'string', 'email', 'max:255', 'unique:users'],
@@ -213,14 +215,16 @@ class UsersController extends Controller
         }
     }
 
-    function verify_view(){
+    function verify_view()
+    {
         $active_navbar = 'Verifikasi Email';
         $nama_halaman = 'Verifikasi Email';
-       
-        return view('Dewa.User.ToVerifyEmail',compact('active_navbar','nama_halaman'));
+
+        return view('Dewa.User.ToVerifyEmail', compact('active_navbar', 'nama_halaman'));
     }
 
-    function submit_verify_email(Request $req){
+    function submit_verify_email(Request $req)
+    {
         $req->validate([
 
             'kode_verifikasi' => 'required|string|max:10',
@@ -235,14 +239,13 @@ class UsersController extends Controller
             'email.max' => 'Nama maksimal 10 karakter.',
         ]);
 
-     
+
         $user = Users::where('email', $req->email)->first();
-        if($user->VerificationCode==$req->kode_verifikasi){
+        if ($user->VerificationCode == $req->kode_verifikasi) {
             $user->email_verified_at = now();
             $user->save();
-            return redirect('/Login')->with('success',['Email berhasil diverifikasi', 'silahkan login']);
-        }
-        else{
+            return redirect('/Login')->with('success', ['Email berhasil diverifikasi', 'silahkan login']);
+        } else {
             return redirect()->back()->with('fail', ['Kode Verifikasi Salah', 'silahkan input ulang']);
         }
     }
@@ -283,10 +286,11 @@ class UsersController extends Controller
     {
         // dd($req);
         // dd(session('account')->id);
+
         $user = Users::findOrFail(session('account')['id']);
         $user->nama = $req->nama;
         $user->alamat = $req->alamat;
-        $user->telpon = $req->telpon;
+        $user->telpon = "(" . $req->dial_code . ") " . $req->telpon;
         if ($user->save()) {
             session(['account' => $user]);
 
@@ -297,9 +301,33 @@ class UsersController extends Controller
 
     function save_preverensi(Request $request)
     {
-        $alal = $request->json()->all();
+        // dd($request);
+        $parameters = $request->all();
+
+        $kriteria = [];
+
+        // Loop dan ekstrak semua kriteria
+        foreach ($parameters as $key => $value) {
+            if(strpos($key, 'kriteria_manual')===0){
+                $all = explode(",",$value);
+                // dd($all);
+                foreach($all as $new_kriteria){
+                    $kriteria[] = trim($new_kriteria);
+                }
+                unset($parameters[$key]);
+            }
+            elseif(strpos($key, 'kriteria') === 0) {
+                $kriteria[] = $value;
+                unset($parameters[$key]); // hapus kriteriaX
+            }
+        }
+
+        // Tambahkan array kriteria baru
+        $parameters['kriteria'] = $kriteria;
+
+        // dd($parameters); // Tampilkan hasil akhir
         $user = Users::findOrFail(session('account')['id']);
-        $user->preferensi_user = json_encode($request->except('_token'));
+        $user->preferensi_user = json_encode(Arr::except($parameters, ['_token']));
         if ($user->save()) {
             session(['account' => $user]);
 
