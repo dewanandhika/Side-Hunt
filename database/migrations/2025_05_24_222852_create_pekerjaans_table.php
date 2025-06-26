@@ -23,7 +23,7 @@ return new class extends Migration
             $table->integer('max_pekerja')->default('0');
             $table->integer('jumlah_pelamar_diterima')->default('0'); 
             $table->integer('is_active')->default(1);
-            $table->string('kriteria');
+            $table->text('kriteria');
             $table->string('status')->default('Open');
             $table->string('petunjuk_alamat');
             $table->string('latitude');

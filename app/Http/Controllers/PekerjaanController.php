@@ -7,19 +7,22 @@ use App\Models\KriteriaJob;
 use App\Models\Pekerjaan;
 use App\Models\Pelamar;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
+
 
 class PekerjaanController extends Controller
 {
     public function index()
     {
-        $all = Pekerjaan::all();
+        $all = Pekerjaan::orderBy('nama', 'asc')->get();
+        $all_rekomendasi = Pekerjaan::all();
         // dd($all[0]);
         $match = ($this->getThe20ies());
         $active_navbar = 'Cari Pekerjaan';
         $nama_halaman = 'Cari Pekerjaan';
 
 
-        return view("Dewa.Mitra.pekerjaan-cari", compact("active_navbar", 'nama_halaman', 'all', 'match'));
+        return view("Dewa.Mitra.pekerjaan-cari", compact("active_navbar", 'nama_halaman', 'all', 'match', 'all_rekomendasi'));
     }
 
 
@@ -27,14 +30,67 @@ class PekerjaanController extends Controller
     {
         $active_navbar = 'Beri Lowongan Kerja';
         $nama_halaman = 'Tambah Pekerjaan';
-        $kriteria = KriteriaJob::all();
+        $path = public_path('Dewa/json/dummy_skills.json');
+        $kriteria = json_decode(file_get_contents($path), true)['skills'];
         return view("Dewa.Mitra.pekerjaan-add", compact("active_navbar", 'nama_halaman', 'kriteria'));
     }
+    public function Daftar_Pelamar($id)
+    {
+        // $id = 50;
+        $active_navbar = 'Pekerjaan';
+        $nama_halaman = 'Daftar Pelamar Pekerjaan';
+        $pelamars = Pekerjaan::join('pelamars', 'pekerjaans.id', '=', 'pelamars.job_id')
+            ->join('users', 'pelamars.user_id', '=', 'users.id')
+            ->where('pekerjaans.pembuat', session('account')['id']);
+        if ($id != 'all') {
+            $pelamars->where('pelamars.job_id', $id);
+        }
+        $pelamars = $pelamars->select(
+            'pekerjaans.*',
+            'pelamars.created_at as daftar',
+            'users.nama as nama_pelamar',
+            'users.preferensi_user',
+            'pelamars.status as status_job'
+        )->get();
 
-    public function view_pekerjaan($id){
+        foreach($pelamars as $pelamar){
+            $skills = [];
+            if (!empty($pelamar->preferensi_user)) {
+                $preferensi = json_decode($pelamar->preferensi_user);
+                if (!empty($preferensi->kriteria)) {
+                    foreach($preferensi->kriteria as $skill){
+                        if($skill != ""){
+                            $skills[] = $skill;
+                        }
+                    }
+                }
+            }
+            $pelamar->preferensi_user=(implode(", ", $skills));;
+        }
+        // dd($skills);
+        // dd($pelamars->preferensi_user);
+        // dd($pelamars);
+        // dd(implode(", ", json_decode($pelamars[0]->preferensi_user)->kriteria));
+
+
+        return view('Dewa.Mitra.daftar-pelamar', compact("active_navbar", 'nama_halaman', 'pelamars'));
+    }
+
+    public function view_pekerjaan($id)
+    {
         $active_navbar = 'Cari Pekerjaan';
         $nama_halaman = 'Lihat Pekerjaan';
-        return view ('Dewa.Mitra.pekerjaan-lihat', compact("active_navbar", 'nama_halaman'));
+        $data_pekerjaan = Pekerjaan::where('id', $id)->get();
+        $kriteria = explode(",", $data_pekerjaan[0]['kriteria']);
+        $data_pekerjaan[0]['kriteria'] = $kriteria;
+        if (session()->has('account')) {
+            $history = Pelamar::where('user_id', session('account')['id'])
+                ->where('job_id', $id)
+                ->get();
+            return view('Dewa.Mitra.pekerjaan-lihat', compact("active_navbar", 'nama_halaman', 'data_pekerjaan', 'history'));
+        } else {
+            return view('Dewa.Mitra.pekerjaan-lihat', compact("active_navbar", 'nama_halaman', 'data_pekerjaan'));
+        }
     }
 
     public function store(Request $request)
@@ -45,7 +101,7 @@ class PekerjaanController extends Controller
             'min_gaji' => 'required|integer|max:99999999999999999999', // maksimal 20 digit
             'max_gaji' => 'required|integer|max:99999999999999999999', // maksimal 20 digit
             'max_pekerja' => 'required|integer|max:9999999999', // maksimal 10 digit
-            'deskripsi' => 'required|string|max:1000',
+            'deskripsi' => 'required|string|max:5000',
             'alamat' => 'required|string|max:100',
             'petunjuk_alamat' => 'required|string|max:100',
             'koordinat' => 'required|string',
@@ -73,7 +129,7 @@ class PekerjaanController extends Controller
 
             'deskripsi.required' => 'Deskripsi wajib diisi.',
             'deskripsi.string' => 'Deskripsi harus berupa teks.',
-            'deskripsi.max' => 'Deskripsi maksimal 1000 karakter.',
+            'deskripsi.max' => 'Deskripsi maksimal 3000 karakter.',
 
             'alamat.required' => 'Alamat wajib diisi.',
             'alamat.string' => 'Alamat harus berupa teks.',
@@ -109,23 +165,8 @@ class PekerjaanController extends Controller
         ]);
         if ($request->koordinat != null) {
             $request['pembuat'] = session('account')['id'];
-            $kriteria = [];
-            // dd($request->kriteria);     
-            foreach ($request->kriteria as $nama) {
-                $cek = (new KriteriaJobController())->cek_exist($nama);
-                if ($cek == false) {
-                    $new = (new KriteriaJobController())->store(trim($nama));
-                    // dD($new);
-                    $kriteria[] = $new->id;
-                } else {
-                    $kriteria[] = $cek;
-                }
-            }
-
-            $request['kriteria'] = implode(",", $kriteria);
-
-            // dd($request['kriteria']);
-
+            $kriteria = implode(",", $request['kriteria']);
+            $request['kriteria'] = $kriteria;
 
             $data = collect($request->all())->mapWithKeys(function ($value, $key) {
                 return [$key => is_array($value) ? $value : (string)$value];
@@ -162,6 +203,43 @@ class PekerjaanController extends Controller
         $pelamar->update(['status' => 'ditolak']);
         return redirect()->back();
     }
+
+    public function Daftar_Lamaran()
+    {
+        $active_navbar = 'Daftar Lamaran';
+        $nama_halaman = 'Daftar Lamaran';
+        $pekerjaans = Pekerjaan::join('pelamars', 'pekerjaans.id', '=', 'pelamars.job_id')
+            ->where('pelamars.user_id', session('account')['id'])
+            ->select('pekerjaans.*', 'pelamars.*') // pilih kolom sesuai kebutuhanmu
+            ->get();
+        // dd($pekerjaans);
+        // $Pekerjaans = Pelamar::where('user_id', session('account')['id'])->get();
+        return view('Dewa.Mitra.pekerjaan-dilamar', compact('active_navbar', 'nama_halaman', 'pekerjaans'));
+    }
+
+    public function Daftar_Pekerjaan()
+    {
+        $active_navbar = 'Pekerjaan';
+        $nama_halaman = 'Lowongan Terdaftar';
+
+
+        $pekerjaans = Pekerjaan::select('pekerjaans.id', 'pekerjaans.nama', 'pekerjaans.alamat', 'pekerjaans.created_at', 'pekerjaans.latitude', 'pekerjaans.longitude', DB::raw('COUNT(pelamars.status) as total_pelamar'))
+            ->join('users', 'pekerjaans.pembuat', '=', 'users.id')
+            ->leftJoin('pelamars', 'pekerjaans.id', '=', 'pelamars.job_id')
+            ->where('pekerjaans.pembuat', session('account')['id'])
+            ->groupBy([
+                'pekerjaans.id',
+                'pekerjaans.nama',
+                'pekerjaans.alamat',
+                'pekerjaans.created_at',
+                'pekerjaans.latitude',
+                'pekerjaans.longitude'
+            ])
+            ->get();
+        // dd($pekerjaans);
+        return view('Dewa.mitra.pekerjaan-dibuat', compact('active_navbar', 'nama_halaman', 'pekerjaans'));
+    }
+
     function cosineSimilarityPercent($text1, $text2)
     {
         // Normalize: lowercase and remove extra spaces
@@ -293,25 +371,11 @@ class PekerjaanController extends Controller
         ) . "%\n\n";
     }
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
     public function getThe20ies()
     {
         $result = [];
         $all = Pekerjaan::all();
+        $filtered = [];
         if (session()->has('account')) { //apabila sudah login
 
             foreach ($all as $kerja) {
@@ -326,10 +390,11 @@ class PekerjaanController extends Controller
                 // );
                 $decimal = $this->cosineSimilarity(
                     json_encode(json_decode($kerja)->nama . " " . json_decode($kerja)->deskripsi),
-                    json_encode(json_decode(session('account')->preferensi_user)->deskripsi." ".implode(",",json_decode(session('account')->preferensi_user)->kriteria))
+                    json_encode(json_decode(session('account')->preferensi_user)->deskripsi . " " . implode(",", json_decode(session('account')->preferensi_user)->kriteria))
                 );
                 // echo "<br> ".json_decode(session('account')->preferensi_user)->deskripsi."n dg <br>".json_decode($kerja)->nama . " <br>" . json_decode($kerja)->deskripsi." Hasilnya: ".$decimal."<br>";
 
+                // echo "<br>".json_decode($kerja)->id." ".json_decode(session('account')->preferensi_user)->deskripsi. json_decode($kerja)->nama." Hasilnya: ".$decimal."<br>";
                 //membatasi jumlah pekerjaan disarankan
                 if (count($result) < 20) {
                     $result[$kerja->id] = $decimal;
@@ -351,13 +416,12 @@ class PekerjaanController extends Controller
             $filtered = array_filter($result, function ($value) {
                 return $value != 0.0;
             });
-            // dd($filtered);
-            (arsort($result)); //urutkan array dari yg terbesar ke terkecil
-            // dd($result);
+            (arsort($filtered));
         } else {
             // $result = $all;
             // dd($result,'belum');
         }
+        // dd($filtered);
 
         return ($filtered);
     }

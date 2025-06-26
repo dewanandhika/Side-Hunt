@@ -30,7 +30,7 @@
             <p>Lihat kata sandi</p>
         </div> -->
         <div class="setara forget-password">
-            <p>Lupa kata sandi?</p><a href=""><p>Klik Disini</p></a>
+            <p>Lupa kata sandi?</p><a href="/forget/password"><p>Klik Disini</p></a>
         </div>
         <div class="submit-button">
             <!-- <button type="submit" class="btn btn-primary" data-bs-toggle="modal" >Login</button> -->

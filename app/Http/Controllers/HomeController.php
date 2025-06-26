@@ -116,7 +116,9 @@ class HomeController extends Controller
     {
         $nama_halaman = 'Form New User';
         $active_navbar = 'Form New User';
-        $kriteria = KriteriaJob::all();
+        $path = public_path('Dewa/json/dummy_skills.json');
+        $kriteria = json_decode(file_get_contents($path), true)['skills']; 
+        // $kriteria = KriteriaJob::all();
 
         return view('Dewa.formQuestionUser', compact('active_navbar', 'nama_halaman', 'kriteria'));
     }

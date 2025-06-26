@@ -2,6 +2,7 @@
 
 use App\Http\Controllers\HomeController;
 use App\Http\Controllers\PekerjaanController;
+use App\Http\Controllers\PelamarController;
 use App\Http\Controllers\UsersController;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\SideJobController;
@@ -23,14 +24,18 @@ Route::get('/Index', [HomeController::class, 'index'])->name('home');
 Route::get('/Login', [HomeController::class, 'Login']);
 Route::get('/Verify-Email', [UsersController::class, 'verify_view']);
 Route::post('/verify_email', [UsersController::class, 'submit_verify_email']);
+Route::get('/forget/password', action: [UsersController::class, 'forget_password']);
+Route::post('/send_change_password', action: [UsersController::class, 'send_code_change_password']);
+Route::get('/reset_password/{token}/{email}', action: [UsersController::class, 'view_Reset_Password']);
+
 Route::get('/Register', [HomeController::class, 'Register']);
 Route::get('/Logout', [UsersController::class, 'logout']);
 Route::get('/Pekerjaan/{id}', [PekerjaanController::class, 'view_pekerjaan']);
 
-Route::get('/NotAllowed', function(){
+Route::get('/NotAllowed', function () {
     $nama_halaman = 'Akses Ditolak';
     $active_navbar = 'none';
-    return view('Dewa.NotAllowedPage', compact('nama_halaman','active_navbar'));
+    return view('Dewa.NotAllowedPage', compact('nama_halaman', 'active_navbar'));
 });
 
 
@@ -38,10 +43,17 @@ Route::get('/NotAllowed', function(){
 Route::post('/Login_account', [UsersController::class, 'Login_Account']);
 Route::post('/Register_account', action: [UsersController::class, 'create']);
 Route::get('/kerja/', action: [PekerjaanController::class, 'index']);
+Route::get('/daftar-lamaran/', action: [PekerjaanController::class, 'Daftar_Lamaran']);
+Route::get('/daftar-Pekerjaan/', action: [PekerjaanController::class, 'Daftar_Pekerjaan']);
+Route::get('/daftar-Pelamar/{id}', action: [PekerjaanController::class, 'Daftar_Pelamar']);
+
 
 Route::middleware(['role:user|mitra'])->group(function () {
+
     Route::post('/user/preferensi/save', action: [UsersController::class, 'save_preverensi']);
     Route::post('/kerja/add', action: [PekerjaanController::class, 'store']);
+    Route::post('/kerja/add', action: [PekerjaanController::class, 'store']);
+    Route::post('/pelamar/{idPekerjaan}', action: [PelamarController::class, 'store']);
     Route::post('/Profile/Edit', [UsersController::class, 'Profile_Edit']);
     Route::get('/transaksi', [TransaksiController::class, 'index'])->name('user.transaksi');
     //Kerja
@@ -53,21 +65,22 @@ Route::middleware(['role:user|mitra'])->group(function () {
     //Profile
     Route::get('/Profile', [UsersController::class, 'Profile']);
     Route::get('/profile/{id}', [UsersController::class, 'show'])->name('user.profile');
-    
+
     Route::middleware(['role:mitra'])->group(function () {
+
         Route::prefix('management')->name('manajemen.')->group(function () {
             Route::get('/', [ManagementPageController::class, 'dashboard'])->name('dashboard');
-    
+
             // Pekerjaan
             Route::get('/pekerjaan-berlangsung', [ManagementPageController::class, 'pekerjaanBerlangsung'])->name('pekerjaan.berlangsung');
             Route::get('/upload-laporan', [ManagementPageController::class, 'uploadLaporan'])->name('laporan.upload');
             Route::get('/riwayat-pekerjaan', [ManagementPageController::class, 'riwayatPekerjaan'])->name('pekerjaan.riwayat');
-    
+
             // Keuangan
             // Route::get('/gateway-pembayaran', [ManagementPageController::class, 'gatewayPembayaran'])->name('pembayaran.gateway');
             Route::get('/Top-Up', [ManagementPageController::class, 'topUp'])->name('topUp');
             Route::post('/Top-Up', [TopUpController::class, 'store'])->name('topup.store');
-    
+
             // TopUp Controller disini
             Route::get('/Top-Up/{external_id}', [TopUpController::class, 'payment'])->name('topup.payment');
             Route::post('/Top-Up/check-status', [TopUpController::class, 'checkStatus'])->name('topup.check-status');
@@ -80,12 +93,12 @@ Route::middleware(['role:user|mitra'])->group(function () {
             Route::get('/riwayat-transaksi/data', [ManagementPageController::class, 'riwayatTransaksiData'])->name('transaksi.riwayat.data');
             Route::get('/refund-dana', [ManagementPageController::class, 'refundDana'])->name('dana.refund');
             Route::get('/laporan-keuangan', [ManagementPageController::class, 'laporanKeuangan'])->name('keuangan.laporan');
-    
+
             // Pelaporan & Bantuan
             Route::get('/lapor-penipuan', [ManagementPageController::class, 'laporPenipuanForm'])->name('pelaporan.penipuan.form');
             Route::post('/lapor-penipuan', [ManagementPageController::class, 'storePenipuanReport'])->name('pelaporan.penipuan.store');
             Route::get('/panel-bantuan', [ManagementPageController::class, 'panelBantuan'])->name('bantuan.panel');
-    
+
             // Fitur Lainnya
             Route::get('/notifikasi-pekerjaan', [ManagementPageController::class, 'notifikasiStatusPekerjaan'])->name('notifikasi.pekerjaan');
             Route::get('/notifikasi-pelamaran', [ManagementPageController::class, 'notifikasiStatusPelamaran'])->name('notifikasi.pelamaran');
@@ -93,26 +106,26 @@ Route::middleware(['role:user|mitra'])->group(function () {
             Route::get('/rating-user', [ManagementPageController::class, 'ratingUser'])->name('rating.user');
             Route::get('/track-record-pelamar', [ManagementPageController::class, 'trackRecordPelamar'])->name('pelamar.track-record');
             Route::post('/transaksi/{jobId}', [TransaksiController::class, 'buatTransaksi'])->name('transaksi.buat');
-    
-    
+
+
             // Rute Khusus Admin (Contoh)
             Route::prefix('admin')->name('admin.') // Buat middleware 'admin' jika belum ada
-            ->group(function () {
-            Route::get('/pemantauan-laporan', [ManagementPageController::class, 'pemantauanLaporanAdmin'])->name('laporan.pemantauan');
-            Route::get('/users', [ManagementPageController::class, 'usersListAdmin'])->name('users.list');
-            Route::get('/users/tambah', [ManagementPageController::class, 'usersTambahAdmin'])->name('users.tambah');
-            // Route::get('/users/{user}/edit', [ManagementPageController::class, 'usersEditAdmin'])->name('users.edit');
-            // Route::put('/users/{user}', [ManagementPageController::class, 'usersUpdateAdmin'])->name('users.update');
-            Route::get('/admin', [HomeController::class, 'admin'])->name('admin.index'); // Index
-            Route::get('/admin/user/{id}/edit', [UsersController::class, 'showAdmin'])->name('admin.show.profile');
-            Route::match(['get', 'put'], '/admin/user/{id}', [UsersController::class, 'update'])->name('admin.update.profile');
-            Route::get('/admin/user/edit/{id}', [UsersController::class, 'edit'])->name('admin.edit.profile');
-            Route::get('/admin/user/delete/{id}', [UsersController::class, 'delete'])->name('admin.delete.profile');
-            Route::get('/admin/transaksi/setujui/{kode}', [TransaksiController::class, 'setujuiTransaksi'])->name('admin.transaksi.setuju');
-            Route::post('/admin/transaksi/tolak/{kode}', [TransaksiController::class, 'tolakTransaksi'])->name('admin.transaksi.tolak');
-            // Route::patch('/users/{user}/activate', [ManagementPageController::class, 'usersActivateAdmin'])->name('users.activate');
-            // Route::patch('/users/{user}/deactivate', [ManagementPageController::class, 'usersDeactivateAdmin'])->name('users.deactivate');
-            });
+                ->group(function () {
+                    Route::get('/pemantauan-laporan', [ManagementPageController::class, 'pemantauanLaporanAdmin'])->name('laporan.pemantauan');
+                    Route::get('/users', [ManagementPageController::class, 'usersListAdmin'])->name('users.list');
+                    Route::get('/users/tambah', [ManagementPageController::class, 'usersTambahAdmin'])->name('users.tambah');
+                    // Route::get('/users/{user}/edit', [ManagementPageController::class, 'usersEditAdmin'])->name('users.edit');
+                    // Route::put('/users/{user}', [ManagementPageController::class, 'usersUpdateAdmin'])->name('users.update');
+                    Route::get('/admin', [HomeController::class, 'admin'])->name('admin.index'); // Index
+                    Route::get('/admin/user/{id}/edit', [UsersController::class, 'showAdmin'])->name('admin.show.profile');
+                    Route::match(['get', 'put'], '/admin/user/{id}', [UsersController::class, 'update'])->name('admin.update.profile');
+                    Route::get('/admin/user/edit/{id}', [UsersController::class, 'edit'])->name('admin.edit.profile');
+                    Route::get('/admin/user/delete/{id}', [UsersController::class, 'delete'])->name('admin.delete.profile');
+                    Route::get('/admin/transaksi/setujui/{kode}', [TransaksiController::class, 'setujuiTransaksi'])->name('admin.transaksi.setuju');
+                    Route::post('/admin/transaksi/tolak/{kode}', [TransaksiController::class, 'tolakTransaksi'])->name('admin.transaksi.tolak');
+                    // Route::patch('/users/{user}/activate', [ManagementPageController::class, 'usersActivateAdmin'])->name('users.activate');
+                    // Route::patch('/users/{user}/deactivate', [ManagementPageController::class, 'usersDeactivateAdmin'])->name('users.deactivate');
+                });
             // ->group(function () {
             //     Route::get('/pemantauan-laporan', [ManagementPageController::class, 'pemantauanLaporanAdmin'])->name('laporan.pemantauan');
             //     Route::get('/users', [ManagementPageController::class, 'usersListAdmin'])->name('users.list');
@@ -126,7 +139,7 @@ Route::middleware(['role:user|mitra'])->group(function () {
     });
 });
 
-Route::get('/cekkossaine',function(){
+Route::get('/cekkossaine', function () {
     return view('Dewa.cekcossaine');
 });
 
@@ -163,7 +176,7 @@ Route::post('/CekKos', [PekerjaanController::class, 'ForTest']);
 // });
 
 // Route::middleware(['role', 'mitra'])->group(function () {
-    
+
 
 //Sidejob
 // Route::get('/sidejob/{id}', [SideJobController::class, 'showAdmin'])->name('admin.sidejob.show');
@@ -172,4 +185,4 @@ Route::post('/CekKos', [PekerjaanController::class, 'ForTest']);
 // });
 
 
-require __DIR__.'/auth.php';
+require __DIR__ . '/auth.php';

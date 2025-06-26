@@ -98,12 +98,12 @@ padding: 0;
                         @endforeach
                     </select>
 
-                    <input type="tel" name="telpon" class="rounded-2 px-2 w-100" id="" placeholder="84965454654654654">
+                    <input type="tel" name="telpon" class="rounded-2 px-2 w-100" value="{{ session('account')->telpon == null ? '' : session('account')->telpon}}" id="" placeholder="84965454654654654">
                 </div>
             </div>
             <div class="opacity-75">
                 <label for="">Alamat Email (tidak bisa diubah)</label>
-                <p>Dewaaaaaaaaa@gmail.co.isos</p>
+                <p>{{ session('account')->email}}</p>
             </div>
             <div>
                 <button type="submit" class="btn btn-primary bg-blue-dark fw-bolder">Simpan</button>

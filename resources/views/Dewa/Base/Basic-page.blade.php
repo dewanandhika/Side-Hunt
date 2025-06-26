@@ -1,6 +1,5 @@
+<!DOCTYPE html>
 @vite(['resources/js/app.js'])
-
-<!doctype html>
 <html lang="{{ str_replace('_', '-', app()->getLocale()) }}">
 
 <head>
@@ -33,7 +32,7 @@
     <!-- Scripts -->
     @vite(['resources/sass/app.scss', 'resources/js/app.js'])
     @yield('css')
-    
+
 
 </head>
 <style>
@@ -57,7 +56,8 @@
                 <div class="d-flex flex-row gap-2">
                     <div class="d-flex d-md-none">
                         <button type="button" class="btn bg-transparent" data-bs-toggle="offcanvas"
-                            data-bs-target="#staticBackdropChat" onclick="window.location.href='/chats'" aria-controls="staticBackdropChat">
+                            data-bs-target="#staticBackdropChat" onclick="window.location.href='/chats'"
+                            aria-controls="staticBackdropChat">
                             <i class="bi bi-chat-right-text-fill text-white"></i>
                         </button>
                     </div>
@@ -89,7 +89,8 @@
 
                             <div class="d-flex flex-row user gap-2 align-items-center justify-content-center"
                                 data-bs-toggle="dropdown" aria-expanded="false">
-                                <p class="m-0 p-0">({{{ucwords(session('account')['role'])}}}) Halo {{{explode(" ", session('account')['nama'])[0]}}}, </p>
+                                <p class="m-0 p-0">({{{ucwords(session('account')['role'])}}}) Halo {{{explode(" ",
+                                    session('account')['nama'])[0]}}}, </p>
                                 <svg width="30" height="29" viewBox="0 0 30 29" fill="none"
                                     xmlns="http://www.w3.org/2000/svg">
                                     <rect width="30" height="29" rx="14.5" fill="white" />
@@ -116,7 +117,8 @@
                         <div class="d-none d-md-flex">
                             <button type="button" class="btn bg-transparent" data-bs-toggle="offcanvas"
                                 data-bs-target="#staticBackdropChat" aria-controls="staticBackdropChat">
-                                <i class="bi bi-chat-left-text-fill text-white" onclick="window.location.href='/chats'"></i>
+                                <i class="bi bi-chat-left-text-fill text-white"
+                                    onclick="window.location.href='/chats'"></i>
                             </button>
                         </div>
 
@@ -136,7 +138,14 @@
                                 <p>Cari Pekerjaan</p>
                             </a>
                         </li>
+
                         @if(session()->has('account'))
+                        <li class="nav-item ">
+                            <a class="nav-link {{{($active_navbar=='Daftar Lamaran')? 'active':''}}}"
+                                aria-current="page" href="/daftar-lamaran/">
+                                <p>Daftar Lamaran</p>
+                            </a>
+                        </li>
                         @if(session('account')->role=='mitra')
                         <li class="nav-item ">
                             <a class="nav-link {{{($active_navbar=='Management')? 'active':''}}}" aria-current="page"
@@ -144,10 +153,6 @@
                                 <p>Management</p>
                             </a>
                         </li>
-                        @endif
-                        @endif
-                        @if(session('account')!=null)
-
                         <li class="nav-item dropdown position-relative">
                             <a class="nav-link d-flex w-auto justify-content-start align-content-center flex-row gap-1 {{{($active_navbar=='Beri Lowongan Kerja')? 'active':''}}}"
                                 href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false">
@@ -159,13 +164,13 @@
                                 </div>
                             </a>
                             <ul class="dropdown-menu normal ms-4 ms-md-0 bg-darker hover-bg-dark">
-                                <li><a class="dropdown-item" href="#">
+                                <li><a class="dropdown-item" href="/daftar-Pekerjaan/">
                                         <div class="d-flex flex-row gap-3">
                                             <i class="bi bi-journal-text"></i>
                                             <p>Lowongan Terdaftar</p>
                                         </div>
                                     </a></li>
-                                <li><a class="dropdown-item" href="#">
+                                <li><a class="dropdown-item" href="/daftar-Pelamar/all">
                                         <div class="d-flex flex-row gap-3">
                                             <i class="bi bi-people"></i>
                                             <p>Daftar Pelamar</p>
@@ -185,9 +190,9 @@
 
                             </ul>
                         </li>
-
-
                         @endif
+                        @endif
+
                     </ul>
 
 

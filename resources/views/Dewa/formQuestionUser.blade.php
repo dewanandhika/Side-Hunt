@@ -175,18 +175,18 @@
             <div class="form-group">
                 <div class="row justify-content-center w-100">
                     <div class="w-100 d-flex justify-content-center p-0 m-0 align-items-center">
-                        <div class="dropdown-container w-100">
+                        <div class="dropdown-container w-100" style="height: 60vh; min-height: 60vh; max-height: 60vh;">
                             <div class="dropdown-button noselect w-100 mb-2">
                                 <label class="form-label fw-semibold text-dark">Kriteria Pekerjaan (pilih minimal
                                     3)</label>
                             </div>
-                            <div class="dropdown-list p-3 overflow-y-hidden">
+                            <div class="dropdown-list h-100 p-3 overflow-y-hidden" style="height: 50vh; min-height: 50vh; max-height: 50vh;">
                                 <!-- Input manual -->
                                 <input type="text" name="kriteria_manual" class="form-control mb-2"
                                     placeholder="Tulis disini jika tidak ada, format: text, text, text">
 
                                 <!-- Input search -->
-                                <input type="text" class="form-control mb-3" oninput="SearchSelect()"
+                                <input type="text" class="form-control mb-3" oninput="SearchBox(this)"
                                     placeholder="Cari Kriteria..." id="searchKriteria">
 
                                 <!-- Tombol Reset -->
@@ -198,15 +198,15 @@
                                 </div>
 
                                 <!-- List kriteria -->
-                                <ul class="list-unstyled mb-0 overflow-y-scroll"
-                                    style="height: 18vh; min-height: 18vh; max-height: 18vh;">
+                                <ul class="list-unstyled flex-grow-1 mb-0 overflow-y-scroll"
+                                    style="max-height: 25vh;">
                                     @foreach($kriteria as $k)
-                                    <li class="mb-2">
+                                    <li class="mb-2 li_container">
                                         <div class="form-check">
-                                            <input class="form-check-input" type="checkbox" name="kriteria{{ $k->id }}"
-                                                value="{{ $k->nama }}" id="kriteria{{ $k->id }}">
-                                            <label class="form-check-label" for="kriteria{{ $k->id }}">
-                                                {{ $k->nama }}
+                                            <input class="form-check-input kriteriaInput" type="checkbox" name="kriteria{{$k}}"
+                                                value="{{ $k}}" id="kriteria{{$k}}">
+                                            <label class="form-check-label" for="kriteria{{ $k }}">
+                                                {{ $k }}
                                             </label>
                                         </div>
                                     </li>
@@ -234,11 +234,27 @@
 </div>
 @endsection
 
-@section('js')
+@section('script')
 <script>
     function resetCheckboxes() {
         const checkboxes = document.querySelectorAll('.form-check-input');
         checkboxes.forEach(cb => cb.checked = false);
+    }
+
+    function SearchBox(elemen) {
+        let all_jobs = document.querySelectorAll('.kriteriaInput')
+        all_jobs.forEach(element => {
+            console.log('apani : '+element.value.toLowerCase().includes(elemen.value.toLowerCase()),element.value.toLowerCase(),elemen.value.toLowerCase())
+            if (element.value.toLowerCase().includes(elemen.value.toLowerCase())) {
+                let li = element.closest('.li_container')
+                li.style.display = "flex"
+            }
+            else {
+                let li = element.closest('.li_container')
+                li.style.display = "none"
+            }
+        });
+
     }
 </script>
 

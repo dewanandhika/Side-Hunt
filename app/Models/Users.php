@@ -30,10 +30,10 @@ class Users extends Model implements AuthenticatableContract
         'password',
         'role',
         'preferensi_user',
+        'email_verified_at',
 
         //adam
         'dompet',
-        'email_verified_at',
     ];
 
     /**

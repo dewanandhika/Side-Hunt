@@ -107,12 +107,12 @@ class DatabaseSeeder extends Seeder
             "membuat makanan fermentasi tradisional"
         ];
 
-        foreach($hobi_offline as $i){
-            KriteriaJob::factory()->create([
-                'nama' => ucwords($i)
-            ]);
-        }
-        $path = database_path('seeders/sql/pekerjaans_mass_insert_final_customized.sql');
+        // foreach($hobi_offline as $i){
+        //     KriteriaJob::factory()->create([
+        //         'nama' => ucwords($i)
+        //     ]);
+        // }
+        $path = database_path('seeders/sql/dummy_Pekerjaans_2.sql');
         
         // Read the SQL content
         $sqlContent = File::get($path);

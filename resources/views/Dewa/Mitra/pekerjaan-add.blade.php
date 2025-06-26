@@ -250,8 +250,8 @@ padding: 0;
 
                 <div class="form-group mb-3">
                     <label class="font-weight-bold">Deskripsi Pekerjaan*</label>
-                    <textarea name="deskripsi" class=" shadow @error('deskripsi') is-invalid @enderror" maxlength="1000"
-                        id="deskripsi" value="">{!! old('deskripsi') !!}</textarea>
+                    <textarea name="deskripsi" class=" shadow @error('deskripsi') is-invalid @enderror" maxlength="3000"
+                        id="deskripsi" >{!! old('deskripsi', $item->deskripsi ?? '') !!}</textarea>
 
                     @error('deskripsi')
                     <div class="invalid-feedback">{{ $message }}</div>
@@ -259,14 +259,13 @@ padding: 0;
                     @enderror
                 </div>
                 <div class="form-group mb-3">
-                    <label class="font-weight-bold">Kriteria Pekerjaan*</label>
-                    <p class="clear-p ps-2" style="font-size: 10px;">minimal 3 kriteria</p>
+                    <label class="font-weight-bold">Tagg yang mungkin cocok dengan pekerjaan ini*</label>
+                    <p class="clear-p ps-2" style="font-size: 10px;">minimal 3</p>
                     <select class="form-control shadow @error('kriteria') is-invalid @enderror" id="kriteria"
                         name="kriteria[]" multiple="multiple" aria-label="Default select example">
-
                         @foreach($kriteria as $k)
-                        <option value="{{ $k->id }}" @selected(in_array($k->nama, (array) old('kriteria', [])))>
-                            {{ $k->nama }}
+                        <option value="{{ $k }}" @selected(in_array($k, (array) old('kriteria', [])))>
+                            {{ $k }}
                         </option>
                         @endforeach
                     </select>
@@ -449,7 +448,7 @@ padding: 0;
         branding: false,
 
         setup: function (editor) {
-            const maxChars = 1000;
+            const maxChars = 3000;
 
             editor.on('keydown', function (e) {
                 const content = editor.getContent({ format: 'text' });

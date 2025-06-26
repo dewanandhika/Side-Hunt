@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Http\Controllers\Controller;
+use App\Mail\ResetPassword;
 use App\Models\Pelamar;
 use App\Models\Users;
 use App\Models\Pekerjaan;
@@ -85,6 +86,52 @@ class UsersController extends Controller
         $user->delete();
 
         return redirect()->back()->with(['success' => 'Data berhasil dihapus']);
+    }
+
+    public function forget_password()
+    {
+        $active_navbar = 'Ganti Password';
+        $nama_halaman = 'Ganti Password';
+        return view('Dewa.User.ToSendChangePassword', compact('active_navbar', 'nama_halaman'));
+    }
+
+    public function send_code_change_password(Request $request)
+    {
+        // dd($request->email);
+        $cek = $this->cekExistEmail($request->email);
+        // dd($cek);
+        if (!($cek != false)) {
+            $verificationCode = $this->sendChangePassword( $request->email);
+            if ($verificationCode != false) {
+                $user = Users::where('email', $request->email)->first();
+                $user->VerificationCode = $verificationCode;
+                $user->save();
+                // dd($user);
+                return redirect()->back()->with('success', ['Berhasil', 'Link untuk ganti password berhasil dikirim ke email']);
+            } else {
+                return redirect()->back()->with('fail', ['Gagal', 'Ada Masalah, mungkin bisa coba lain waktu']);
+            }
+        } else {
+            return redirect()->back()->with('fail', ['Gagal', 'Tidak ada akun yg terdaftar atas email tersebut']);
+        }
+    }
+
+    public function view_Reset_Password($token, $email)
+    {
+        $user = $this->cekExistEmail($email);
+        if (!($user != false)) {
+            $user = Users::where('email', $email)->first();
+            if ($user->VerificationCode == $token) {
+                $active_navbar = 'Verifikasi Email';
+                $nama_halaman = 'Verifikasi Email';
+
+                return view('Dewa.User.ResetPassword', compact('active_navbar', 'nama_halaman'));
+            } else {
+                return redirect()->back()->with('fail', ['Gagal', 'Kode Sudah Tidak aktif atau Kode sudah terpakai']);
+            }
+        } else {
+            return redirect()->back()->with('fail', ['Gagal', 'tidak ada akun yang terdaftar atas email ini']);
+        }
     }
 
     //NEW
@@ -215,6 +262,16 @@ class UsersController extends Controller
         }
     }
 
+    function sendChangePassword($email)
+    {
+        $code = rand(100000, 999999);
+        if (Mail::to($email)->send(new ResetPassword($code, $email))) {
+            return $code;
+        } else {
+            return false;
+        }
+    }
+
     function verify_view()
     {
         $active_navbar = 'Verifikasi Email';
@@ -255,6 +312,7 @@ class UsersController extends Controller
     function cekExistEmail($emailUntukDicek)
     {
         $user = Users::where('email', $emailUntukDicek)->first();
+        // dd($user);
         return ($user) ? false : true;
     }
 
@@ -308,15 +366,14 @@ class UsersController extends Controller
 
         // Loop dan ekstrak semua kriteria
         foreach ($parameters as $key => $value) {
-            if(strpos($key, 'kriteria_manual')===0){
-                $all = explode(",",$value);
+            if (strpos($key, 'kriteria_manual') === 0) {
+                $all = explode(",", $value);
                 // dd($all);
-                foreach($all as $new_kriteria){
+                foreach ($all as $new_kriteria) {
                     $kriteria[] = trim($new_kriteria);
                 }
                 unset($parameters[$key]);
-            }
-            elseif(strpos($key, 'kriteria') === 0) {
+            } elseif (strpos($key, 'kriteria') === 0) {
                 $kriteria[] = $value;
                 unset($parameters[$key]); // hapus kriteriaX
             }
