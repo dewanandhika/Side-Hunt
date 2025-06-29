@@ -89,6 +89,44 @@
 </style>
 @endsection
 @section('add-onn')
+<form action="" class="form_picked d-flex" method="post">
+    @csrf
+    <input type="text" name="idLamaran" class="idLamaran" id="">
+    <input type="text" name="status" id="" class="status">
+    <input type="text" name="alasan" id="" class="alasan">
+</form>
+<div class="offcanvas to_reject offcanvas-start" data-bs-backdrop="static" tabindex="-1" id="form_Reject"
+    aria-labelledby="staticBackdropLabel">
+    <div class="offcanvas-header border-bottom">
+        <h5 class="offcanvas-title fw-semibold text-danger" id="staticBackdropLabel">
+            Konfirmasi Penolakan Lamaran
+        </h5>
+        <button type="button" class="btn-close" data-bs-dismiss="offcanvas" aria-label="Tutup"></button>
+    </div>
+    <div class="offcanvas-body">
+        <form id="rejectForm" onsubmit="event.preventDefault(); submitForm('tolak');">
+            <div class="mb-3">
+                <label for="alasan" class="form-label">
+                    Alasan Tidak Lolos <span class="text-danger">*</span>
+                </label>
+                <input type="text" class="form-control" oninput="fill_alasan(this)" id="alasan" name="alasan"
+                    placeholder="Tuliskan alasan penolakan" value="{{ old('alasan') }}"
+                    required>
+                <div class="invalid-feedback">
+                    Alasan penolakan wajib diisi.
+                </div>
+            </div>
+            <button type="submit" onclick="submit_form()" class="btn btn-danger w-100 shadow-sm">
+                <i class="bi bi-send"></i> Kirim Alasan Penolakan
+            </button>
+        </form>
+        <div class="text-muted mt-3 small">
+            Tuliskan alasan penolakan secara singkat dan sopan
+            Pastikan Anda menyampaikan alasan dengan sopan dan membangun.
+        </div>
+    </div>
+</div>
+
 <div class="offcanvas ToInterview offcanvas-start" data-bs-backdrop="static" tabindex="-1" id="formBackdrop"
     aria-labelledby="staticBackdropLabel">
     <div class="offcanvas-header">
@@ -203,7 +241,8 @@
                         </td>
                         <td>
                             @if($pelamar->jadwal!=null)
-                            <p class="clear-p" style="font-size: 10px;">{{{\Carbon\Carbon::parse($pelamar->jadwal)->translatedFormat('l, d F Y H:i')}}}</p>
+                            <p class="clear-p" style="font-size: 10px;">
+                                {{{\Carbon\Carbon::parse($pelamar->jadwal)->translatedFormat('l, d F Y H:i')}}}</p>
                             @endif
                         </td>
                         <td class="text-center">
@@ -222,7 +261,7 @@
                                     onclick="lanjut_interview('{{{$pelamar->id_pelamars}}}')" data-bs-toggle="offcanvas"
                                     data-bs-target="#formBackdrop" aria-controls="staticBackdrop">Interview</button>
                                 <button class="btn btn-danger rounded-5"
-                                    onclick="tolak('{{{$pelamar->id_pelamars}}}', alasan)">Tolak</button>
+                                    onclick="tolak('{{{$pelamar->id_pelamars}}}')">Tolak</button>
                                 @elseif($pelamar->status_job=='interview')
                                 <button class="btn btn-success rounded-5"
                                     onclick="interview_sukses('{{{$pelamar->id_pelamars}}}')">Terima</button>
@@ -281,7 +320,7 @@
 
 @section('script')
 <script>
-    @if ($errors->any())
+    @if ($errors -> any())
         show_form_interview()
     @endif
 
@@ -294,36 +333,38 @@
         let id = document.querySelector('.ToInterview .id')
         id.value = idLamaran;
     }
-    function tolak(idLamaran, alasan) {
-        // form('/pelamar/terima', 'ditolak', idLamaran, alasan);
+    function tolak(idLamaran) {
+        form('/pelamar/tolak', 'ditolak', idLamaran, null);
     }
     function interview_sukses(idLamaran) {
         form('/pelamar/terima', 'Menunggu Pekerjaan', idLamaran, null);
     }
     function interview_gagal(idLamaran) {
-        form('/pelamar/terima', 'Gagal', idLamaran, null);
+        form('/pelamar/tolak', 'Gagal', idLamaran, null);
     }
 
 
     function form(link, status, idLamaran, alasan) {
-        fetch(link, {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-                'X-CSRF-TOKEN': csrfToken,
-            }, body: JSON.stringify({
-                _token: csrfToken,
-                status: status,
-                id_lamaran: idLamaran,
-                alasan: alasan,
-            })
-        }).then(response => response.json())
-            .then(data => {
-                location.reload();
-            })
-            .catch(error => {
-                fail('Gagal', error);
-            });
+        let form = document.querySelector('.form_picked')
+        form.setAttribute('action', link);
+        form.querySelector('.idLamaran').value = idLamaran
+        form.querySelector('.status').value = status
+        form.querySelector('.alasan').value = alasan
+        if (status != 'ditolak'||status !='Gagal') {
+            form.submit();
+        }
+        else {
+            var offcanvasElement = document.getElementById('form_Reject');
+            var offcanvas = new bootstrap.Offcanvas(offcanvasElement);
+            offcanvas.show();
+        }
+    }
+
+    function fill_alasan(elemen){
+        document.querySelector('.form_picked .alasan').value = elemen.value;
+    }
+    function submit_form(){
+        document.querySelector('.form_picked').submit();
     }
 </script>
 @endsection

@@ -117,6 +117,29 @@
                                         </div>
                                     </div>
                                     <!-- Step 2 -->
+                                     @elseif($history[0]->status=='ditolak')
+                                    <div class="d-flex align-items-start position-relative pb-4">
+                                        <span class="position-relative me-1">
+                                            <span class="bg-info rounded-circle d-inline-block"
+                                                style="width:16px;height:16px;"></span>
+                                            <span class="position-absolute top-100 start-50 translate-middle-x bg-info"
+                                                style="width:2px;height:40px;z-index:0;"></span>
+                                        </span>
+                                        <div>
+                                            <div class="fw-bold">Diterima</div>
+                                            <small class="text-muted">Lamaran Anda Diterima</small>
+                                        </div>
+                                    </div>
+                                    <div class="d-flex align-items-start position-relative pb-4">
+                                        <span class="position-relative me-1">
+                                            <span class="bg-danger rounded-circle d-inline-block"
+                                                style="width:16px;height:16px;"></span>
+                                        </span>
+                                        <div>
+                                            <div class="fw-bold">Ditolak</div>
+                                            <small class="text-muted">Lamaran Anda Ditolak</small>
+                                        </div>
+                                    </div>
                                     @elseif($history[0]->status=='interview')
                                     <div class="d-flex align-items-start position-relative pb-4">
                                         <span class="position-relative me-1">
@@ -145,8 +168,46 @@
                                             <small class="text-muted">Lihat Lamaran Anda</small>
                                         </div>
                                     </div>
+                                    @elseif($history[0]->status=='Gagal')
+                                    <div class="d-flex align-items-start position-relative pb-4">
+                                        <span class="position-relative me-1">
+                                            <span class="bg-info rounded-circle d-inline-block"
+                                                style="width:16px;height:16px;"></span>
+                                        </span>
+                                        <div>
+                                            <div class="fw-bold">Interview Gagal</div>
+                                            <small class="text-muted">Lamaran Berhenti Sampai Disini</small>
+                                        </div>
+                                    </div>
                                     <!-- Step 3 -->
-                                    @elseif($history[0]->status=='diterima')
+                                    @elseif($history[0]->status=='Menunggu Pekerjaan')
+                                    <div class="d-flex align-items-start position-relative pb-4">
+                                        <span class="position-relative me-1">
+                                            <span class="bg-primary rounded-circle d-inline-block"
+                                                style="width:16px;height:16px;"></span>
+                                            <!-- Vertical Line -->
+                                            <span
+                                                class="position-absolute top-100 start-50 translate-middle-x bg-primary"
+                                                style="width:2px;height:40px;z-index:0;"></span>
+                                        </span>
+                                        <div>
+                                            <div class="fw-bold">Lamaran Disubmit</div>
+                                            <small class="text-muted">Lamaran kamu sudah dikirim ke perusahaan.</small>
+                                        </div>
+                                    </div>
+                                    <div class="d-flex align-items-start position-relative pb-4">
+                                        <span class="position-relative me-1">
+                                            <span class="bg-warning rounded-circle d-inline-block"
+                                                style="width:16px;height:16px;"></span>
+                                            <span
+                                                class="position-absolute top-100 start-50 translate-middle-x bg-warning"
+                                                style="width:2px;height:40px;z-index:0;"></span>
+                                        </span>
+                                        <div>
+                                            <div class="fw-bold">Dalam Tahap interview</div>
+                                            <small class="text-muted">Lihat Lamaran Anda</small>
+                                        </div>
+                                    </div>
                                     <div class="d-flex align-items-start position-relative pb-4">
                                         <span class="position-relative me-1">
                                             <span class="bg-info rounded-circle d-inline-block"
@@ -159,40 +220,20 @@
                                             <small class="text-muted">Lamaran Anda Diterima</small>
                                         </div>
                                     </div>
-                                    <div class="d-flex align-items-start position-relative">
-                                        <span class="position-relative me-1">
-                                            <span class="bg-success rounded-circle d-inline-block"
-                                                style="width:16px;height:16px;"></span>
-                                        </span>
-                                        <div>
-                                            <div class="fw-bold">Selesai</div>
-                                            <small class="text-muted">Proses lamaran sudah selesai.</small>
-                                        </div>
-                                    </div>
-                                    <!-- Step 4 -->
-                                    @elseif($history[0]->status=='ditolak')
                                     <div class="d-flex align-items-start position-relative pb-4">
                                         <span class="position-relative me-1">
-                                            <span class="bg-danger rounded-circle d-inline-block"
+                                            <span class="bg-info rounded-circle d-inline-block"
                                                 style="width:16px;height:16px;"></span>
                                             <span class="position-absolute top-100 start-50 translate-middle-x bg-info"
                                                 style="width:2px;height:40px;z-index:0;"></span>
                                         </span>
                                         <div>
-                                            <div class="fw-bold">Ditolak</div>
-                                            <small class="text-muted">Lamaran Anda Ditolak</small>
+                                            <div class="fw-bold">Menunggu Bekerja</div>
+                                            <small class="text-muted">{{{$data_pekerjaan[0]->start_job}}} Mulai Bekerja</small>
                                         </div>
                                     </div>
-                                    <div class="d-flex align-items-start position-relative">
-                                        <span class="position-relative me-1">
-                                            <span class="bg-success rounded-circle d-inline-block"
-                                                style="width:16px;height:16px;"></span>
-                                        </span>
-                                        <div>
-                                            <div class="fw-bold">Selesai</div>
-                                            <small class="text-muted">Proses lamaran sudah selesai.</small>
-                                        </div>
-                                    </div>
+                                    <!-- Step 4 -->
+                                    
                                     @endif
                                 </div>
                             </div>

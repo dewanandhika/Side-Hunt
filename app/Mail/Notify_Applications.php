@@ -46,7 +46,13 @@ class Notify_Applications extends Mailable
                 ]);
         } elseif ($this->status == 'Menunggu Pekerjaan') {
             return $this->subject('Selamat! Lamaran Anda Lolos dan siap bekerja')
-                ->view('Dewa.notifikasi_ke_email.pekerjaan.lolos_ke_interview')
+                ->view('Dewa.notifikasi_ke_email.pekerjaan.lolos_siap_bekerja')
+                ->with([
+                    compact('data')
+                ]);
+        } elseif ($this->status == 'ditolak'||$this->status == 'Gagal') {
+            return $this->subject('Terima Kasih atas Partisipasi Anda')
+                ->view('Dewa.notifikasi_ke_email.pekerjaan.tolak')
                 ->with([
                     compact('data')
                 ]);

@@ -52,8 +52,6 @@ class PelamarController extends Controller
         }
     }
 
-    public function tolak(Request $request) {}
-
     public function Profile_Pelamar($idPelamar)
     {
         // dD()
@@ -117,9 +115,11 @@ class PelamarController extends Controller
     }
 
     public function terima(Request $request){
-        $find = Pelamar::findOrFail($request->id);
+        // dd($request->idLamaran);
+        $find = Pelamar::findOrFail($request->idLamaran);
+        // dd($find);
         if($find){
-            $find->jadwal_interview = 'done';
+            $find->jadwal_interview = null;
             $find->link_Interview = null;
             $find->status = $request->status;
             if ($find->save()) {
@@ -127,7 +127,34 @@ class PelamarController extends Controller
                 $Pekerjaan = Pekerjaan::where('id', $find->job_id)->first();
                 $email = ($user->email);
                 Mail::to($email)->send(new Notify_Applications([$find,$user,$Pekerjaan,session('account')],'Menunggu Pekerjaan'));
-                return redirect('/daftar-Pelamar/all')->with('success', ['Selamat!', 'Interview Sudah kami kabarkan kepada user']);
+                return redirect('/daftar-Pelamar/all')->with('success', ['Berhasil!', 'User Sudah Menerima Informasi Ini Lewat Email Mereka']);
+            } else {
+                return redirect()->back()->with('fail', ['Gagal!', 'Ada yang salah, coba beberapa saat lagi!']);
+            }
+        }
+    }
+
+    public function tolak(Request $request){
+        // dd($request->idLamaran);
+        $find = Pelamar::findOrFail($request->idLamaran);
+        // dd($find);
+        if($find){
+            $find->jadwal_interview = null;
+            $find->link_Interview = null;
+            $find->status = $request->status;
+            $find->alasan = $request->alasan;
+            if ($find->save()) {
+                $user = Users::where('id',$find->user_id)->first();
+                $Pekerjaan = Pekerjaan::where('id', $find->job_id)->first();
+                $email = ($user->email);
+                if($request->status=='ditolak'){
+                    Mail::to($email)->send(new Notify_Applications([$find,$user,$Pekerjaan,session('account')],'ditolak'));
+                }
+                else{
+                    Mail::to($email)->send(new Notify_Applications([$find,$user,$Pekerjaan,session('account')],'Gagal'));
+
+                }
+                return redirect('/daftar-Pelamar/all')->with('success', ['Sedih Mendengarnya!', 'User Sudah Menerima Informasi Ini Lewat Email Mereka']);
             } else {
                 return redirect()->back()->with('fail', ['Gagal!', 'Ada yang salah, coba beberapa saat lagi!']);
             }

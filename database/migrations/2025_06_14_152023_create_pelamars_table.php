@@ -17,6 +17,7 @@ return new class extends Migration
             $table->unsignedBigInteger('job_id');
             $table->dateTime('jadwal_interview')->nullable();
             $table->string('link_Interview')->nullable();
+            $table->string('alasan')->nullable();
             $table->integer('gaji_deals')->nullable();
             $table->enum('status', ['tunda', 'interview', 'ditolak','Menunggu Pekerjaan','Sedang Bekerja','Menuggu Pembayaran','Gagal','selesai'])->default('tunda');
             $table->timestamps();
