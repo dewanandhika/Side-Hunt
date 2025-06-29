@@ -17,6 +17,14 @@ Route::get('/', function () {
     return redirect('/Index');
 });
 
+Route::get('/tes', function () {
+    return view('Dewa.tes');
+});
+
+Route::get('/see', function () {
+    return view('Dewa.notifikasi_ke_email.pekerjaan.lolos_siap_bekerja');
+});
+
 
 //Auth
 Route::get('/', [HomeController::class, 'index'])->name('home');
@@ -46,6 +54,7 @@ Route::get('/kerja/', action: [PekerjaanController::class, 'index']);
 Route::get('/daftar-lamaran/', action: [PekerjaanController::class, 'Daftar_Lamaran']);
 Route::get('/daftar-Pekerjaan/', action: [PekerjaanController::class, 'Daftar_Pekerjaan']);
 Route::get('/daftar-Pelamar/{id}', action: [PekerjaanController::class, 'Daftar_Pelamar']);
+Route::get('/Pelamar/Profile/{idPelamar}', [PelamarController::class, 'Profile_Pelamar']);
 
 
 Route::middleware(['role:user|mitra'])->group(function () {
@@ -53,9 +62,10 @@ Route::middleware(['role:user|mitra'])->group(function () {
     Route::post('/user/preferensi/save', action: [UsersController::class, 'save_preverensi']);
     Route::post('/kerja/add', action: [PekerjaanController::class, 'store']);
     Route::post('/kerja/add', action: [PekerjaanController::class, 'store']);
-    Route::post('/pelamar/{idPekerjaan}', action: [PelamarController::class, 'store']);
     Route::post('/Profile/Edit', [UsersController::class, 'Profile_Edit']);
     Route::get('/transaksi', [TransaksiController::class, 'index'])->name('user.transaksi');
+    Route::post('/Lamar/{idPekerjaan}', action: [PelamarController::class, 'store']);
+
     //Kerja
     Route::get('/question-new-user', action: [HomeController::class, 'new_user']);
     Route::get('/kerja/create', action: [PekerjaanController::class, 'create']);
@@ -67,6 +77,10 @@ Route::middleware(['role:user|mitra'])->group(function () {
     Route::get('/profile/{id}', [UsersController::class, 'show'])->name('user.profile');
 
     Route::middleware(['role:mitra'])->group(function () {
+        Route::post('/pelamar/tolak', action: [PelamarController::class, 'tolak']);
+        Route::post('/pelamar/terima', action: [PelamarController::class, 'terima']);
+        Route::post('/pelamar/interview', action: [PelamarController::class, 'interview_pelamar']);
+        
 
         Route::prefix('management')->name('manajemen.')->group(function () {
             Route::get('/', [ManagementPageController::class, 'dashboard'])->name('dashboard');
@@ -136,6 +150,8 @@ Route::middleware(['role:user|mitra'])->group(function () {
             // Route::patch('/users/{user}/deactivate', [ManagementPageController::class, 'usersDeactivateAdmin'])->name('users.deactivate');
             // });
         });
+
+
     });
 });
 

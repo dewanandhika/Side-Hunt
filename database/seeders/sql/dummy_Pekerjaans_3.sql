@@ -1999,6 +1999,11 @@ INSERT INTO pekerjaans (id, nama, deskripsi, alamat, koordinat, min_gaji, max_ga
 <p>Menaikkan exposure brand/akun lewat konten kreatif dan engagement tinggi di Instagram.</p>',
 'Bandung', '-', 1600000, 3200000, 2, 1, 1, 'Instagram, content creator, editing', '', '-7.09', '107.82', '2025-01-01 00:00:00', '2025-01-01 00:00:00', '2025-01-01 00:00:00', '', 27, '2025-01-01 00:00:00', '2025-01-01 00:00:00');
 
+UPDATE pekerjaans
+SET deadline_job = CONCAT(LAST_DAY(CURDATE()), ' 23:59:59');
+
+UPDATE pekerjaans
+SET koordinat = CONCAT(latitude,",",longitude);
 
 
 

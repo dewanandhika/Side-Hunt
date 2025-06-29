@@ -48,6 +48,6 @@ class Pekerjaan extends Model
 
     public function pelamar()
     {
-        return $this->belongsToMany(SideJob::class, 'pelamars', 'user_id', 'job_id');
+        return $this->belongsToMany(Pekerjaan::class, 'pelamars', 'user_id', 'job_id');
     }
 }

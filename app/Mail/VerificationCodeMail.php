@@ -26,7 +26,7 @@ class VerificationCodeMail extends Mailable
     {
          $serverUrl = request()->getSchemeAndHttpHost();
         return $this->subject('Your Verification Code')
-            ->view('Dewa.User.VerificationCodeToEmail')
+            ->view('Dewa.notifikasi_ke_email.auth.VerificationCodeToEmail')
             ->with(['code' => $this->code,'server_url'=>$serverUrl]);
     }
 

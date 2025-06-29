@@ -39,7 +39,7 @@ class ResetPassword extends Mailable
          $serverUrl = request()->getSchemeAndHttpHost();
 
         return $this->subject('Permintaan Ganti Password Akun Anda')
-            ->view('Dewa.User.ChangePasswordToEmail')
+            ->view('Dewa.notifikasi_ke_email.auth.ChangePasswordToEmail')
             ->with([
                 'url' => $serverUrl,'code'=>$this->code, 'email'=>$this->email
             ]);

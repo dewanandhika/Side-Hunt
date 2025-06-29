@@ -36,7 +36,7 @@ class UsersController extends Controller
         $active_navbar = 'Profile';
         $nama_halaman = 'Profile';
         $kode_Nomor = json_decode(file_get_contents(public_path('json/dial_country.json')), TRUE);
-        return view('Dewa.profile', compact('active_navbar', 'nama_halaman', 'kode_Nomor'));
+        return view('Dewa.need_auth.profile', compact('active_navbar', 'nama_halaman', 'kode_Nomor'));
 
         // return view('users.profile', compact('user', 'jobs'));
     }
@@ -92,7 +92,7 @@ class UsersController extends Controller
     {
         $active_navbar = 'Ganti Password';
         $nama_halaman = 'Ganti Password';
-        return view('Dewa.User.ToSendChangePassword', compact('active_navbar', 'nama_halaman'));
+        return view('Dewa.notifikasi_ke_email.auth.ToSendChangePassword', compact('active_navbar', 'nama_halaman'));
     }
 
     public function send_code_change_password(Request $request)
@@ -101,7 +101,7 @@ class UsersController extends Controller
         $cek = $this->cekExistEmail($request->email);
         // dd($cek);
         if (!($cek != false)) {
-            $verificationCode = $this->sendChangePassword( $request->email);
+            $verificationCode = $this->sendChangePassword($request->email);
             if ($verificationCode != false) {
                 $user = Users::where('email', $request->email)->first();
                 $user->VerificationCode = $verificationCode;
@@ -125,7 +125,7 @@ class UsersController extends Controller
                 $active_navbar = 'Verifikasi Email';
                 $nama_halaman = 'Verifikasi Email';
 
-                return view('Dewa.User.ResetPassword', compact('active_navbar', 'nama_halaman'));
+                return view('Dewa.notifikasi_ke_email.auth.ResetPassword', compact('active_navbar', 'nama_halaman'));
             } else {
                 return redirect()->back()->with('fail', ['Gagal', 'Kode Sudah Tidak aktif atau Kode sudah terpakai']);
             }
@@ -258,7 +258,8 @@ class UsersController extends Controller
         if (Mail::to($email)->send(new VerificationCodeMail($code))) {
             return $code;
         } else {
-            return false;
+            dd('email eror');
+            return 'email eror';
         }
     }
 
@@ -277,7 +278,7 @@ class UsersController extends Controller
         $active_navbar = 'Verifikasi Email';
         $nama_halaman = 'Verifikasi Email';
 
-        return view('Dewa.User.ToVerifyEmail', compact('active_navbar', 'nama_halaman'));
+        return view('Dewa.notifikasi_ke_email.auth.ToVerifyEmail', compact('active_navbar', 'nama_halaman'));
     }
 
     function submit_verify_email(Request $req)
@@ -337,13 +338,37 @@ class UsersController extends Controller
 
         // return view('pekerjaan.list', compact('Pekerjaan'));
 
-        return view('Dewa/profile', compact('jobs', 'peta', 'active_navbar', 'nama_halaman', 'kode_Nomor'));
+        return view('Dewa.need_auth.profile', compact('jobs', 'peta', 'active_navbar', 'nama_halaman', 'kode_Nomor'));
     }
 
     function Profile_Edit(Request $req)
     {
-        // dd($req);
-        // dd(session('account')->id);
+        $req->validate([
+            'dial_code' => 'required|string|max:10',
+            'nama'      => ['required', 'string', 'max:150'],
+            'alamat'    => ['required', 'string', 'max:255'],
+            'telpon'    => ['required', 'string'],
+        ], [
+            // dial_code
+            'dial_code.required' => 'Kode Negara wajib diisi.',
+            'dial_code.string'   => 'Kode Negara harus berupa teks.',
+            'dial_code.max'      => 'Kode Negara maksimal 10 karakter.',
+
+            // nama
+            'nama.required' => 'Nama wajib diisi.',
+            'nama.string'   => 'Nama harus berupa teks.',
+            'nama.max'      => 'Nama maksimal 150 karakter.',
+
+
+            // alamat
+            'alamat.required' => 'Alamat wajib diisi.',
+            'alamat.string'   => 'Alamat harus berupa teks.',
+            'alamat.max'      => 'Alamat maksimal 255 karakter.',
+
+            // telpon
+            'telpon.required' => 'Nomor Telepon wajib diisi.',
+            'telpon.string'   => 'Nomor Telepon harus berupa teks.',
+        ]);
 
         $user = Users::findOrFail(session('account')['id']);
         $user->nama = $req->nama;

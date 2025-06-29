@@ -15,7 +15,10 @@ return new class extends Migration
             $table->id();
             $table->unsignedBigInteger('user_id');
             $table->unsignedBigInteger('job_id');
-            $table->enum('status', ['tunda', 'diterima', 'ditolak','selesai'])->default('tunda');
+            $table->dateTime('jadwal_interview')->nullable();
+            $table->string('link_Interview')->nullable();
+            $table->integer('gaji_deals')->nullable();
+            $table->enum('status', ['tunda', 'interview', 'ditolak','Menunggu Pekerjaan','Sedang Bekerja','Menuggu Pembayaran','Gagal','selesai'])->default('tunda');
             $table->timestamps();
             $table->foreign('user_id')->references('id')->on('users')->onDelete('cascade');
             $table->foreign('job_id')->references('id')->on('pekerjaans')->onDelete('cascade');

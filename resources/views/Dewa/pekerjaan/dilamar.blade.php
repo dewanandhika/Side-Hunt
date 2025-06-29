@@ -90,7 +90,7 @@
                     </div>
                     @endforeach
                     @else
-                    <p>Belum ada pekerjaan yang terdaftar</p>
+                    <p>Belum ada lamaran</p>
                     @endif
                 </div>
             </div>

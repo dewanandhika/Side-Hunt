@@ -3,7 +3,9 @@
 namespace Database\Seeders;
 use Illuminate\Support\Facades\Hash;
 use App\Models\Users;
+use App\Models\Pekerjaan;
 use App\Models\KriteriaJob;
+use App\Models\Pelamar;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\File;
 // use Illuminate\Database\Console\Seeds\WithoutModelEvents;
@@ -128,5 +130,15 @@ class DatabaseSeeder extends Seeder
         }, $sqlContent);
         
         DB::unprepared($sqlContent);
+
+        $all_pekerjaan = Pekerjaan::all();
+        foreach($all_pekerjaan as $pekerjaan){
+            Pelamar::factory()->count(20)->create([
+                'job_id' => $pekerjaan['id']
+            ]);
+        }
+    }
+    public function is_own_id($id){
+        return session('account')['id']==$id;        
     }
 }

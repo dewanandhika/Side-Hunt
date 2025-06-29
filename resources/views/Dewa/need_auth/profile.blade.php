@@ -75,13 +75,16 @@ padding: 0;
         <div class="contform h-100 gap-3 d-flex flex-column justify-content-start" style="width: 90% !important;">
             <div class="d-flex justify-content-start flex-column w-50 align-content-center">
                 <label for="">Nama</label>
-                <input type="text" name="nama" class="rounded-2 px-2 w-100" value="{{{session('account')->nama}}}" id=""
-                    placeholder="John">
+                <input type="text" name="nama" class="rounded-2 px-2 w-100"
+                    value="{{ old('nama-depan', session('account')->nama ?? '') }}" id="" placeholder="John">
+                
             </div>
             <div class="d-flex justify-content-start flex-column w-75 align-content-center">
                 <label for="">Alamat</label>
-                <input type="text" name="alamat" class="rounded-2 px-2 w-100" value="{{{session('account')->alamat}}}"
-                    id="" placeholder="Jl, Pangsud V Mangundikaran, Nganjuk">
+                <input type="text" name="alamat" class="rounded-2 px-2 w-100"
+                    value="{{ old('alamat', session('account')->alamat ?? '') }}" id=""
+                    placeholder="Jl, Pangsud V Mangundikaran, Nganjuk">
+                
             </div>
             <div class="d-flex justify-content-start flex-column w-100 align-content-center">
                 <label for="">Nomor Telepon</label>
@@ -98,13 +101,27 @@ padding: 0;
                         @endforeach
                     </select>
 
-                    <input type="tel" name="telpon" class="rounded-2 px-2 w-100" value="{{ session('account')->telpon == null ? '' : session('account')->telpon}}" id="" placeholder="84965454654654654">
+
+                    <input type="tel" name="telpon" class="rounded-2 px-2 w-100"
+                        value="{{ old('nama-depan', session('account')->telpon ?? '') }}" id=""
+                        placeholder="84965454654654654">
+                    
+
                 </div>
             </div>
             <div class="opacity-75">
                 <label for="">Alamat Email (tidak bisa diubah)</label>
                 <p>{{ session('account')->email}}</p>
             </div>
+            @if ($errors->any())
+            <div class="alert alert-danger">
+                <ul>
+                    @foreach ($errors->all() as $error)
+                    <li>{{ $error }}</li>
+                    @endforeach
+                </ul>
+            </div>
+            @endif
             <div>
                 <button type="submit" class="btn btn-primary bg-blue-dark fw-bolder">Simpan</button>
                 <button type="button" class="btn cl-blue-dark fw-bolder" data-bs-dismiss="offcanvas"
@@ -187,5 +204,15 @@ padding: 0;
 @endsection
 
 @section('script')
+<script>
+    @if ($errors -> any())
+        set_edit_to_flex();
+    @endif
 
+    function set_edit_to_flex() {
+        let offcanvasElement = document.getElementById('offcanvasExample');
+        let offcanvas = new bootstrap.Offcanvas(offcanvasElement);
+        offcanvas.show();
+    }
+</script>
 @endsection

@@ -22,7 +22,7 @@ class PekerjaanController extends Controller
         $nama_halaman = 'Cari Pekerjaan';
 
 
-        return view("Dewa.Mitra.pekerjaan-cari", compact("active_navbar", 'nama_halaman', 'all', 'match', 'all_rekomendasi'));
+        return view("Dewa.pekerjaan.cari", compact("active_navbar", 'nama_halaman', 'all', 'match', 'all_rekomendasi'));
     }
 
 
@@ -32,7 +32,7 @@ class PekerjaanController extends Controller
         $nama_halaman = 'Tambah Pekerjaan';
         $path = public_path('Dewa/json/dummy_skills.json');
         $kriteria = json_decode(file_get_contents($path), true)['skills'];
-        return view("Dewa.Mitra.pekerjaan-add", compact("active_navbar", 'nama_halaman', 'kriteria'));
+        return view("Dewa.pekerjaan.add", compact("active_navbar", 'nama_halaman', 'kriteria'));
     }
     public function Daftar_Pelamar($id)
     {
@@ -50,7 +50,10 @@ class PekerjaanController extends Controller
             'pelamars.created_at as daftar',
             'users.nama as nama_pelamar',
             'users.preferensi_user',
-            'pelamars.status as status_job'
+            'pelamars.status as status_job',
+            'pelamars.id as id_pelamars',
+            'pelamars.link_Interview as link',
+            'pelamars.jadwal_interview as jadwal',
         )->get();
 
         foreach($pelamars as $pelamar){
@@ -67,13 +70,10 @@ class PekerjaanController extends Controller
             }
             $pelamar->preferensi_user=(implode(", ", $skills));;
         }
-        // dd($skills);
-        // dd($pelamars->preferensi_user);
         // dd($pelamars);
-        // dd(implode(", ", json_decode($pelamars[0]->preferensi_user)->kriteria));
 
 
-        return view('Dewa.Mitra.daftar-pelamar', compact("active_navbar", 'nama_halaman', 'pelamars'));
+        return view('Dewa.pekerjaan.daftar-pelamar', compact("active_navbar", 'nama_halaman', 'pelamars'));
     }
 
     public function view_pekerjaan($id)
@@ -87,9 +87,9 @@ class PekerjaanController extends Controller
             $history = Pelamar::where('user_id', session('account')['id'])
                 ->where('job_id', $id)
                 ->get();
-            return view('Dewa.Mitra.pekerjaan-lihat', compact("active_navbar", 'nama_halaman', 'data_pekerjaan', 'history'));
+            return view('Dewa.pekerjaan.lihat', compact("active_navbar", 'nama_halaman', 'data_pekerjaan', 'history'));
         } else {
-            return view('Dewa.Mitra.pekerjaan-lihat', compact("active_navbar", 'nama_halaman', 'data_pekerjaan'));
+            return view('Dewa.pekerjaan.lihat', compact("active_navbar", 'nama_halaman', 'data_pekerjaan'));
         }
     }
 
@@ -214,7 +214,7 @@ class PekerjaanController extends Controller
             ->get();
         // dd($pekerjaans);
         // $Pekerjaans = Pelamar::where('user_id', session('account')['id'])->get();
-        return view('Dewa.Mitra.pekerjaan-dilamar', compact('active_navbar', 'nama_halaman', 'pekerjaans'));
+        return view('Dewa.pekerjaan.dilamar', compact('active_navbar', 'nama_halaman', 'pekerjaans'));
     }
 
     public function Daftar_Pekerjaan()
@@ -237,7 +237,7 @@ class PekerjaanController extends Controller
             ])
             ->get();
         // dd($pekerjaans);
-        return view('Dewa.mitra.pekerjaan-dibuat', compact('active_navbar', 'nama_halaman', 'pekerjaans'));
+        return view('Dewa.pekerjaan.dibuat', compact('active_navbar', 'nama_halaman', 'pekerjaans'));
     }
 
     function cosineSimilarityPercent($text1, $text2)
@@ -442,5 +442,10 @@ class PekerjaanController extends Controller
         $distance = $earthRadius * $c;
 
         return $distance;
+    }
+
+    function is_own_pelamar($idPelamar){
+        $job = Pekerjaan::findOrFail($idPelamar);
+        return ($job->pembuat==session('account')['id']);
     }
 }

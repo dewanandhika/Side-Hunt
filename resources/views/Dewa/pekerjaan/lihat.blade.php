@@ -49,9 +49,9 @@
                     <i class="bi bi-pin-map clear-p"></i>
                     @if(session('account'))
                     <p class="clear-p" style="font-size: 12px; color: #2E2D2C;">
-                        {{{$data_pekerjaan[0]['alamat']."(".hitungJarak($data_pekerjaan[0]['longitude'],
-                        $data_pekerjaan[0]['langitude'],
-                        session('account')['longitude'], session('account')['langitude']).")"}}}</p>
+                        {{{$data_pekerjaan[0]['alamat']." (".hitungJarak($data_pekerjaan[0]['longitude'],
+                        $data_pekerjaan[0]['latitude'],
+                        session('account')['longitude'], session('account')['latitude']).")"}}}</p>
 
                     @else
                     <p class="clear-p" style="font-size: 12px; color: #2E2D2C;">
@@ -79,7 +79,7 @@
                             pada {{{date('d-m-Y H:i:s', strtotime($data_pekerjaan[0]->deadline_job))}}}</p>
                     </div>
                     <button class="btn btn-warning mt-2 w-100"
-                        onclick="ValidasiPendaftaran({{{$data_pekerjaan[0]->id}}})">Lamar Sekarang</button>
+                        onclick="ValidasiPendaftaran('{{{$data_pekerjaan[0]->id}}}')">Lamar Sekarang</button>
                     @elseif(!$history->isEmpty())
                     <div class="w-100 gap-2 d-flex flex-row justify-content-evenly align-items-center">
                         <button class="btn btn-dark mt-2 w-100" disabled>Anda Sudah Mendaftar</button>
@@ -117,7 +117,7 @@
                                         </div>
                                     </div>
                                     <!-- Step 2 -->
-                                    @elseif($history[0]->status=='ditinjau')
+                                    @elseif($history[0]->status=='interview')
                                     <div class="d-flex align-items-start position-relative pb-4">
                                         <span class="position-relative me-1">
                                             <span class="bg-primary rounded-circle d-inline-block"
@@ -141,8 +141,8 @@
                                                 style="width:2px;height:40px;z-index:0;"></span>
                                         </span>
                                         <div>
-                                            <div class="fw-bold">Sedang Ditinjau</div>
-                                            <small class="text-muted">HRD sedang meninjau data dan CV kamu.</small>
+                                            <div class="fw-bold">Dalam Tahap interview</div>
+                                            <small class="text-muted">Lihat Lamaran Anda</small>
                                         </div>
                                     </div>
                                     <!-- Step 3 -->
@@ -201,10 +201,13 @@
                     @endif
 
                     @elseif(session('account')['role']=='mitra')
-                        <button class="btn btn-warning mt-5 w-100" onclick="window.location.href='/daftar-Pelamar/{{{$data_pekerjaan[0]->id}}}'">Daftar Pelamar</button>
-                        @endif
-                        @else
-                        <button class="btn btn-info mt-2 w-100" onclick="window.location.href='/Login'">Login Untuk Mendaftar</button>
+                    <button class="btn btn-warning mt-5 w-100"
+                        onclick="window.location.href='/daftar-Pelamar/{{{$data_pekerjaan[0]->id}}}'">Daftar
+                        Pelamar</button>
+                    @endif
+                    @else
+                    <button class="btn btn-info mt-2 w-100" onclick="window.location.href='/Login'">Login Untuk
+                        Mendaftar</button>
                     @endif
 
 
@@ -220,6 +223,7 @@
                 <hr>
                 {!! $data_pekerjaan[0]->deskripsi !!}
             </div>
+
             <div class="">
                 <h6 class="fw-bold">Tagg</h6>
                 <div class="d-flex flex-wrap gap-2">
@@ -239,8 +243,8 @@
 @section('script')
 <script>
     const csrfToken = document.querySelector('meta[name="csrf-token"]').getAttribute('content');
-    function ValidasiPendaftaran(idPekerjaan) {
-        let route = '/pelamar/' + idPekerjaan;
+    async function ValidasiPendaftaran(idPekerjaan) {
+        let route = '/Lamar/' + idPekerjaan;
         console.log('route: ', route);
         Swal.fire({
             title: "Apakah anda yakin?",
@@ -252,7 +256,7 @@
             confirmButtonText: "Ya, Daftar!"
         }).then((result) => {
             if (result.isConfirmed) {
-                fetch('/pelamar/' + idPekerjaan, {
+                fetch('/Lamar/' + idPekerjaan, {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json',
@@ -260,24 +264,26 @@
                         // tambahkan header lain jika perlu, misal token, dll
                     }, body: JSON.stringify({
                         _token: csrfToken,
-                        // ...data lain
                     })
-                }).then(response => response.json()) // jika server mengirim response JSON
+                }).then(response => response.json())
                     .then(data => {
                         console.log('Response dari server:', data);
-                        Swal.fire({
-                            title: "Berhasil Mendaftar!",
-                            text: "Biasanya butuh 1 - 2 minggu untuk HRD memproses lamaranmu, semoga dilancarkan!.",
-                            icon: "success"
-                        }).then((result) => {
-                            location.reload();
-                        });
+                        if (data.success == true) {
+                            Swal.fire({
+                                title: "Berhasil Mendaftar!",
+                                text: "Biasanya butuh 1 - 2 minggu untuk HRD memproses lamaranmu, semoga dilancarkan!.",
+                                icon: "success"
+                            }).then((result) => {
+                                location.reload();
+                            });
+                        }
+                        else {
+                            fail('Gagal Mendaftar', data.success)
+                        }
                     })
                     .catch(error => {
                         console.error('Error:', error);
                     });
-
-                //disini
 
             }
         });
