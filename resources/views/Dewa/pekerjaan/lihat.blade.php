@@ -229,7 +229,10 @@
                                         </span>
                                         <div>
                                             <div class="fw-bold">Menunggu Bekerja</div>
-                                            <small class="text-muted">{{{$data_pekerjaan[0]->start_job}}} Mulai Bekerja</small>
+                                            <div class="d-flex flex-column gap-0">
+                                                <small class="text-muted">{{{$data_pekerjaan[0]->start_job}}} Mulai Bekerja</small>
+                                                <a class="text-muted" style="font-size: 10px;" href="https://maps.google.com/?q={{{$data_pekerjaan[0]->latitude}}},{{{$data_pekerjaan[0]->longitude}}}">klik untuk ke lokasi pekerjaan</a>
+                                            </div>
                                         </div>
                                     </div>
                                     <!-- Step 4 -->

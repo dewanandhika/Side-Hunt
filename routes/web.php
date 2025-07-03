@@ -29,12 +29,13 @@ Route::get('/see', function () {
 //Auth
 Route::get('/', [HomeController::class, 'index'])->name('home');
 Route::get('/Index', [HomeController::class, 'index'])->name('home');
-Route::get('/Login', [HomeController::class, 'Login']);
+Route::get('/Login', [HomeController::class, 'Login'])->name(name: 'Login');
 Route::get('/Verify-Email', [UsersController::class, 'verify_view']);
 Route::post('/verify_email', [UsersController::class, 'submit_verify_email']);
 Route::get('/forget/password', action: [UsersController::class, 'forget_password']);
 Route::post('/send_change_password', action: [UsersController::class, 'send_code_change_password']);
 Route::get('/reset_password/{token}/{email}', action: [UsersController::class, 'view_Reset_Password']);
+Route::post('/reset-new-password', action: [UsersController::class, 'reset_password']);
 
 Route::get('/Register', [HomeController::class, 'Register']);
 Route::get('/Logout', [UsersController::class, 'logout']);

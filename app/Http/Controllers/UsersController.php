@@ -122,10 +122,11 @@ class UsersController extends Controller
         if (!($user != false)) {
             $user = Users::where('email', $email)->first();
             if ($user->VerificationCode == $token) {
-                $active_navbar = 'Verifikasi Email';
-                $nama_halaman = 'Verifikasi Email';
+                $active_navbar = 'Reset Password';
+                $nama_halaman = 'Reset Password';
+                $emails = $email;
 
-                return view('Dewa.notifikasi_ke_email.auth.ResetPassword', compact('active_navbar', 'nama_halaman'));
+                return view('Dewa.notifikasi_ke_email.auth.ResetPassword', compact('active_navbar', 'nama_halaman', 'emails'));
             } else {
                 return redirect()->back()->with('fail', ['Gagal', 'Kode Sudah Tidak aktif atau Kode sudah terpakai']);
             }
@@ -414,6 +415,42 @@ class UsersController extends Controller
             session(['account' => $user]);
 
             return redirect('/')->with('success', ['Terimakasih', 'Semoga Lekas Diterima Kerja']);
+        }
+    }
+
+    public function reset_password(Request $request)
+    {
+        $request->validate([
+            'password' => 'required|string|max:12',
+            'password_confirmation' => ['required', 'string', 'max:12', 'same:password'],
+            'email' => ['required', 'string', 'max:150'],
+        ], [
+            // password
+            'password.required'      => 'Password wajib diisi.',
+            'password.string'        => 'Password harus berupa teks.',
+            'password.max'           => 'Password maksimal 12 karakter.',
+
+            // password-retype
+            'password_confirmation.required' => 'Ulangi password wajib diisi.',
+            'password_confirmation.string'   => 'Ulangi password harus berupa teks.',
+            'password_confirmation.max'      => 'Ulangi password maksimal 12 karakter.',
+            'password_confirmation.same'     => 'Ulangi password harus sama dengan password.',
+
+            // email
+            'email.required'         => 'Email wajib diisi.',
+            'email.string'           => 'Email harus berupa teks.',
+            'email.max'              => 'Email maksimal 150 karakter.',
+        ]);
+        $user = Users::where('email', $request->email)->first();
+        if ($user) {
+            $user->password = $request->password;
+            if ($user->save()) {
+                return redirect('/Login')->with('success', ['Silahkan Login', 'Password Berhasil Diganti!']);
+            } else {
+                return redirect()->back()->with('fail', ['Kesalahan Sistem!', 'Mohon Coba beberapa saat lagi!']);
+            }
+        } else {
+            return redirect()->back()->with('fail', ['Gagal!', 'Tidak Ada akun dengan email ' . $request->email . '!']);
         }
     }
 }
