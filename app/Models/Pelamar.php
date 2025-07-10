@@ -14,6 +14,9 @@ class Pelamar extends Model
         'user_id',
         'job_id',
         'status',
+        'Tipe_Group',
+        'Data_Team'
+
     ];
 
     public function user()

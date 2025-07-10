@@ -1,6 +1,9 @@
 <?php
 
 namespace Database\Seeders;
+
+use App\Models\excel;
+use App\Models\to_excel;
 use Illuminate\Support\Facades\Hash;
 use App\Models\Users;
 use App\Models\Pekerjaan;
@@ -115,30 +118,33 @@ class DatabaseSeeder extends Seeder
         //     ]);
         // }
         $path = database_path('seeders/sql/dummy_Pekerjaans_2.sql');
-        
+
         // Read the SQL content
         $sqlContent = File::get($path);
-        
+
         // Replace invalid user IDs with valid ones (1-7)
         // This ensures foreign key constraints are satisfied
         $validUserIds = [1, 2, 3, 4, 5, 6, 7];
-        
+
         // Use regex to find and replace the pembuat column values
-        $sqlContent = preg_replace_callback('/(\', )(\d+)(, NOW\(\), NOW\(\)\))/', function($matches) use ($validUserIds) {
+        $sqlContent = preg_replace_callback('/(\', )(\d+)(, NOW\(\), NOW\(\)\))/', function ($matches) use ($validUserIds) {
             $randomUserId = $validUserIds[array_rand($validUserIds)];
             return $matches[1] . $randomUserId . $matches[3];
         }, $sqlContent);
-        
+
         DB::unprepared($sqlContent);
 
         $all_pekerjaan = Pekerjaan::all();
-        foreach($all_pekerjaan as $pekerjaan){
-            Pelamar::factory()->count(20)->create([
+        foreach ($all_pekerjaan as $pekerjaan) {
+            Pelamar::factory()->count(1)->create([
                 'job_id' => $pekerjaan['id']
             ]);
         }
+
+        excel::factory()->count(2500)->create();
     }
-    public function is_own_id($id){
-        return session('account')['id']==$id;        
+    public function is_own_id($id)
+    {
+        return session('account')['id'] == $id;
     }
 }

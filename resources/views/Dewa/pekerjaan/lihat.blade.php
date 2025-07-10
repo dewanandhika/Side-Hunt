@@ -24,6 +24,70 @@
 </style>
 @endsection
 
+@section('add-onn')
+<div class="offcanvas offcanvas-start" data-bs-backdrop="static" tabindex="-1" id="form_is_alone"
+    aria-labelledby="formIsAloneLabel">
+    <div class="offcanvas-header border-bottom">
+        <h5 class="offcanvas-title fw-semibold text-black" id="formIsAloneLabel">
+            Lengkapi Data Tim
+        </h5>
+        <button type="button" class="btn-close" data-bs-dismiss="offcanvas" aria-label="Tutup"></button>
+    </div>
+
+    <div class="offcanvas-body">
+        <div class="alert alert-warning small mt-2" role="alert"> <strong>Perhatian:</strong>
+            <ul>
+                <li>Setiap individu yang Anda daftarkan melalui formulir ini <strong>sepenuhnya menjadi tanggung jawab
+                        Anda sebagai pelamar.</strong></li>
+                <li>Segala hal yang berkaitan dengan gaji, pekerjaan, komunikasi, serta bentuk pertanggungjawaban
+                    lainnya merupakan <strong>urusan pribadi antara Anda dan pihak pemberi kerja.</strong> Kami
+                    <strong>tidak berperan sebagai perantara</strong> maupun terlibat dalam hubungan kerja tersebut.
+                </li>
+            </ul>
+        </div>
+        
+        <form id="team_data"
+            onsubmit="event.preventDefault(); ValidasiPendaftaran('{{{$data_pekerjaan[0]->id}}}',true);">
+            <div id="contactEntries" class="contactEntries">
+                <h6 class="fw-bold">Anggota 1 <span class="text-danger">*</span></h6>
+                <div class="contact-entry mb-4 p-4 border rounded bg-light">
+                    <div class="mb-3">
+                        <label class="form-label" for="nama-1">Nama Lengkap <span class="text-danger">*</span></label>
+                        <input type="text" id="nama-1" name="nama" class="nama form-control"
+                            placeholder="Masukkan nama lengkap" required>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label" for="telepon-1">Nomor Telepon <span
+                                class="text-danger">*</span></label>
+                        <input type="tel" id="telepon-1" name="telepon" class="telepon form-control"
+                            placeholder="Masukkan nomor telepon" required>
+                    </div>
+                    <!-- Tombol Hapus -->
+                    <button type="button" class="btn btn-danger" onclick="hapusDataKontak(this)">
+                        <i class="bi bi-trash"></i> Hapus
+                    </button>
+                </div>
+            </div>
+
+            <button type="button" onclick="tambahDataKontak()" class="btn btn-outline-secondary w-100 mb-3">
+                <i class="bi bi-person-plus"></i> Tambah Orang
+            </button>
+
+            <button type="button" class="Sendiri btn btn-warning w-100 mb-3">
+                <i class="bi bi-person-plus"></i> Sendiri
+            </button>
+
+            <button type="submit" class="btn btn-info w-100 shadow-sm">
+                <i class="bi bi-send"></i> Submit
+                Lamaran
+            </button>
+        </form>
+
+    </div>
+</div>
+
+@endsection
+
 @section('content')
 <div class="container w-100 hcont gap-1 d-flex my-5 p-3 flex-column justify-content-start align-items-start">
     <div class="w-100 d-flex justify-content-start">
@@ -78,12 +142,14 @@
                             ditutup
                             pada {{{date('d-m-Y H:i:s', strtotime($data_pekerjaan[0]->deadline_job))}}}</p>
                     </div>
-                    <button class="btn btn-warning mt-2 w-100"
-                        onclick="ValidasiPendaftaran('{{{$data_pekerjaan[0]->id}}}')">Lamar Sekarang</button>
+                    <button class="btn btn-warning mt-2 w-100" onclick="is_Alone('{{{$data_pekerjaan[0]->id}}}')">Lamar
+                        Sekarang</button>
                     @elseif(!$history->isEmpty())
                     <div class="w-100 gap-2 d-flex flex-row justify-content-evenly align-items-center">
                         <button class="btn btn-dark mt-2 w-100" disabled>Anda Sudah Mendaftar</button>
-                        <button class="btn btn-info mt-2 w-100">Chat Pemberi Kerja</button>
+                        <button class="btn btn-info mt-2 w-100"
+                            onclick="window.location.href='/Chat/{{{$data_pekerjaan[0]->pembuat}}}'">Chat Pemberi
+                            Kerja</button>
                     </div>
                     @else
                     <div class="d-flex flex-row gap-2 justify-content-center align-items-center">
@@ -117,7 +183,7 @@
                                         </div>
                                     </div>
                                     <!-- Step 2 -->
-                                     @elseif($history[0]->status=='ditolak')
+                                    @elseif($history[0]->status=='ditolak')
                                     <div class="d-flex align-items-start position-relative pb-4">
                                         <span class="position-relative me-1">
                                             <span class="bg-info rounded-circle d-inline-block"
@@ -169,6 +235,33 @@
                                         </div>
                                     </div>
                                     @elseif($history[0]->status=='Gagal')
+                                    <div class="d-flex align-items-start position-relative pb-4">
+                                        <span class="position-relative me-1">
+                                            <span class="bg-primary rounded-circle d-inline-block"
+                                                style="width:16px;height:16px;"></span>
+                                            <!-- Vertical Line -->
+                                            <span
+                                                class="position-absolute top-100 start-50 translate-middle-x bg-primary"
+                                                style="width:2px;height:40px;z-index:0;"></span>
+                                        </span>
+                                        <div>
+                                            <div class="fw-bold">Lamaran Disubmit</div>
+                                            <small class="text-muted">Lamaran kamu sudah dikirim ke perusahaan.</small>
+                                        </div>
+                                    </div>
+                                    <div class="d-flex align-items-start position-relative pb-4">
+                                        <span class="position-relative me-1">
+                                            <span class="bg-warning rounded-circle d-inline-block"
+                                                style="width:16px;height:16px;"></span>
+                                            <span
+                                                class="position-absolute top-100 start-50 translate-middle-x bg-warning"
+                                                style="width:2px;height:40px;z-index:0;"></span>
+                                        </span>
+                                        <div>
+                                            <div class="fw-bold">Dalam Tahap interview</div>
+                                            <small class="text-muted">Lihat Lamaran Anda</small>
+                                        </div>
+                                    </div>
                                     <div class="d-flex align-items-start position-relative pb-4">
                                         <span class="position-relative me-1">
                                             <span class="bg-info rounded-circle d-inline-block"
@@ -230,13 +323,16 @@
                                         <div>
                                             <div class="fw-bold">Menunggu Bekerja</div>
                                             <div class="d-flex flex-column gap-0">
-                                                <small class="text-muted">{{{$data_pekerjaan[0]->start_job}}} Mulai Bekerja</small>
-                                                <a class="text-muted" style="font-size: 10px;" href="https://maps.google.com/?q={{{$data_pekerjaan[0]->latitude}}},{{{$data_pekerjaan[0]->longitude}}}">klik untuk ke lokasi pekerjaan</a>
+                                                <small class="text-muted">{{{$data_pekerjaan[0]->start_job}}} Mulai
+                                                    Bekerja</small>
+                                                <a class="text-muted" style="font-size: 10px;"
+                                                    href="https://maps.google.com/?q={{{$data_pekerjaan[0]->latitude}}},{{{$data_pekerjaan[0]->longitude}}}">klik
+                                                    untuk ke lokasi pekerjaan</a>
                                             </div>
                                         </div>
                                     </div>
                                     <!-- Step 4 -->
-                                    
+
                                     @endif
                                 </div>
                             </div>
@@ -286,10 +382,45 @@
 
 @section('script')
 <script>
+    function hapusDataKontak(button) {
+        const entry = button.closest('.contactEntries');
+        entry.remove();
+    }
     const csrfToken = document.querySelector('meta[name="csrf-token"]').getAttribute('content');
-    async function ValidasiPendaftaran(idPekerjaan) {
+    function is_Alone(idPekerjaan) {
+        Swal.fire({
+            title: "Dengan siapa anda akan bekerja",
+            text: "Anda bisa bekerja bersama teman atau kenalan anda",
+            icon: "question",
+            showCancelButton: true,
+            confirmButtonText: "Sendiri",
+            cancelButtonText: "Dengan Tim"
+        }).then((result) => {
+            if (result.isConfirmed) {
+                ValidasiPendaftaran(idPekerjaan, false);
+            } else if (result.dismiss === Swal.DismissReason.cancel) {
+                show_form_is_alone(idPekerjaan);
+            }
+        });
+    }
+
+    function show_form_is_alone(idPekerjaan) {
+        var offcanvasElement = document.getElementById('form_is_alone');
+        var offcanvas = new bootstrap.Offcanvas(offcanvasElement);
+        offcanvas.show();
+        let button_alone = offcanvasElement.querySelector('.Sendiri')
+        button_alone.setAttribute('onclick', `ValidasiPendaftaran("${idPekerjaan}", false)`);
+    }
+
+
+    async function ValidasiPendaftaran(idPekerjaan, is_team) {
+        is_alone = "";
+        if (is_team) {
+            is_alone = Prepared_data_team();
+            console.log(is_alone);
+        }
         let route = '/Lamar/' + idPekerjaan;
-        console.log('route: ', route);
+        // console.log('route: ', route);
         Swal.fire({
             title: "Apakah anda yakin?",
             text: "Pemberi kerja akan meninjau data preferensi usermu, klik Ya jika yakin!",
@@ -304,11 +435,14 @@
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json',
-                        'X-CSRF-TOKEN': csrfToken,
+                        'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content'),
                         // tambahkan header lain jika perlu, misal token, dll
                     }, body: JSON.stringify({
                         _token: csrfToken,
-                    })
+                        team: is_team,
+                        data: is_alone,
+                    }),
+                    credentials: 'include'
                 }).then(response => response.json())
                     .then(data => {
                         console.log('Response dari server:', data);
@@ -331,6 +465,87 @@
 
             }
         });
+    }
+
+    let jumlahKontak = 1;
+    const maxKontak = 4;
+
+    function Prepared_data_team() {
+        // let Dataform;
+        // const formData = new FormData();
+        let form = document.querySelector('#team_data')
+        let data = [];
+        form.querySelectorAll('.contact-entry').forEach(item => {
+            console.log('ini: ', item)
+            let the_data = {
+                nama: item.querySelector('.nama').value,
+                telepon: item.querySelector('.telepon').value,
+            }
+            data.push(the_data);
+        })
+        // console.log(data);
+        // data.push(the_data)
+        // formData.append('data', JSON.stringify(data));
+        return data;
+    }
+
+    function tambahDataKontak() {
+        if (jumlahKontak >= maxKontak) {
+            alert("Maksimal 4 data kontak yang diperbolehkan.");
+            return;
+        }
+
+        jumlahKontak++;
+
+        const container = document.getElementById("contactEntries");
+        container.classList.add('contactEntries')
+
+        // Elemen heading (Anggota X)
+        const heading = document.createElement("h6");
+        heading.className = "fw-bold";
+        heading.innerHTML = `Anggota ${jumlahKontak} <span class="text-danger">*</span>`;
+
+        // Elemen form (contact-entry)
+        const divWrapper = document.createElement("div");
+        divWrapper.className = "contact-entry mb-4 p-4 border rounded bg-light";
+
+        divWrapper.innerHTML = `
+        <div class="mb-3">
+            <label class="form-label" for="nama-${jumlahKontak}" >Nama Lengkap <span class="text-danger">*</span></label>
+            <input type="text" id="nama-${jumlahKontak}" name="nama[]" class="nama form-control" placeholder="Masukkan nama lengkap" required>
+        </div>
+        <div class="mb-3">
+            <label class="form-label" for="telepon-${jumlahKontak}">Nomor Telepon <span class="text-danger">*</span></label>
+            <input type="tel" id="telepon-${jumlahKontak}" name="telepon[]" class="telepon form-control" placeholder="Masukkan nomor telepon" required>
+        </div>
+        <button type="button" class="btn btn-danger" onclick="hapusDataKontak(this)">
+            <i class="bi bi-trash"></i> Hapus
+        </button>
+    `;
+        // Masukkan heading dan form ke dalam container
+        container.appendChild(heading);
+        container.appendChild(divWrapper);
+    }
+
+    function hapusDataKontak(button) {
+        const entry = button.closest(".contact-entry");
+        const heading = entry.previousElementSibling;
+
+        if (document.querySelectorAll(".contact-entry").length <= 1) {
+            alert("Minimal harus ada satu kontak.");
+            return;
+        }
+
+        entry.remove();
+        if (heading && heading.tagName === "H6") heading.remove();
+        jumlahKontak--;
+    }
+    function submitForm() {
+        // Validasi dan proses data di sini
+        const form = document.getElementById('rejectForm');
+        console.log(new FormData(form));
+        // Tambahkan logika submit jika diperlukan
+        alert("Form dikirim (simulasi).");
     }
 </script>
 @endsection

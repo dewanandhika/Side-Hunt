@@ -38,7 +38,7 @@
 @section('content')
 <div class="container w-100 h-auto gap-5 d-flex my-5 flex-column justify-content-center align-items-center">
     <div class="w-100 d-flex mt-5 mb-2 flex-column justify-content-center align-items-center">
-        <p class="fw-bolder" style="font-size: 30px;">Cari Pekerjaan Yang Dilamar</p>
+        <p class="fw-bolder" style="font-size: 30px;">History Lamaran yang anda daftar</p>
         <div
             class="form-control w-75 ps-3 rounded-5 shadow d-flex flex-row gap-0 justify-content-center align-items-center">
             <i class="bi bi-search w-auto"></i>

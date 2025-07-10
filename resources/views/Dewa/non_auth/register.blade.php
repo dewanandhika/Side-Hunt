@@ -17,9 +17,10 @@
         @csrf
         <div class="d-flex flex-column h-auto gap-3 w-100 justify-content-between">
             <label for="">Mendaftar sebagai siapa?*</label>
-            <select class="form-select selectform shadow-none @error('role') is-invalid @enderror" aria-label="Default select example">
+            <select class="form-select selectform shadow-none @error('role') is-invalid @enderror" aria-label="Default select example"
+            name="role">
                 <option value="1" {{{ old('role') == 'mitra' ? 'selected' : '' }}}>Mitra (Pemberi Kerja)</option>
-                <option value="2"{ {{ old('role') == 'mitra' ? 'selected' : '' }}} selected>User (Pencari Kerja)</option>
+                <option value="2"{ {{ old('role') == 'user' ? 'selected' : '' }}} selected>User (Pencari Kerja)</option>
             </select>
         </div>
         <div class="d-flex flex-row h-auto gap-3 w-100 justify-content-between">

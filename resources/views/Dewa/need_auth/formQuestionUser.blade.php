@@ -83,68 +83,6 @@
         <form method="POST" action="/user/preferensi/save">
 
             @csrf
-            @php
-            $questions = [
-            'job_distance' => ['label' => 'Jarak kerja yang Anda bersedia tempuh', 'options' => [
-            '0 ' => 'hanya remote',
-            '1' => 'kurang dari atau sama dengan 1 km',
-            '2' => '1–5 km',
-            '3' => '6–10 km',
-            '4' => '11–20 km',
-            '5' => 'lebih dari 20 km'
-            ]],
-            'expected_rate' => ['label' => 'Minimal upah yang Anda harapkan', 'options' => [
-            '0' => 'kurang dari atau sama dengan 20rb',
-            '1' => 'kurang dari atau sama dengan 30rb',
-            '2' => 'kurang dari atau sama dengan 40rb',
-            '3' => 'kurang dari atau sama dengan 50rb',
-            '4' => 'kurang dari atau sama dengan 75rb',
-            '5' => 'lebih dari 75rb'
-            ]],
-            'daily_hours' => ['label' => 'Waktu kerja per hari yang bisa diluangkan', 'options' => [
-            '0' => 'kurang dari 1 jam',
-            '1' => '1–2 jam',
-            '2' => '3–4 jam',
-            '3' => '5–6 jam',
-            '4' => '7–8 jam',
-            '5' => 'lebih dari 8 jam'
-            ]],
-            'project_duration' => ['label' => 'Durasi proyek yang Anda inginkan', 'options' => [
-            '0' => '1 hari',
-            '1' => 'kurang dari atau sama dengan 3 hari',
-            '2' => 'kurang dari atau sama dengan 1 minggu',
-            '3' => 'kurang dari atau sama dengan 2 minggu',
-            '4' => 'kurang dari atau sama dengan 1 bulan',
-            '5' => 'lebih dari 1 bulan'
-            ]],
-            'work_method' => ['label' => 'Preferensi metode kerja', 'options' => [
-            '0' => 'hanya on-site',
-            '1' => 'lebih suka on-site',
-            '2' => 'fleksibel cenderung on-site',
-            '3' => 'fleksibel netral',
-            '4' => 'fleksibel cenderung remote',
-            '5' => 'hanya remote'
-            ]],
-            'experience_length' => ['label' => 'Lama pengalaman kerja Anda', 'options' => [
-            '0' => 'tidak ada',
-            '1' => 'kurang dari 3 bulan',
-            '2' => '3–6 bulan',
-            '3' => '6–12 bulan',
-            '4' => '1–2 tahun',
-            '5' => 'lebih dari 2 tahun'
-            ]],
-            'available_start' => ['label' => 'Kapan Anda bisa mulai bekerja', 'options' => [
-            '0' => 'lebih dari 2 minggu',
-            '1' => 'dalam 2 minggu',
-            '2' => 'dalam 1 minggu',
-            '3' => 'dalam 3 hari',
-            '4' => 'besok',
-            '5' => 'hari ini'
-            ]],
-
-            ];
-            @endphp
-
             <div class="form-group d-flex flex-column">
 
 
@@ -152,25 +90,6 @@
                 <textarea name="deskripsi" id="" class="shadow-sm form-control mb-3"
                     placeholder="Beri gambaran kepada kami anda orang yang seperti apa, bisa kebiasaan, pekerjaan, dan hal yang disukai"></textarea>
             </div>
-
-            @foreach ($questions as $name => $q)
-            <div class="form-section">
-                <label for="{{ $name }}" class="form-label">{{ $q['label'] }}</label>
-                <select id="{{ $name }}" name="{{ $name }}"
-                    class="form-select shadow-sm @error($name) is-invalid @enderror" data-style="btn-outline-primary"
-                    data-width="100%">
-                    <option value="-" selected>Pilih jawaban...</option>
-                    @foreach ($q['options'] as $key => $desc)
-                    <option value="{{ $key.' '.$desc }}" {{old($name)==(string)$key?'selected':''}}>
-                        {{ $desc }}
-                    </option>
-                    @endforeach
-                </select>
-                @error($name)
-                <div class="invalid-feedback d-block">{{ $message }}</div>
-                @enderror
-            </div>
-            @endforeach
 
             <div class="form-group">
                 <div class="row justify-content-center w-100">

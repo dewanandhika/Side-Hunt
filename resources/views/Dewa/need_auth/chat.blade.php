@@ -1,0 +1,1172 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
+    <meta name="csrf-token" content="{{ csrf_token() }}">
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+
+    <title>Chat - Side Hunt</title>
+
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+    <style>
+        html,
+        body {
+            height: 100%;
+            margin: 0;
+            background: #f0f2f5;
+            overflow: hidden;
+        }
+
+
+        body {
+            min-height: 100vh;
+            min-width: 100vw;
+            font-family: 'Inter', Arial, sans-serif;
+        }
+
+        .chat-app {
+            width: 100vw;
+            height: 100vh;
+            display: flex;
+            background: #f0f2f5;
+        }
+
+        .sidebar {
+            width: 340px;
+            max-width: 100vw;
+            background: #fff;
+            border-right: 1px solid #e3e6ea;
+            display: flex;
+            flex-direction: column;
+            height: 100vh;
+        }
+
+        .sidebar-header {
+            /* padding: 1rem; */
+            border-bottom: 1px solid #e3e6ea;
+            background: #f7f8fa;
+            min-height: 72px !important;
+            padding: 1rem 1.6rem;
+            gap: 1rem;
+            border-bottom: 1px solid #e3e6ea;
+
+        }
+
+        .sidebar-search {
+            padding: 0.75rem 1rem;
+            background: #fff;
+            border-bottom: 1px solid #e3e6ea;
+        }
+
+        .sidebar-people {
+            flex: 1 1 auto;
+            overflow-y: auto;
+            padding-bottom: 1rem;
+            background: #fff;
+        }
+
+        .person {
+            display: flex;
+            align-items: center;
+            padding: 0.7rem 1.2rem;
+            cursor: pointer;
+            border-bottom: 1px solid #f3f3f3;
+            gap: 1rem;
+            position: relative;
+        }
+
+        .person.active,
+        .person:hover {
+            background: #e7f1ff;
+        }
+
+        .person-img {
+            width: 48px;
+            height: 48px;
+            border-radius: 50%;
+            background: #d6dbdf;
+            object-fit: cover;
+            flex-shrink: 0;
+        }
+
+        .person-details {
+            min-width: 0;
+            flex: 1 1 auto;
+        }
+
+        .person-details strong {
+            display: block;
+            font-size: 1rem;
+            color: #23272f;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        .person-details small {
+            color: #8a9099;
+            font-size: 0.93rem;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        .chat-main {
+            flex: 1 1 auto;
+            display: flex;
+            flex-direction: column;
+            height: 100vh;
+            background: #f0f2f5;
+        }
+
+        .chat-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            background: #fff;
+            padding: 1rem 1.6rem;
+            gap: 1rem;
+            border-bottom: 1px solid #e3e6ea;
+            min-height: 72px;
+        }
+
+        .chat-header .chat-person {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+        }
+
+        .chat-header .person-img {
+            width: 44px;
+            height: 44px;
+        }
+
+        .chat-header span {
+            font-weight: 600;
+            font-size: 1.11rem;
+            color: #23272f;
+        }
+
+        .chat-header .btn {
+            border-radius: 50%;
+            width: 40px;
+            height: 40px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+
+
+        .chat-search {
+            background: #f7f8fa;
+            padding: 0.7rem 1.6rem;
+            border-bottom: 1px solid #e3e6ea;
+        }
+
+        .chat-body {
+            /* background-color: #006cff !important; */
+            /* height: 50vh !important; */
+            /* max-height: 70vh !important; */
+            flex: 1 1 auto;
+            /* min-height: 70vh !important; */
+            padding: 2rem 1.5rem;
+            /* padding-top: 2rem; */
+            overflow-y: auto;
+            display: flex;
+            flex-direction: column;
+            gap: 1.5rem;
+            background: #f7faff;
+            position: relative;
+        }
+
+        .chat-inner {
+            /* max-width: min-content !important; */
+        }
+
+        .chat-message {
+            display: flex;
+            align-items: flex-end;
+            gap: 0.6rem;
+            position: relative;
+            max-width: 100%;
+        }
+
+        .chat-message.user {
+            flex-direction: row-reverse;
+            justify-content: flex-end;
+
+
+        }
+
+        .chat-message .person-img {
+            width: 36px;
+            height: 36px;
+        }
+
+        .chat-message .msg {
+            background: #fff;
+            color: #23272f;
+            border-radius: 1.3rem;
+            padding: 1rem 1.25rem;
+            max-width: 58vw;
+            min-width: 60px;
+            box-shadow: 0 2px 7px rgba(0, 0, 0, 0.04);
+            position: relative;
+            font-size: 1.03rem;
+            word-break: break-word;
+            cursor: pointer;
+        }
+
+        .chat-message.user .msg {
+            background: #006cff;
+            color: #fff;
+            border-bottom-right-radius: 0.4rem;
+            margin-left: 0.1rem;
+        }
+
+        .chat-message {
+            img {
+                width: 36px;
+                height: 36px;
+                margin: 0;
+                padding: 0;
+            }
+        }
+
+        .chat-message.user {
+            justify-content: end !important;
+            width: 100%;
+
+            >div {
+                justify-content: end;
+                align-items: end;
+            }
+
+
+        }
+
+        .chat-message.other {
+            justify-content: start;
+            width: 100%;
+
+            >div {
+                justify-content: start;
+                align-items: start;
+            }
+        }
+
+        .chat-message.other .msg {
+            background: #f0f2f5;
+            color: #222;
+            border-bottom-left-radius: 0.4rem;
+            margin-right: 0.1rem;
+        }
+
+        .msg .replied-to {
+            background: #e6eaff;
+            color: #414561;
+            padding: 0.38rem 0.85rem;
+            border-radius: 0.7rem 0.7rem 0.7rem 0.2rem;
+            margin-bottom: 0.42rem;
+            font-size: 0.96em;
+            display: inline-block;
+            font-style: italic;
+        }
+
+        .chat-footer {
+            padding: 1.1rem 1.6rem;
+            background: #fff;
+            border-top: 1px solid #e3e6ea;
+            display: flex;
+            gap: 0.7rem;
+            align-items: center;
+            min-height: 120px;
+            max-height: 200px;
+            z-index: 2;
+        }
+
+        .chat-footer input[type="text"] {
+            flex: 1 1 auto;
+            border-radius: 1.2rem;
+            font-size: 1.04rem;
+            padding-left: 1.1rem;
+            padding-right: 1.1rem;
+        }
+
+        .file-upload-group {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .file-upload-label {
+            cursor: pointer;
+        }
+
+        .file-type-select {
+            max-width: 95px;
+            font-size: 0.96rem;
+        }
+
+        .file-preview {
+            font-size: 0.97rem;
+            margin-left: 8px;
+            color: #2a4365;
+            background: #eaf6ff;
+            border-radius: 10px;
+            padding: 2px 10px;
+        }
+
+        .remove-file {
+            color: #db2222;
+            margin-left: 5px;
+            cursor: pointer;
+            background: none;
+            border: none;
+        }
+
+        /* Bubble Action Menu */
+        .bubble-menu {
+            position: absolute;
+            left: 0;
+            top: 100%;
+            min-width: 120px;
+            background: #fff;
+            border-radius: 12px;
+            box-shadow: 0 4px 16px rgba(0, 0, 0, 0.15);
+            z-index: 100;
+            margin-top: 8px;
+            padding: 6px 0;
+            border: 1px solid #e8eaf1;
+            animation: fadein .16s;
+        }
+
+        @keyframes fadein {
+            from {
+                opacity: 0;
+                transform: translateY(16px);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .bubble-menu-btn {
+            width: 100%;
+            text-align: left;
+            padding: 10px 20px;
+            border: none;
+            background: none;
+            color: #293048;
+            font-size: 1rem;
+            cursor: pointer;
+            transition: background 0.1s;
+        }
+
+        .bubble-menu-btn:hover {
+            background: #f0f4ff;
+            color: #175fff;
+        }
+
+        .chat-message.user .bubble-menu {
+            left: auto;
+            right: 0;
+        }
+
+        @media (max-width: 900px) {
+            .sidebar {
+                width: 88px;
+                min-width: 88px;
+            }
+
+            .sidebar-header,
+            .sidebar-search {
+                display: none;
+            }
+
+            .person-details {
+                display: none;
+            }
+
+            .person-img {
+                margin: auto;
+            }
+
+            .sidebar-people {
+                padding: 0;
+            }
+
+            .chat-header,
+            .chat-search,
+            .chat-footer {
+                padding-left: 0.7rem !important;
+                padding-right: 0.7rem !important;
+            }
+        }
+
+        @media (max-width: 650px) {
+
+            .chat-app,
+            .chat-main,
+            html,
+            body {
+                min-width: 100vw;
+                max-width: 100vw;
+                width: 100vw !important;
+            }
+
+            .sidebar {
+                display: none;
+            }
+
+            .chat-header,
+            .chat-footer {
+                min-width: 100vw;
+                max-width: 100vw;
+                width: 100vw;
+            }
+
+            .chat-main {
+                width: 100% !important;
+            }
+
+            .chat-body .msg {
+                max-width: 85vw !important;
+            }
+        }
+
+        ::-webkit-scrollbar {
+            width: 6px;
+            background: #f0f2f5;
+        }
+
+        ::-webkit-scrollbar-thumb {
+            background: #e6e7ee;
+            border-radius: 6px;
+        }
+
+        @media (max-width: 650px) {
+            .sidebar {
+                position: fixed;
+                left: -100vw;
+                /* Sembunyikan di luar layar */
+                top: 0;
+                width: 80vw;
+                max-width: 350px;
+                height: 100vh;
+                transition: left 0.22s cubic-bezier(.46, .01, .32, 1);
+                box-shadow: 3px 0 16px rgba(0, 0, 0, 0.13);
+                z-index: 2001;
+                display: block;
+            }
+
+            .sidebar.open {
+                left: 0;
+                /* Muncul slide-in */
+            }
+
+            .sidebar-backdrop {
+                display: none;
+                position: fixed;
+                inset: 0;
+                background: rgba(0, 0, 0, 0.15);
+                z-index: 2000;
+            }
+
+            .sidebar.open+.sidebar-backdrop {
+                display: block;
+            }
+
+            #openSidebarBtn {
+                display: inline-flex !important;
+            }
+        }
+
+        #openSidebarBtn {
+            display: none;
+        }
+
+        .reply-preview {
+            background: #f2f2f2;
+            border-left: 3px solid #4F8CFF;
+            padding: 6px 12px;
+            margin-bottom: 6px;
+            font-size: 0.95em;
+            color: #555;
+            border-radius: 6px;
+            width: fit-content;
+            /* margin-right: 10%; */
+            /* margin-right: ; */
+        }
+
+        .reply-author {
+            font-weight: bold;
+            margin-right: 5px;
+        }
+
+        .btn-close-custom {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            width: 2rem;
+            height: 2rem;
+            background: rgba(0, 0, 0, 0.05);
+            border: none;
+            border-radius: 50%;
+            transition: background 0.15s, box-shadow 0.15s, color 0.15s;
+            color: #6b7280;
+            /* soft gray */
+            box-shadow: 0 1px 4px rgba(0, 0, 0, 0.04);
+            cursor: pointer;
+            margin-left: auto;
+        }
+
+        .btn-close-custom:hover {
+            background: #f87171;
+            /* red-400 */
+            color: white;
+            box-shadow: 0 4px 16px rgba(248, 113, 113, 0.2);
+        }
+
+        .btn-close-custom svg {
+            pointer-events: none;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="chat-app">
+        <!-- SIDEBAR -->
+        <div class="sidebar">
+            <div class="sidebar-header">
+                <strong style="font-size:1.16rem;color:#1565c0;">Chat List</strong>
+            </div>
+            <div class="sidebar-search">
+                <input type="text" class="form-control" placeholder="Cari orang...">
+            </div>
+            <div class="sidebar-people">
+                @forEach($to_text as $person)
+                @if($person->id!=session('account')->id)
+                <div class="person">
+                    @if($person->avatar_url!=null)
+                    <img src="" class="person-img" />
+                    @else
+                    <svg width="30" height="29" viewBox="0 0 30 29" fill="none" xmlns="http://www.w3.org/2000/svg">
+                        <rect width="30" height="29" rx="14.5" fill="white" />
+                        <path fill-rule="evenodd" clip-rule="evenodd"
+                            d="M11.375 9.5C11.375 8.57174 11.7437 7.6815 12.4001 7.02513C13.0565 6.36875 13.9467 6 14.875 6C15.8033 6 16.6935 6.36875 17.3499 7.02513C18.0063 7.6815 18.375 8.57174 18.375 9.5C18.375 10.4283 18.0063 11.3185 17.3499 11.9749C16.6935 12.6313 15.8033 13 14.875 13C13.9467 13 13.0565 12.6313 12.4001 11.9749C11.7437 11.3185 11.375 10.4283 11.375 9.5ZM11.375 14.75C10.2147 14.75 9.10188 15.2109 8.28141 16.0314C7.46094 16.8519 7 17.9647 7 19.125C7 19.8212 7.27656 20.4889 7.76884 20.9812C8.26113 21.4734 8.92881 21.75 9.625 21.75H20.125C20.8212 21.75 21.4889 21.4734 21.9812 20.9812C22.4734 20.4889 22.75 19.8212 22.75 19.125C22.75 17.9647 22.2891 16.8519 21.4686 16.0314C20.6481 15.2109 19.5353 14.75 18.375 14.75H11.375Z"
+                            fill="#1B4841" />
+                    </svg>
+                    @endif
+                    <div class="person-details">
+                        <strong>{{{$person->nama}}}</strong>
+                        <!-- <small>Hai! Ada kabar baru?</small> -->
+                    </div>
+                </div>
+                @else
+                @endif
+                <!-- <div class="person active">
+                    <img src="https://randomuser.me/api/portraits/men/12.jpg" class="person-img" />
+                    <div class="person-details">
+                        <strong>Agus Saputra</strong>
+                        <small>Hai! Ada kabar baru?</small>
+                    </div>
+                </div>
+                <div class="person">
+                    <img src="https://randomuser.me/api/portraits/women/20.jpg" class="person-img" />
+                    <div class="person-details">
+                        <strong>Bella Wulandari</strong>
+                        <small>Oke, nanti saya cek dulu ya</small>
+                    </div>
+                </div>
+                <div class="person">
+                    <img src="https://randomuser.me/api/portraits/men/22.jpg" class="person-img" />
+                    <div class="person-details">
+                        <strong>Rama Permana</strong>
+                        <small>Terima kasih banyak!</small>
+                    </div>
+                </div>
+                <div class="person">
+                    <img src="https://randomuser.me/api/portraits/men/31.jpg" class="person-img" />
+                    <div class="person-details">
+                        <strong>Erik Pratama</strong>
+                        <small>Sampai ketemu besok ya</small>
+                    </div>
+                </div>
+                <div class="person">
+                    <img src="https://randomuser.me/api/portraits/women/33.jpg" class="person-img" />
+                    <div class="person-details">
+                        <strong>Putri Anjani</strong>
+                        <small>Sudah saya kirim emailnya</small>
+                    </div>
+                </div> -->
+                @endforeach
+            </div>
+        </div>
+        <div class="sidebar-backdrop"></div>
+
+        <!-- MAIN CHAT -->
+        <div class="chat-main">
+            <div class="chat-header">
+                <!-- Ini tombol untuk buka sidebar di HP -->
+                <button
+                    class="btn btn-outline-primary d-flex d-sm-none d-md-none align-items-center gap-2 px-3 py-1 rounded-3 shadow-sm"
+                    id="openSidebarBtn" type="button" title="Open Sidebar" style="font-size: 0.96rem;">
+                    <i class="bi bi-list fs-5"></i>
+                    <span class="d-none d-md-inline">Menu</span>
+                </button>
+
+                <div class="chat-person">
+                    <img src="https://randomuser.me/api/portraits/men/12.jpg" class="person-img" />
+                    <span>Agus Saputra</span>
+                </div>
+                <button class="btn btn-light" title="Lainnya">
+                    <svg width="23" height="23" viewBox="0 0 16 16">
+                        <circle cx="2.5" cy="8" r="1.5" />
+                        <circle cx="8" cy="8" r="1.5" />
+                        <circle cx="13.5" cy="8" r="1.5" />
+                    </svg>
+                </button>
+            </div>
+            <div class="chat-search">
+                <input type="text" class="form-control" placeholder="Cari isi chat...">
+            </div>
+            <div class="chat-body">
+                @forEach($all_chats as $chat)
+                @if($chat->Lamaran_status!=null)
+                <div class="alert alert-info d-flex flex-column justify-content-center align-items-center mb-3 rounded-3 border-0 py-2"
+                    role="alert" style="background-color: #e7f3fe;">
+                    <span class="fw-semibold text-primary small">Topik: </span>
+                    <span class="fw-semibold text-primary small">{{{$chat->nama}}}
+                        ({{{$chat->Lamaran_status=='tunda'?'Lamaran Masuk':''}}})</span>
+                </div>
+                @else
+                <div class="chat-message user">
+                    <img src="https://randomuser.me/api/portraits/men/50.jpg" class="person-img" />
+                    <div class="chat-inner d-flex flex-column align-items-start">
+                        @if($chat->chat_references!=null)
+                        <div class="reply-preview" data-references="{{{$chat->chat_references}}}">
+                            <span class="reply-text">{{{$chat->content_references}}}</span>
+                        </div>
+                        @endif
+                        <div class="d-flex flex-column gap-1 align-items-end">
+                            @if($chat->file_json!=null)
+                            <div class="d-flex justify-content-end mb-2">
+                                <div
+                                    class="bg-primary bg-opacity-10 rounded-3 p-3 d-inline-flex align-items-center shadow-sm">
+                                    <i class="bi bi-file-earmark-pdf text-danger fs-3 me-3"></i>
+                                    <div>
+                                        <div class="fw-semibold text-primary mb-2">Ariana.pdf</div>
+                                        <div class="d-flex gap-2">
+                                            <a href="{{ asset('Dewa/file/beri kerja.pdf') }}" target="_blank"
+                                                class="btn btn-sm btn-outline-secondary">
+                                                <i class="bi bi-eye me-1"></i> Preview
+                                            </a>
+                                            <a href="{{ asset('Dewa/file/beri kerja.pdf') }}" download
+                                                class="btn btn-sm btn-outline-primary">
+                                                <i class="bi bi-download me-1"></i> Download
+                                            </a>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <img class="w-50 h-auto rounded-3" src="/Dewa/img/f4030acf172260f3241cad5f4527a7d8.jpg"
+                                alt="">
+                            @endif
+                            @if($chat->contents!=null)
+                            <div class="msg">{{{$chat->contents}}}</div>
+                            @endif
+                        </div>
+                    </div>
+                </div>
+                @endif
+                @endforeach
+                <!-- <div class="chat-message other">
+                    <img src="https://randomuser.me/api/portraits/men/12.jpg" class="person-img" />
+                    <div>
+                        <div class="msg">Alhamdulillah, sudah hampir selesai kak 🙏</div>
+                    </div>
+                </div>
+                <div class="chat-message user">
+                    <img src="https://randomuser.me/api/portraits/men/50.jpg" class="person-img" />
+                    <div>
+                        <div class="msg">Baik, nanti saya update lagi kalau sudah fix.</div>
+                    </div>
+                </div>
+                <div class="chat-message other">
+                    <img src="https://randomuser.me/api/portraits/men/12.jpg" class="person-img" />
+                    <div>
+                        <div class="msg">Oke siap, terima kasih yaa!</div>
+                    </div>
+                </div>
+                <div class="chat-message user">
+                    <img src="https://randomuser.me/api/portraits/men/50.jpg" class="person-img" />
+                    <div>
+                        <div class="msg">🙏🙏🙏</div>
+                    </div>
+                </div>
+                <div class="chat-message user">
+                    <img src="https://randomuser.me/api/portraits/men/50.jpg" class="person-img" />
+                    <div>
+                        <div class="msg">Baik, nanti saya update lagi kalau sudah fix.</div>
+                    </div>
+                </div>
+                <div class="chat-message other">
+                    <img src="https://randomuser.me/api/portraits/men/12.jpg" class="person-img" />
+                    <div>
+                        <div class="msg">Oke siap, terima kasih yaa!</div>
+                    </div>
+                </div>
+                <div class="chat-message user">
+                    <img src="https://randomuser.me/api/portraits/men/50.jpg" class="person-img" />
+                    <div>
+                        <div class="msg">🙏🙏🙏</div>
+                    </div>
+                </div>
+                <div class="chat-message user">
+                    <img src="https://randomuser.me/api/portraits/men/50.jpg" class="person-img" />
+                    <div>
+                        <div class="msg">Baik, nanti saya update lagi kalau sudah fix.</div>
+                    </div>
+                </div>
+                <div class="chat-message other">
+                    <img src="https://randomuser.me/api/portraits/men/12.jpg" class="person-img" />
+                    <div>
+                        <div class="msg">Oke siap, terima kasih yaa!</div>
+                    </div>
+                </div>
+                <div class="chat-message user">
+                    <img src="https://randomuser.me/api/portraits/men/50.jpg" class="person-img" />
+                    <div>
+                        <div class="msg">🙏🙏🙏</div>
+                    </div>
+                </div>
+                <div class="alert alert-info d-flex flex-column justify-content-center align-items-center mb-3 rounded-3 border-0 py-2"
+                    role="alert" style="background-color: #e7f3fe;">
+                    <span class="fw-semibold text-primary small">Topik: </span>
+                    <span class="fw-semibold text-primary small">Pekerjaan Menanam Padi (Lamaran)</span>
+                </div>
+
+
+
+
+                <div class="chat-message user">
+                    <img src="https://randomuser.me/api/portraits/men/50.jpg" class="person-img" />
+                    <div class="d-flex flex-column align-items-start">
+                        <div class="reply-preview">
+                            <span class="reply-text">Saya sudah kirim file-nya tadi pagi.</span>
+                        </div>
+                        <div class="d-flex flex-column justify-content-end">
+                            <div class="msg">
+                                Baik, nanti saya update lagi kalau sudah fix.
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="chat-message other">
+                    <img src="https://randomuser.me/api/portraits/men/12.jpg" class="person-img" />
+                    <div class="d-flex flex-column align-items-start">
+                        <div class="msg">Oke siap, terima kasih yaa!</div>
+                    </div>
+                </div>
+                <div class="chat-message user">
+                    <img src="https://randomuser.me/api/portraits/men/50.jpg" class="person-img" />
+                    <div class="chat-inner d-flex flex-column align-items-start">
+                        <div class="reply-preview">
+                            <span class="reply-text">Saya sudah kirim file-nya tadi pagi.</span>
+                        </div>
+                        <div class="d-flex flex-column gap-1 align-items-end">
+                            <div class="d-flex justify-content-end mb-2">
+                                <div
+                                    class="bg-primary bg-opacity-10 rounded-3 p-3 d-inline-flex align-items-center shadow-sm">
+                                    <i class="bi bi-file-earmark-pdf text-danger fs-3 me-3"></i>
+                                    <div>
+                                        <div class="fw-semibold text-primary mb-2">Ariana.pdf</div>
+                                        <div class="d-flex gap-2">
+                                            <a href="{{ asset('Dewa/file/beri kerja.pdf') }}" target="_blank"
+                                                class="btn btn-sm btn-outline-secondary">
+                                                <i class="bi bi-eye me-1"></i> Preview
+                                            </a>
+                                            <a href="{{ asset('Dewa/file/beri kerja.pdf') }}" download
+                                                class="btn btn-sm btn-outline-primary">
+                                                <i class="bi bi-download me-1"></i> Download
+                                            </a>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <img class="w-50 h-auto rounded-3" src="/Dewa/img/f4030acf172260f3241cad5f4527a7d8.jpg"
+                                alt="">
+                            <div class="msg">🙏🙏🙏</div>
+                        </div>
+                    </div>
+                </div>-->
+            </div>
+
+            <form class="chat-footer w-100" id="chat-footer">
+                <div id="filePreviewArea" class="mb-2 d-none position-absolute" style="top: -70px;">
+                    <div class="d-flex align-items-center gap-2 bg-light border rounded-3 px-3 py-2 position-relative"
+                        style="max-width:360px;">
+                        <img id="imgPreview" src="" alt="preview"
+                            style="max-width:56px;max-height:48px;border-radius:8px;display:none;border:1px solid #e0e0e0;">
+                        <div>
+                            <span id="filePreview" class="file-preview"></span>
+                        </div>
+                        <button type="button"
+                            class="remove-file btn btn-sm btn-light position-absolute end-0 top-0 mt-1 me-1"
+                            id="removeFileBtn" title="Hapus file" style="z-index:2;">
+                            <i class="bi bi-x-lg"></i>
+                        </button>
+                    </div>
+                </div>
+                <div class="w-100">
+                    <!-- Preview area (di atas input) -->
+                    <div class="reference_chat d-none align-items-center mb-2">
+                        <div class="border-start border-4 border-primary ps-2 me-2 small text-secondary"
+                            style="min-width: 0;">
+                            <span id="referencePreview" class="d-block text-truncate" style="max-width: 250px;">
+                                ini apa
+                            </span>
+                        </div>
+                        <button class="btn-close-custom" aria-label="Close" onclick="close_reference_chat(this,event)">
+                            <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
+                                <path d="M3 3L13 13M13 3L3 13" stroke="currentColor" stroke-width="2"
+                                    stroke-linecap="round" />
+                            </svg>
+                        </button>
+
+                    </div>
+
+
+
+                    <div class="d-flex align-items-center gap-2">
+                        <div class="file-upload-group d-flex align-items-center">
+                            <label class="file-upload-label mb-0" title="Attach file">
+                                <input type="file" id="fileInput" name="file_input" style="display:none;">
+                                <i class="bi bi-paperclip fs-4" style="cursor:pointer;"></i>
+                            </label>
+                        </div>
+                        <input type="text" class="form-control" placeholder="Ketik pesan..." id="chatInput"
+                            autocomplete="off" />
+                        <button class="btn btn-primary px-4" type="submit" id="sendBtn">Kirim</button>
+
+                        <!-- INPUT FILE -->
+                    </div>
+                </div>
+            </form>
+
+        </div>
+    </div>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        const target = @json($target);
+        document.querySelectorAll('.chat-message').forEach(function (item) {
+            item.addEventListener('dblclick', function () {
+                reply(this);
+            });
+        });
+        function scrollToTarget(idElemen) {
+            document.getElementById(idElemen).scrollIntoView({ behavior: 'smooth' });
+        }
+        document.getElementById('chatInput').addEventListener('keydown', function (event) {
+            // Cek jika tombol yang ditekan adalah Enter, dan bukan Shift+Enter
+            if (event.key === 'Enter' && !event.shiftKey) {
+                event.preventDefault(); // Stop default behaviour (misal form double submit)
+                document.getElementById('sendBtn').click(); // Trigger tombol Kirim
+            }
+        });
+        let currentReference = null; // Untuk menyimpan referensi pesan yang sedang di-reply
+
+        function reply(elemen) {
+            let msgWrap = elemen.closest('.chat-message');
+            let msg = msgWrap.querySelector('.msg');
+
+            // Dapatkan isi pesan & nama file jika ada
+            let text = msg.innerText.trim();
+            let fileName = "";
+            let isFile = false;
+
+            const imgInMsg = msg.querySelector('img');
+            const fileIcon = msg.querySelector('.bi-paperclip, .bi-image');
+
+            if (fileIcon) {
+                let textAfterIcon = fileIcon.parentNode.textContent.trim();
+                fileName = textAfterIcon;
+                isFile = true;
+            }
+
+            // Compose referensi
+            let previewText = "";
+            if (isFile || imgInMsg) {
+                previewText = fileName;
+                if (text && text !== fileName) previewText += " - " + text;
+            } else {
+                previewText = text;
+            }
+
+            // Simpan referensi (bisa berupa object kalau mau)
+            currentReference = {
+                text: text,
+                fileName: fileName,
+                isFile: !!(isFile || imgInMsg),
+                preview: previewText
+            };
+
+            // Tampilkan di reference_chat
+            let reference = document.querySelector('.reference_chat');
+            let previewElem = document.getElementById('referencePreview');
+            previewElem.innerHTML = previewText;
+            reference.classList.remove('d-none');
+            reference.classList.add('d-flex');
+        }
+
+
+        function close_reference_chat(elemen, event) {
+            event.preventDefault()
+            // event.stopPropagation()
+            console.log('masuk referensi')
+            console.log(elemen.closest('.reference_chat'))
+            elemen.closest('.reference_chat').classList.replace('d-flex', 'd-none')
+        }
+        // --- File Upload Logic ---
+        let selectedFile = null;
+        let imageDataUrl = null;
+
+        const fileInput = document.getElementById('fileInput');
+        const filePreview = document.getElementById('filePreview');
+        const filePreviewArea = document.getElementById('filePreviewArea');
+        const removeFileBtn = document.getElementById('removeFileBtn');
+        const imgPreview = document.getElementById('imgPreview');
+
+
+        fileInput.addEventListener('change', function (e) {
+            if (fileInput.files && fileInput.files.length > 0) {
+                selectedFile = fileInput.files[0];
+                filePreview.textContent = selectedFile.name;
+                filePreviewArea.classList.remove('d-none');
+                removeFileBtn.classList.remove('d-none');
+                // Jika gambar, tampilkan thumbnail
+                if (selectedFile.type.startsWith('image/')) {
+                    const reader = new FileReader();
+                    reader.onload = function (evt) {
+                        imgPreview.src = evt.target.result;
+                        imgPreview.style.display = 'block';
+                        imageDataUrl = evt.target.result;
+                    }
+                    reader.readAsDataURL(selectedFile);
+                } else {
+                    imgPreview.src = '';
+                    imgPreview.style.display = 'none';
+                    imageDataUrl = null;
+                }
+            } else {
+                clearFileSelection();
+            }
+        });
+
+        removeFileBtn.addEventListener('click', function () {
+            clearFileSelection();
+        });
+
+        function clearFileSelection() {
+            selectedFile = null;
+            imageDataUrl = null;
+            fileInput.value = '';
+            filePreview.textContent = '';
+            filePreviewArea.classList.add('d-none');
+            removeFileBtn.classList.add('d-none');
+            imgPreview.src = '';
+            imgPreview.style.display = 'none';
+        }
+
+        // --- Modify chat submit ---
+        document.getElementById('chat-footer').addEventListener('submit', function (e) {
+            e.preventDefault();
+            const chatInput = document.getElementById('chatInput');
+            let text = (chatInput.value.trim() == '') ? null : `<div class="msg">${chatInput.value.trim()}</div>`;
+
+
+
+            if (text === "" && !selectedFile) return;
+            let reference = null;
+            if (cek_references() != null) {
+                ;
+                reference = `
+               <div class="reply-preview">
+                            <span class="reply-text" onclick="scrollToTarget(1)">${cek_references()[0]}</span>
+                        </div>
+               `;
+            }
+
+
+            let preview = null;
+
+            if (selectedFile) {
+                if (selectedFile.type.startsWith('image/') && imageDataUrl) {
+                    preview = `
+                        <img class="w-50 h-auto rounded-3" src="${imageDataUrl}" alt="">
+                `;
+                } else {
+                    preview = `
+                    
+                    <div class="d-flex justify-content-end mb-2">
+                            <div
+                                class="bg-primary bg-opacity-10 rounded-3 p-3 d-inline-flex align-items-center shadow-sm">
+                                <i class="bi bi-file-earmark-pdf text-danger fs-3 me-3"></i>
+                                <div>
+                                    <div class="fw-semibold text-primary mb-2">${selectedFile.name}</div>
+                                    <div class="d-flex gap-2">
+                                        <a href="{{ asset('Dewa/file/beri kerja.pdf') }}" target="_blank"
+                                            class="btn btn-sm btn-outline-secondary">
+                                            <i class="bi bi-eye me-1"></i> Preview
+                                        </a>
+                                        <a href="{{ asset('Dewa/file/beri kerja.pdf') }}" download
+                                            class="btn btn-sm btn-outline-primary">
+                                            <i class="bi bi-download me-1"></i> Download
+                                        </a>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>`
+
+                }
+            }
+
+    const csrfToken = document.querySelector('meta[name="csrf-token"]').getAttribute('content');
+
+            // const csrfToken = document.querySelector('meta[name="csrf-token"]').getAttribute('content');
+            const formData = new FormData();
+            formData.append('contents', (chatInput.value.trim() == '') ? null : chatInput.value.trim());
+            formData.append('file_json', selectedFile);
+            // console.log('file: ',selectedFile)
+            formData.append('chat_references', (cek_references() == null) ? null : cek_references()[1]);
+            formData.append('receiver', target);
+            formData.append('_token', csrfToken);
+            // console.log(Object.fromEntries(formData.entries()));
+            fetch('/make_chat', {
+                method: 'POST',
+                body: formData
+            })
+                .then(response => response.json())
+                .then(data => {
+                    if (data) {
+                        console.log('data controller',data)
+                        // Berarti proses berhasil, bisa tampilkan pesan sukses
+                        
+                        // Atau update UI kamu sesuai kebutuhan
+                    } else {
+                        // Kalau butuh handle selain itu
+                        console.log('GAgal',JSON.stringify(data))
+                        // alert('Gagal: ' + JSON.stringify(data));
+                    }
+                })
+                .catch(error => {
+                    console.error('Error:', error);
+                    // alert('Terjadi error di koneksi!');
+                });
+
+
+
+
+        });
+
+        const sidebar = document.querySelector('.sidebar');
+        const backdrop = document.querySelector('.sidebar-backdrop');
+        const openSidebarBtn = document.getElementById('openSidebarBtn');
+
+        openSidebarBtn?.addEventListener('click', function () {
+            sidebar.classList.add('open');
+            backdrop.style.display = 'block';
+        });
+
+        backdrop.addEventListener('click', function () {
+            sidebar.classList.remove('open');
+            backdrop.style.display = 'none';
+        });
+
+        document.querySelectorAll('.person').forEach(person => {
+            person.addEventListener('click', function () {
+                sidebar.classList.remove('open');
+                backdrop.style.display = 'none';
+                // Logic ganti chat bisa ditaruh di sini
+            });
+        });
+
+        //     
+
+        newest_chat();
+        function newest_chat() {
+            const chatBodies = document.querySelectorAll('.chat-message');
+            const newest = chatBodies[chatBodies.length - 1]; // Elemen .chat-body terakhir
+            if (newest) {
+                console.log('msuk')
+                newest.scrollIntoView({ behavior: "smooth" });
+            }
+            // console.log('newest', newest);
+        }
+
+
+        // ==== Bubble Menu ====
+        function bubbleMenuBind() {
+            document.querySelectorAll('.chat-message .msg').forEach(function (el) {
+                el.onclick = function (e) {
+                    e.stopPropagation();
+                    removeBubbleMenu();
+                    showBubbleMenu(el);
+                };
+            });
+        }
+
+        function showBubbleMenu(msgElem) {
+            removeBubbleMenu();
+            const bubble = document.createElement('div');
+            bubble.className = 'bubble-menu';
+            bubble.innerHTML = `
+      <button class="bubble-menu-btn" onclick="reply(this)">Reply</button>
+      <button class="bubble-menu-btn" onclick="alert('Fitur edit belum diaktifkan!')">Edit</button>
+      <button class="bubble-menu-btn text-danger" onclick="bubbleDeleteMsg(this)">Delete</button>
+    `;
+            msgElem.parentElement.appendChild(bubble);
+
+            // Close if click outside
+            setTimeout(function () {
+                window.addEventListener('click', removeBubbleMenu, { once: true });
+            }, 50);
+        }
+        function removeBubbleMenu() {
+            document.querySelectorAll('.bubble-menu').forEach(function (el) { el.remove(); });
+        }
+
+        function cek_references() {
+            let reference = document.querySelector('.reference_chat')
+            if (reference.classList.contains('d-flex')) {
+                return [reference.querySelector('#referencePreview').textContent, 1];
+            }
+            else {
+                return null;
+            }
+        }
+
+        function clear_reference_chat() {
+            let reference = document.querySelector('.reference_chat')
+            reference.classList.replace('d-flex', 'd-none')
+        }
+        function bubbleDeleteMsg(btn) {
+            // Hapus bubble dan chat message parent
+            const msgWrap = btn.closest('.chat-message');
+            msgWrap.remove();
+            removeBubbleMenu();
+        }
+        // Init on load
+        bubbleMenuBind();
+    </script>
+</body>
+
+</html>

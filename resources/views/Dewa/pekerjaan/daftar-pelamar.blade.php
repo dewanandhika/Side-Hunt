@@ -223,13 +223,7 @@
                         </td>
                         <td>
                             <div class="d-flex flex-row gap-2">
-                                <p class="clear-p text-truncate">{{{$pelamar->nama_pelamar}}}
-                                <div class="d-flex flex-row gap-1 justify-content-center align-items-center">
-                                    <p class="clear-p">3.5</p>
-                                    <i class="bi bi-star-fill fs-10"></i>
-                                </div>
-
-                                </p>
+                                <p class="clear-p text-truncate">{{{$pelamar->nama_pelamar}}}</p>
 
                             </div>
                         </td>

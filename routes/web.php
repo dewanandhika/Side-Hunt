@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\ChatController;
 use App\Http\Controllers\HomeController;
 use App\Http\Controllers\PekerjaanController;
 use App\Http\Controllers\PelamarController;
@@ -18,7 +19,7 @@ Route::get('/', function () {
 });
 
 Route::get('/tes', function () {
-    return view('Dewa.tes');
+    return view('Dewa.faktur');
 });
 
 Route::get('/see', function () {
@@ -39,6 +40,7 @@ Route::post('/reset-new-password', action: [UsersController::class, 'reset_passw
 
 Route::get('/Register', [HomeController::class, 'Register']);
 Route::get('/Logout', [UsersController::class, 'logout']);
+Route::get('/chat', [ChatController::class, 'index']);
 Route::get('/Pekerjaan/{id}', [PekerjaanController::class, 'view_pekerjaan']);
 
 Route::get('/NotAllowed', function () {
@@ -66,6 +68,9 @@ Route::middleware(['role:user|mitra'])->group(function () {
     Route::post('/Profile/Edit', [UsersController::class, 'Profile_Edit']);
     Route::get('/transaksi', [TransaksiController::class, 'index'])->name('user.transaksi');
     Route::post('/Lamar/{idPekerjaan}', action: [PelamarController::class, 'store']);
+    Route::get('/Chat/Kerja/{idPekerjaan}', action: [ChatController::class, 'Lamaran']);
+    Route::get('/Chat/{id_target}', action: [ChatController::class, 'index']);
+    Route::post('/make_chat', action: [ChatController::class, 'store']);
 
     //Kerja
     Route::get('/question-new-user', action: [HomeController::class, 'new_user']);

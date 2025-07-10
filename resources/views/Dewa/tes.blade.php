@@ -6,8 +6,13 @@
     <title>Document</title>
 </head>
 <body>
-    <form action="/Lamar/10002" method="POST">
+    <form action="/make_chat" method="POST">
         @csrf
+        <input type="text" name="receiver" placeholder="receiver">
+        <input type="text" name="contents" placeholder="contents">
+        <!-- <input type="text" name="file" placeholder="file"> -->
+        <input type="file" name="file_input" placeholder="file">
+        <input type="text" name="chat_references" placeholder="references">
         <button type="submit">Submit</button>
     </form>
 </body>

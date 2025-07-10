@@ -9,48 +9,98 @@ use App\Models\Pelamar;
 use App\Models\Users;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Mail;
-use PhpParser\Node\Expr\Cast\Object_;
+use Illuminate\Database\QueryException;
+use Illuminate\Support\Facades\Log;
 
 class PelamarController extends Controller
 {
-    public function store($idPekerjaan)
+    public function store($idPekerjaan, Request $req)
     {
-        // dd($idPekerjaan);
-        $cekJob = Pekerjaan::where('id',$idPekerjaan)->first();
-        // dd($cekJob);
-        if($cekJob!=null){
+        try {
+            $cekJob = Pekerjaan::where('id', $idPekerjaan)->first();
 
-            $cek = Pelamar::where('user_id', session('account')['id'])
-                ->where('job_id', $idPekerjaan)
-                ->first();
-            // dd($cek);
-            if ($cek == null){
-                $data = null;
-                $data['user_id'] = session('account')['id'];
-                $data['job_id'] = $idPekerjaan;
-                $save_attemp_job = Pelamar::create($data);
-                // dd($save_attemp_job);
-                if ($save_attemp_job) {
+            if ($cekJob != null) {
+                try {
+                    $cek = Pelamar::where('user_id', session('account')['id'])
+                        ->where('job_id', $idPekerjaan)
+                        ->first();
+                } catch (\Exception $e) {
+                    // Log::error('Error saat mengecek pelamar: ' . $e->getMessage());
                     return response()->json([
-                        'success' => true,
+                        'success' => false,
+                        'message' => 'Gagal memeriksa pelamar sebelumnya: ' . $e->getMessage(),
                     ]);
+                }
+
+                if ($cek == null) {
+                    $data = [];
+                    $data['user_id'] = session('account')['id'];
+                    $data['job_id'] = $idPekerjaan;
+                    $data['Tipe_Group'] = $req->team == true ? 'Team' : 'Sendiri';
+                    $data['Data_Team'] = $req->team == true ? json_encode($req->data) : null;
+
+                    try {
+                        $save_attemp_job = Pelamar::create($data);
+                    } catch (QueryException $e) {
+                        // Log::error('DB Error saat menyimpan pelamar: ' . $e->getMessage());
+                        return response()->json([
+                            'success' => false,
+                            'message' => 'Terjadi kesalahan database saat menyimpan pelamar: ' . $e->getMessage(),
+                        ]);
+                    } catch (\Exception $e) {
+                        // Log::error('Error umum saat menyimpan pelamar: ' . $e->getMessage());
+                        return response()->json([
+                            'success' => false,
+                            'message' => 'Terjadi kesalahan saat menyimpan data pelamar: ' . $e->getMessage(),
+                        ]);
+                    }
+
+                    if ($save_attemp_job) {
+                        try {
+                            if ((new ChatController())->lamaran_diterima($save_attemp_job->id)) {
+                                return response()->json([
+                                    'success' => true,
+                                    'message' => $req->data
+                                ]);
+                            } else {
+                                return response()->json([
+                                    'success' => false,
+                                    'message' => 'Lamaran tidak diterima oleh sistem.',
+                                ]);
+                            }
+                        } catch (\Exception $e) {
+                            // Log::error('Error saat memproses lamaran_diterima: ' . $e->getMessage());
+                            return response()->json([
+                                'success' => false,
+                                'message' => 'Terjadi kesalahan saat memproses lamaran: ' . $e->getMessage(),
+                            ]);
+                        }
+                    } else {
+                        return response()->json([
+                            'success' => false,
+                            'message' => 'Gagal menyimpan data pelamar.',
+                        ]);
+                    }
                 } else {
                     return response()->json([
-                        'success' => 'Server sedang bermasalah, mohon tunggu beberapa saat',
+                        'success' => true,
                     ]);
                 }
             } else {
                 return response()->json([
-                    'success' => true,
+                    'success' => false,
+                    'message' => 'Pekerjaan ini tidak ada atau ada yang salah dengan data Anda.',
                 ]);
             }
-        }
-        else{
+        } catch (\Exception $e) {
+            // Log::error('Error umum pada store pelamar: ' . $e->getMessage());
             return response()->json([
-                    'success' => 'Pekerjaan ini Tidak Ada atau ada yang salah dengan data anda',
-                ]);
+                'success' => false,
+                'message' => 'Terjadi kesalahan sistem: ' . $e->getMessage(),
+            ]);
         }
     }
+
 
     public function Profile_Pelamar($idPelamar)
     {
@@ -103,10 +153,10 @@ class PelamarController extends Controller
             $find->status = 'interview';
             // dd($find);;
             if ($find->save()) {
-                $user = Users::where('id',$find->user_id)->first();
+                $user = Users::where('id', $find->user_id)->first();
                 $Pekerjaan = Pekerjaan::where('id', $find->job_id)->first();
                 $email = ($user->email);
-                Mail::to($email)->send(new Notify_Applications([$find,$user,$Pekerjaan,session('account')],'interview'));
+                Mail::to($email)->send(new Notify_Applications([$find, $user, $Pekerjaan, session('account')], 'interview'));
                 return redirect('/daftar-Pelamar/all')->with('success', ['Selamat!', 'Interview Sudah kami kabarkan kepada user']);
             } else {
                 return redirect()->back()->with('fail', ['Gagal!', 'Ada yang salah, coba beberapa saat lagi!']);
@@ -114,19 +164,20 @@ class PelamarController extends Controller
         }
     }
 
-    public function terima(Request $request){
+    public function terima(Request $request)
+    {
         // dd($request->idLamaran);
         $find = Pelamar::findOrFail($request->idLamaran);
         // dd($find);
-        if($find){
+        if ($find) {
             $find->jadwal_interview = null;
             $find->link_Interview = null;
             $find->status = $request->status;
             if ($find->save()) {
-                $user = Users::where('id',$find->user_id)->first();
+                $user = Users::where('id', $find->user_id)->first();
                 $Pekerjaan = Pekerjaan::where('id', $find->job_id)->first();
                 $email = ($user->email);
-                Mail::to($email)->send(new Notify_Applications([$find,$user,$Pekerjaan,session('account')],'Menunggu Pekerjaan'));
+                Mail::to($email)->send(new Notify_Applications([$find, $user, $Pekerjaan, session('account')], 'Menunggu Pekerjaan'));
                 return redirect('/daftar-Pelamar/all')->with('success', ['Berhasil!', 'User Sudah Menerima Informasi Ini Lewat Email Mereka']);
             } else {
                 return redirect()->back()->with('fail', ['Gagal!', 'Ada yang salah, coba beberapa saat lagi!']);
@@ -134,25 +185,24 @@ class PelamarController extends Controller
         }
     }
 
-    public function tolak(Request $request){
+    public function tolak(Request $request)
+    {
         // dd($request->idLamaran);
         $find = Pelamar::findOrFail($request->idLamaran);
         // dd($find);
-        if($find){
+        if ($find) {
             $find->jadwal_interview = null;
             $find->link_Interview = null;
             $find->status = $request->status;
             $find->alasan = $request->alasan;
             if ($find->save()) {
-                $user = Users::where('id',$find->user_id)->first();
+                $user = Users::where('id', $find->user_id)->first();
                 $Pekerjaan = Pekerjaan::where('id', $find->job_id)->first();
                 $email = ($user->email);
-                if($request->status=='ditolak'){
-                    Mail::to($email)->send(new Notify_Applications([$find,$user,$Pekerjaan,session('account')],'ditolak'));
-                }
-                else{
-                    Mail::to($email)->send(new Notify_Applications([$find,$user,$Pekerjaan,session('account')],'Gagal'));
-
+                if ($request->status == 'ditolak') {
+                    Mail::to($email)->send(new Notify_Applications([$find, $user, $Pekerjaan, session('account')], 'ditolak'));
+                } else {
+                    Mail::to($email)->send(new Notify_Applications([$find, $user, $Pekerjaan, session('account')], 'Gagal'));
                 }
                 return redirect('/daftar-Pelamar/all')->with('success', ['Sedih Mendengarnya!', 'User Sudah Menerima Informasi Ini Lewat Email Mereka']);
             } else {

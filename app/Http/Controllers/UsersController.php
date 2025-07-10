@@ -238,6 +238,9 @@ class UsersController extends Controller
         // dd('masuk');
         $data['password'] = Hash::make($req->password);
         $data['nama'] = $req['nama-depan'] . ' ' . $req['nama-belakang'];
+        // dd($req);
+        $data['role'] = $req['role']=="1"?"mitra":"user";
+        // dd($data, $req);
         $save_user = Users::create($data);
         if ($save_user) {
             $verificationCode = $this->sendVerificationCode($data['email']);
