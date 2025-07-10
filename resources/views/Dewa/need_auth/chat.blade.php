@@ -245,15 +245,32 @@
                 align-items: end;
             }
 
+            .previewFile {
+                justify-content: end;
+            }
+
+            .preview {
+                align-items: end;
+            }
+
 
         }
 
         .chat-message.other {
-            justify-content: start;
+            justify-content: start !important;
             width: 100%;
 
             >div {
                 justify-content: start;
+                align-items: start;
+            }
+
+            .previewFile {
+                /* justify-content-end */
+                justify-content: start;
+            }
+
+            .preview {
                 align-items: start;
             }
         }
@@ -646,7 +663,7 @@
                         ({{{$chat->Lamaran_status=='tunda'?'Lamaran Masuk':''}}})</span>
                 </div>
                 @else
-                <div class="chat-message user">
+                <div class="chat-message {{{$chat->sender==session('account')['id']?'user':'other'}}}">
                     <img src="https://randomuser.me/api/portraits/men/50.jpg" class="person-img" />
                     <div class="chat-inner d-flex flex-column align-items-start">
                         @if($chat->chat_references!=null)
@@ -654,9 +671,9 @@
                             <span class="reply-text">{{{$chat->content_references}}}</span>
                         </div>
                         @endif
-                        <div class="d-flex flex-column gap-1 align-items-end">
+                        <div class="preview d-flex flex-column gap-1">
                             @if($chat->file_json!=null)
-                            <div class="d-flex justify-content-end mb-2">
+                            <div class="previewFile d-flex mb-2">
                                 <div
                                     class="bg-primary bg-opacity-10 rounded-3 p-3 d-inline-flex align-items-center shadow-sm">
                                     <i class="bi bi-file-earmark-pdf text-danger fs-3 me-3"></i>
@@ -992,18 +1009,18 @@
             const chatInput = document.getElementById('chatInput');
             let text = (chatInput.value.trim() == '') ? null : `<div class="msg">${chatInput.value.trim()}</div>`;
 
-
-
             if (text === "" && !selectedFile) return;
             let reference = null;
-            if (cek_references() != null) {
+            let referensi_chat = cek_references();
+            if (referensi_chat != null) {
                 ;
                 reference = `
                <div class="reply-preview">
-                            <span class="reply-text" onclick="scrollToTarget(1)">${cek_references()[0]}</span>
+                            <span class="reply-text" onclick="scrollToTarget(1)">${referensi_chat[0]}</span>
                         </div>
                `;
             }
+
 
 
             let preview = null;
@@ -1039,37 +1056,88 @@
                 }
             }
 
-    const csrfToken = document.querySelector('meta[name="csrf-token"]').getAttribute('content');
+            const csrfToken = document.querySelector('meta[name="csrf-token"]').getAttribute('content');
 
             // const csrfToken = document.querySelector('meta[name="csrf-token"]').getAttribute('content');
-            const formData = new FormData();
-            formData.append('contents', (chatInput.value.trim() == '') ? null : chatInput.value.trim());
-            formData.append('file_json', selectedFile);
-            // console.log('file: ',selectedFile)
-            formData.append('chat_references', (cek_references() == null) ? null : cek_references()[1]);
-            formData.append('receiver', target);
-            formData.append('_token', csrfToken);
-            // console.log(Object.fromEntries(formData.entries()));
+            // const formData = new FormData();
+            // formData.append('contents', (chatInput.value.trim() == '') ? null : chatInput.value.trim());
+            // formData.append('file_json', selectedFile);
+            // // console.log('file: ',selectedFile)
+            // formData.append('chat_references', (cek_references() == null) ? null : cek_references()[1]);
+            // formData.append('receiver', target);
+            // formData.append('_token', csrfToken);
+            // // console.log(Object.fromEntries(formData.entries()));
+            // fetch('/make_chat', {
+            //     method: 'POST',
+            //     body: formData
+            // })
+            //     .then(response => response.json())
+            //     .then(data => {
+            //         if (data) {
+            //             console.log('data controller', data)
+            //             // Berarti proses berhasil, bisa tampilkan pesan sukses
+
+            //             // Atau update UI kamu sesuai kebutuhan
+            //         } else {
+            //             // Kalau butuh handle selain itu
+            //             console.log('GAgal', JSON.stringify(data))
+            //             // alert('Gagal: ' + JSON.stringify(data));
+            //         }
+            //     })
+            //     .catch(error => {
+            //         console.error('Error:', error);
+            //         // alert('Terjadi error di koneksi!');
+            //     });
+            console.log(referensi_chat);
             fetch('/make_chat', {
                 method: 'POST',
-                body: formData
-            })
-                .then(response => response.json())
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content'),
+                }, body: JSON.stringify({
+                    _token: csrfToken,
+                    receiver: target,
+                    contents: chatInput.value.trim(),
+                    file: selectedFile,
+                    chat_reference: referensi_chat == null ? null : referensi_chat[1]
+                }),
+                credentials: 'include'
+            }).then(response => response.json())
                 .then(data => {
-                    if (data) {
-                        console.log('data controller',data)
-                        // Berarti proses berhasil, bisa tampilkan pesan sukses
-                        
-                        // Atau update UI kamu sesuai kebutuhan
-                    } else {
-                        // Kalau butuh handle selain itu
-                        console.log('GAgal',JSON.stringify(data))
-                        // alert('Gagal: ' + JSON.stringify(data));
+                    // console.log('Response dari server:', data);
+                    if (data.success == true) {
+                        Reset_Input()
+
+                        const chatBody = document.querySelector('.chat-body');
+
+                        let referenceHTML = reference ? reference : '';
+                        let previewHTML = preview ? preview : '';
+                        let textHTML = text ? text : '';
+
+                        chatBody.insertAdjacentHTML('beforeend',
+                            `
+                            <div class="chat-message user">
+                                <img src="https://randomuser.me/api/portraits/men/50.jpg" class="person-img" />
+                                <div class="chat-inner d-flex flex-column align-items-start">
+                                    ${referenceHTML}
+                                    <div class="d-flex flex-column gap-1 align-items-end">
+                                        ${previewHTML}
+                                        ${textHTML}
+                                    </div>
+                                </div>
+                            </div>
+                        `
+                        );
+                        bubbleMenuBind();
+                        newest_chat();
+
+                    }
+                    else {
+                        fail('Gagal Mengirim', data.success)
                     }
                 })
                 .catch(error => {
                     console.error('Error:', error);
-                    // alert('Terjadi error di koneksi!');
                 });
 
 
@@ -1158,6 +1226,18 @@
             let reference = document.querySelector('.reference_chat')
             reference.classList.replace('d-flex', 'd-none')
         }
+
+        function Reset_Input() {
+            document.querySelector('.reference_chat').classList.replace("d-flex", "d-none")
+
+            let reset = [
+                document.querySelector('#fileInput'),
+                document.querySelector('#chatInput'),
+            ]
+            reset.forEach(e => {
+                e.value = ""
+            })
+        }
         function bubbleDeleteMsg(btn) {
             // Hapus bubble dan chat message parent
             const msgWrap = btn.closest('.chat-message');
@@ -1166,6 +1246,10 @@
         }
         // Init on load
         bubbleMenuBind();
+
+        function refresh_chat(){
+            
+        }
     </script>
 </body>
 

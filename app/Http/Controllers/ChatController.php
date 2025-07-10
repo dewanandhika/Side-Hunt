@@ -91,22 +91,31 @@ class ChatController extends Controller
         // return response()->json([
         //             'success' => 'masuk',
         //         ]);
-        return response()->json($request->file('file_json'));
-            // $chat = new chat();
-            // $chat->sender = session('account')['id'];
-            // $chat->receiver = $request->receiver;
-            // $chat->contents = $request->contents;
-            // $chat->file_json = json_encode($request->file('file_json'));
-            // $chat->chat_references = $request->chat_references;
-            // if ($chat->save()) {
-            //     return response()->json([
-            //         'success' => true,
-            //         'data'=>$chat
-            //     ]);
-            // } else {
-            //     return response()->json([
-            //         'success' => false,
-            //     ]);
-            // }
+        // return response()->json($request->file('file_json'));
+            $chat = new chat();
+            $chat->sender = session('account')['id'];
+            $chat->receiver = $request->receiver;
+            if(($request->contents!=null)||($request->file('file_json')!=null)){
+                $chat->contents = $request->contents==null?null:$request->contents;
+                $chat->file_json = $request->file('file_json')==null?null:json_encode($request->file('file_json'));
+                $chat->chat_references = $request->chat_references==null?null:$request->chat_references;
+                if ($chat->save()) {
+                    return response()->json([
+                        'success' => true,
+                        'data'=>$chat
+                    ]);
+                } else {
+                    return response()->json([
+                        'success' => false,
+                        'data'=>"terjadi kesalahan dalam menyimpan pesan"
+                    ]);
+                }
+            }
+            else{
+                return response()->json([
+                        'success' => false,
+                        'data'=>"tidak ada pesan yang perlu dikirim"
+                    ]);
+            }
     }
 }

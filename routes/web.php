@@ -19,7 +19,7 @@ Route::get('/', function () {
 });
 
 Route::get('/tes', function () {
-    return view('Dewa.faktur');
+    return view('Dewa.tes');
 });
 
 Route::get('/see', function () {
@@ -40,7 +40,7 @@ Route::post('/reset-new-password', action: [UsersController::class, 'reset_passw
 
 Route::get('/Register', [HomeController::class, 'Register']);
 Route::get('/Logout', [UsersController::class, 'logout']);
-Route::get('/chat', [ChatController::class, 'index']);
+Route::get('/chat/{id_target}', [ChatController::class, 'index']);
 Route::get('/Pekerjaan/{id}', [PekerjaanController::class, 'view_pekerjaan']);
 
 Route::get('/NotAllowed', function () {

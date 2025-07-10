@@ -305,6 +305,7 @@ class UsersController extends Controller
         $user = Users::where('email', $req->email)->first();
         if ($user->VerificationCode == $req->kode_verifikasi) {
             $user->email_verified_at = now();
+            $user->VerificationCode = null;
             $user->save();
             return redirect('/Login')->with('success', ['Email berhasil diverifikasi', 'silahkan login']);
         } else {
@@ -447,6 +448,8 @@ class UsersController extends Controller
         $user = Users::where('email', $request->email)->first();
         if ($user) {
             $user->password = $request->password;
+            $user->VerificationCode = null;
+
             if ($user->save()) {
                 return redirect('/Login')->with('success', ['Silahkan Login', 'Password Berhasil Diganti!']);
             } else {

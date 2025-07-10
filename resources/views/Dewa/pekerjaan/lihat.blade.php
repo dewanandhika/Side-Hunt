@@ -45,7 +45,7 @@
                 </li>
             </ul>
         </div>
-        
+
         <form id="team_data"
             onsubmit="event.preventDefault(); ValidasiPendaftaran('{{{$data_pekerjaan[0]->id}}}',true);">
             <div id="contactEntries" class="contactEntries">
