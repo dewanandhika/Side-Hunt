@@ -575,9 +575,14 @@ $imageExtensions = ['jpg', 'jpeg', 'png', 'gif', 'bmp', 'webp', 'svg'];
     <div class="chat-app">
         <!-- SIDEBAR -->
         <div class="sidebar">
-            <div class="sidebar-header">
-                <strong style="font-size:1.16rem;color:#1565c0;">Chat List</strong>
+            <div
+                class="sidebar-header d-flex align-items-center justify-content-between p-3 bg-white rounded-top shadow-sm">
+                <span class="fw-bold fs-5 text-primary">Chat List</span>
+                <button type="button" class="btn btn-primary btn-sm" onclick="window.location.href='/'">
+                    Kembali ke Beranda
+                </button>
             </div>
+
             <div class="sidebar-search">
                 <input type="text" class="form-control" placeholder="Cari orang...">
             </div>
@@ -585,7 +590,7 @@ $imageExtensions = ['jpg', 'jpeg', 'png', 'gif', 'bmp', 'webp', 'svg'];
                 @forEach($all as $person)
                 @if($person->counterpart_id!=session('account')->id)
                 <div class="person" onclick="window.location.href='/chat/{{{$person->counterpart_id}}}'">
-                    @if($person->nama_user)
+                    @if($person->avatar_url!=null)
                     <img src="" class="person-img" />
                     @else
                     <svg width="30" height="29" viewBox="0 0 30 29" fill="none" xmlns="http://www.w3.org/2000/svg">
@@ -606,9 +611,8 @@ $imageExtensions = ['jpg', 'jpeg', 'png', 'gif', 'bmp', 'webp', 'svg'];
                         @else
                         <small>
                             <div class="d-flex align-items-center gap-2 mb-2">
-                                <span class="badge bg-primary">Lamaran Masuk</span>
+                                <span class="badge bg-primary">{{{$person->Lamaran_status}}}</span>
                             </div>
-
                         </small>
                         @endif
                     </div>
@@ -622,6 +626,13 @@ $imageExtensions = ['jpg', 'jpeg', 'png', 'gif', 'bmp', 'webp', 'svg'];
 
         <!-- MAIN CHAT -->
         <div class="chat-main">
+            @if($target=='all')
+            <div class="no chat w-100 h-100 d-flex justify-content-center align-content-center">
+                <div class="d-flex align-items-center gap-2 mb-2">
+                    <span class="badge bg-primary">Silahkan Pilih Dengan Siapa anda ingin berkomunikasi</span>
+                </div>
+            </div>
+            @elseif(count($all_chats)>0)
             <div class="chat-header">
                 <!-- Ini tombol untuk buka sidebar di HP -->
                 <button
@@ -632,8 +643,17 @@ $imageExtensions = ['jpg', 'jpeg', 'png', 'gif', 'bmp', 'webp', 'svg'];
                 </button>
 
                 <div class="chat-person">
+                    @if($user->avatar_url!=null)
                     <img src="" class="person-img" />
-                    <span>Agus Saputra</span>
+                    @else
+                    <svg width="30" height="29" viewBox="0 0 30 29" fill="none" xmlns="http://www.w3.org/2000/svg">
+                        <rect width="30" height="29" rx="14.5" fill="white" />
+                        <path fill-rule="evenodd" clip-rule="evenodd"
+                            d="M11.375 9.5C11.375 8.57174 11.7437 7.6815 12.4001 7.02513C13.0565 6.36875 13.9467 6 14.875 6C15.8033 6 16.6935 6.36875 17.3499 7.02513C18.0063 7.6815 18.375 8.57174 18.375 9.5C18.375 10.4283 18.0063 11.3185 17.3499 11.9749C16.6935 12.6313 15.8033 13 14.875 13C13.9467 13 13.0565 12.6313 12.4001 11.9749C11.7437 11.3185 11.375 10.4283 11.375 9.5ZM11.375 14.75C10.2147 14.75 9.10188 15.2109 8.28141 16.0314C7.46094 16.8519 7 17.9647 7 19.125C7 19.8212 7.27656 20.4889 7.76884 20.9812C8.26113 21.4734 8.92881 21.75 9.625 21.75H20.125C20.8212 21.75 21.4889 21.4734 21.9812 20.9812C22.4734 20.4889 22.75 19.8212 22.75 19.125C22.75 17.9647 22.2891 16.8519 21.4686 16.0314C20.6481 15.2109 19.5353 14.75 18.375 14.75H11.375Z"
+                            fill="#1B4841" />
+                    </svg>
+                    @endif
+                    <span>{{{$user->nama}}}</span>
                 </div>
                 <button class="btn btn-light" title="Lainnya">
                     <svg width="23" height="23" viewBox="0 0 16 16">
@@ -677,7 +697,30 @@ $imageExtensions = ['jpg', 'jpeg', 'png', 'gif', 'bmp', 'webp', 'svg'];
                 @else
                 <div class="chat-message {{{$chat->sender==session('account')['id']?'user':'other'}}}"
                     data_id_references="{{{$chat->id_chat}}}">
+                    @if($chat->sender==session('account')['id'])
+                    @if(session('account')['avatar_url']!=null)
                     <img src="https://randomuser.me/api/portraits/men/50.jpg" class="person-img" />
+                    @else
+                    <svg width="30" height="29" viewBox="0 0 30 29" fill="none" xmlns="http://www.w3.org/2000/svg">
+                        <rect width="30" height="29" rx="14.5" fill="white" />
+                        <path fill-rule="evenodd" clip-rule="evenodd"
+                            d="M11.375 9.5C11.375 8.57174 11.7437 7.6815 12.4001 7.02513C13.0565 6.36875 13.9467 6 14.875 6C15.8033 6 16.6935 6.36875 17.3499 7.02513C18.0063 7.6815 18.375 8.57174 18.375 9.5C18.375 10.4283 18.0063 11.3185 17.3499 11.9749C16.6935 12.6313 15.8033 13 14.875 13C13.9467 13 13.0565 12.6313 12.4001 11.9749C11.7437 11.3185 11.375 10.4283 11.375 9.5ZM11.375 14.75C10.2147 14.75 9.10188 15.2109 8.28141 16.0314C7.46094 16.8519 7 17.9647 7 19.125C7 19.8212 7.27656 20.4889 7.76884 20.9812C8.26113 21.4734 8.92881 21.75 9.625 21.75H20.125C20.8212 21.75 21.4889 21.4734 21.9812 20.9812C22.4734 20.4889 22.75 19.8212 22.75 19.125C22.75 17.9647 22.2891 16.8519 21.4686 16.0314C20.6481 15.2109 19.5353 14.75 18.375 14.75H11.375Z"
+                            fill="#1B4841" />
+                    </svg>
+                    @endif
+                    @else
+                    @if($user->avatar_url!=null)
+                    <img src="https://randomuser.me/api/portraits/men/50.jpg" class="person-img" />
+                    @else
+                    <svg width="30" height="29" viewBox="0 0 30 29" fill="none" xmlns="http://www.w3.org/2000/svg">
+                        <rect width="30" height="29" rx="14.5" fill="white" />
+                        <path fill-rule="evenodd" clip-rule="evenodd"
+                            d="M11.375 9.5C11.375 8.57174 11.7437 7.6815 12.4001 7.02513C13.0565 6.36875 13.9467 6 14.875 6C15.8033 6 16.6935 6.36875 17.3499 7.02513C18.0063 7.6815 18.375 8.57174 18.375 9.5C18.375 10.4283 18.0063 11.3185 17.3499 11.9749C16.6935 12.6313 15.8033 13 14.875 13C13.9467 13 13.0565 12.6313 12.4001 11.9749C11.7437 11.3185 11.375 10.4283 11.375 9.5ZM11.375 14.75C10.2147 14.75 9.10188 15.2109 8.28141 16.0314C7.46094 16.8519 7 17.9647 7 19.125C7 19.8212 7.27656 20.4889 7.76884 20.9812C8.26113 21.4734 8.92881 21.75 9.625 21.75H20.125C20.8212 21.75 21.4889 21.4734 21.9812 20.9812C22.4734 20.4889 22.75 19.8212 22.75 19.125C22.75 17.9647 22.2891 16.8519 21.4686 16.0314C20.6481 15.2109 19.5353 14.75 18.375 14.75H11.375Z"
+                            fill="#1B4841" />
+                    </svg>
+                    @endif
+                    @endif
+
                     <div class="chat-inner d-flex flex-column align-items-start">
                         @if($chat->chat_references!=null)
                         <div class="reply-preview" data-references="{{{$chat->chat_references}}}">
@@ -725,7 +768,7 @@ $imageExtensions = ['jpg', 'jpeg', 'png', 'gif', 'bmp', 'webp', 'svg'];
                 @endforeach
             </div>
 
-            <form class="chat-footer w-100" id="chat-footer">
+            <form class="chat-footer w-100 position-relative" id="chat-footer">
                 <div id="filePreviewArea" class="mb-2 d-none position-absolute" style="top: -70px;">
                     <div class="d-flex align-items-center gap-2 bg-light border rounded-3 px-3 py-2 position-relative"
                         style="max-width:360px;">
@@ -777,6 +820,13 @@ $imageExtensions = ['jpg', 'jpeg', 'png', 'gif', 'bmp', 'webp', 'svg'];
                 </div>
             </form>
 
+            @else
+            <div class="no chat w-100 h-100 d-flex justify-content-center align-content-center">
+                <div class="d-flex align-items-center gap-2 mb-2">
+                    <span class="badge bg-warning text-black">Tidak ada lamaran yang aktif, jadi anda belum bisa berkomunikasi dengan user ini</span>
+                </div>
+            </div>
+            @endif
         </div>
     </div>
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
@@ -865,12 +915,14 @@ $imageExtensions = ['jpg', 'jpeg', 'png', 'gif', 'bmp', 'webp', 'svg'];
 
 
         fileInput.addEventListener('change', function (e) {
+            // console.log(fileInput.files,fileInput.files.length > 0,fileInput.files && fileInput.files.length > 0)
             if (fileInput.files && fileInput.files.length > 0) {
+                console.log('masuk file')
                 selectedFile = fileInput.files[0];
                 filePreview.textContent = selectedFile.name;
                 filePreviewArea.classList.remove('d-none');
                 removeFileBtn.classList.remove('d-none');
-                // Jika gambar, tampilkan thumbnail
+                console.log(selectedFile.type.startsWith('image/'))
                 if (selectedFile.type.startsWith('image/')) {
                     const reader = new FileReader();
                     reader.onload = function (evt) {
@@ -983,6 +1035,7 @@ $imageExtensions = ['jpg', 'jpeg', 'png', 'gif', 'bmp', 'webp', 'svg'];
                         console.log('Response dari server:', data);
                         if (data.success == true) {
                             Reset_Input()
+                            clearFileSelection();
 
                             const chatBody = document.querySelector('.chat-body');
 

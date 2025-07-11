@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use App\Models\chat;
 use App\Models\Pekerjaan;
 use App\Models\Pelamar;
+use App\Models\Users;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 
@@ -42,18 +43,19 @@ class ChatController extends Controller
     public function index($id_target)
     {
         $session_account_id = session('account')['id'];
+        $user = Users::where('id', $id_target)->first();
         $subQuery = DB::table('chats')
             ->select('sender as user_id')
-            ->where(function ($q) {
-                $q->where('receiver', 5)
-                    ->orWhere('sender', 5);
+            ->where(function ($q) use ($session_account_id) {
+                $q->where('receiver', $session_account_id)
+                    ->orWhere('sender', $session_account_id);
             })
             ->union(
                 DB::table('chats')
                     ->select('receiver as user_id')
-                    ->where(function ($q) {
-                        $q->where('receiver', 5)
-                            ->orWhere('sender', 5);
+                    ->where(function ($q) use ($session_account_id) {
+                        $q->where('receiver', $session_account_id)
+                            ->orWhere('sender', $session_account_id);
                     })
             );
         $results =  DB::table(DB::raw('(SELECT *, 
@@ -74,27 +76,32 @@ class ChatController extends Controller
             ->select(
                 'ranked_chats.*',
                 'users.id AS id_from_user',
-                'users.nama AS nama_user'
+                'users.nama AS nama_user',
+                'users.avatar_url AS avatar_url',
             )
             ->get();
+            
+
+            
+            // dd($results);
 
         // Query utama: join subquery ke users
         $to_text = DB::query()
-            ->fromSub($subQuery, 'a')
-            ->join('users as b', 'a.user_id', '=', 'b.id')
-            ->select('a.*', 'b.*')
-            ->get();
-        // dd($to_text);
-        // dd(session('account')['id']);
+                    ->fromSub($subQuery, 'a')
+                    ->join('users as b', 'a.user_id', '=', 'b.id')
+                    ->select('a.*', 'b.*')
+                    ->get();
+                // dd($to_text);
+                // dd(session('account')['id']);
 
-        $all_chats = DB::table('chats as c')
-            ->selectRaw('
-        c.id AS id_chat,
-        c.*,
-        a.*,
-        d.contents AS content_references,
-        c.created_at AS sent
-    ')
+                $all_chats = DB::table('chats as c')
+                    ->selectRaw('
+                c.id AS id_chat,
+                c.*,
+                a.*,
+                d.contents AS content_references,
+                c.created_at AS sent
+            ')
             ->leftJoin('pekerjaans as a', 'a.id', '=', 'c.pekerjaan_id')
             ->leftJoin('chats as d', 'd.chat_references', '=', 'c.id')
             ->where(function ($query) use ($session_account_id, $id_target) {
@@ -113,7 +120,7 @@ class ChatController extends Controller
         // dd($all);
 
 
-        return view('Dewa.need_auth.chat', compact('to_text', 'all_chats', 'target', 'all'));
+        return view('Dewa.need_auth.chat', compact('to_text', 'all_chats', 'target', 'all','user'));
     }
 
     public function store(Request $request)
