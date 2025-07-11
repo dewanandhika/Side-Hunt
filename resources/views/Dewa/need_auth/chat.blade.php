@@ -241,16 +241,27 @@
             width: 100%;
 
             >div {
-                justify-content: end;
-                align-items: end;
+                justify-content: end !important;
+                align-items: end !important;
             }
 
             .previewFile {
-                justify-content: end;
+                justify-content: end !important;
             }
 
             .preview {
-                align-items: end;
+                align-items: end !important;
+            }
+
+            .reply-preview {
+                width: auto;
+                display: flex;
+                justify-content: start;
+                align-items: start;
+            }
+
+            div>img {
+                width: max-content;
             }
 
 
@@ -556,6 +567,10 @@
     </style>
 </head>
 
+@php
+$imageExtensions = ['jpg', 'jpeg', 'png', 'gif', 'bmp', 'webp', 'svg'];
+@endphp
+
 <body>
     <div class="chat-app">
         <!-- SIDEBAR -->
@@ -567,10 +582,10 @@
                 <input type="text" class="form-control" placeholder="Cari orang...">
             </div>
             <div class="sidebar-people">
-                @forEach($to_text as $person)
-                @if($person->id!=session('account')->id)
-                <div class="person">
-                    @if($person->avatar_url!=null)
+                @forEach($all as $person)
+                @if($person->counterpart_id!=session('account')->id)
+                <div class="person" onclick="window.location.href='/chat/{{{$person->counterpart_id}}}'">
+                    @if($person->nama_user)
                     <img src="" class="person-img" />
                     @else
                     <svg width="30" height="29" viewBox="0 0 30 29" fill="none" xmlns="http://www.w3.org/2000/svg">
@@ -581,47 +596,25 @@
                     </svg>
                     @endif
                     <div class="person-details">
-                        <strong>{{{$person->nama}}}</strong>
-                        <!-- <small>Hai! Ada kabar baru?</small> -->
+                        <strong>{{{$person->nama_user}}}</strong>
+                        @if($person->contents!=null)
+                        @if($person->sender==session('account')->id)
+                        <small>me: {{{$person->contents}}}</small>
+                        @else
+                        <small>{{{$person->contents}}}</small>
+                        @endif
+                        @else
+                        <small>
+                            <div class="d-flex align-items-center gap-2 mb-2">
+                                <span class="badge bg-primary">Lamaran Masuk</span>
+                            </div>
+
+                        </small>
+                        @endif
                     </div>
                 </div>
                 @else
                 @endif
-                <!-- <div class="person active">
-                    <img src="https://randomuser.me/api/portraits/men/12.jpg" class="person-img" />
-                    <div class="person-details">
-                        <strong>Agus Saputra</strong>
-                        <small>Hai! Ada kabar baru?</small>
-                    </div>
-                </div>
-                <div class="person">
-                    <img src="https://randomuser.me/api/portraits/women/20.jpg" class="person-img" />
-                    <div class="person-details">
-                        <strong>Bella Wulandari</strong>
-                        <small>Oke, nanti saya cek dulu ya</small>
-                    </div>
-                </div>
-                <div class="person">
-                    <img src="https://randomuser.me/api/portraits/men/22.jpg" class="person-img" />
-                    <div class="person-details">
-                        <strong>Rama Permana</strong>
-                        <small>Terima kasih banyak!</small>
-                    </div>
-                </div>
-                <div class="person">
-                    <img src="https://randomuser.me/api/portraits/men/31.jpg" class="person-img" />
-                    <div class="person-details">
-                        <strong>Erik Pratama</strong>
-                        <small>Sampai ketemu besok ya</small>
-                    </div>
-                </div>
-                <div class="person">
-                    <img src="https://randomuser.me/api/portraits/women/33.jpg" class="person-img" />
-                    <div class="person-details">
-                        <strong>Putri Anjani</strong>
-                        <small>Sudah saya kirim emailnya</small>
-                    </div>
-                </div> -->
                 @endforeach
             </div>
         </div>
@@ -639,7 +632,7 @@
                 </button>
 
                 <div class="chat-person">
-                    <img src="https://randomuser.me/api/portraits/men/12.jpg" class="person-img" />
+                    <img src="" class="person-img" />
                     <span>Agus Saputra</span>
                 </div>
                 <button class="btn btn-light" title="Lainnya">
@@ -656,46 +649,73 @@
             <div class="chat-body">
                 @forEach($all_chats as $chat)
                 @if($chat->Lamaran_status!=null)
-                <div class="alert alert-info d-flex flex-column justify-content-center align-items-center mb-3 rounded-3 border-0 py-2"
+                <div class="alert {{{$chat->Lamaran_status == 'Gagal'?'alert-dark':'alert-info'}}} d-flex flex-column justify-content-center align-items-center mb-3 rounded-3 border-0 py-2"
                     role="alert" style="background-color: #e7f3fe;">
+                    @if($chat->Lamaran_status == 'Gagal')
+                    <span class="fw-semibold text-primary small">Chat Berakhir</span>
+                    @else
                     <span class="fw-semibold text-primary small">Topik: </span>
-                    <span class="fw-semibold text-primary small">{{{$chat->nama}}}
-                        ({{{$chat->Lamaran_status=='tunda'?'Lamaran Masuk':''}}})</span>
+                    @endif
+                    <span class="fw-semibold text-primary small">
+                        {{{ $chat->nama }}}
+                        (
+                        {{{
+                        $chat->Lamaran_status == 'tunda' ? 'Lamaran Masuk' :
+                        ($chat->Lamaran_status == 'interview' ? 'Dalam masa Interview' :
+                        ($chat->Lamaran_status == 'Menunggu Pekerjaan' ? 'Menunggu Bekerja' :
+                        ($chat->Lamaran_status == 'Gagal' ? 'Lamaran Gagal' : $chat->Lamaran_status)))
+
+                        }}}
+                        )
+                    </span>
+
+                    <span>
+                        <p class="fw-semibold text-primary small">{{{$chat->sent}}}</p>
+                    </span>
+
                 </div>
                 @else
-                <div class="chat-message {{{$chat->sender==session('account')['id']?'user':'other'}}}">
+                <div class="chat-message {{{$chat->sender==session('account')['id']?'user':'other'}}}"
+                    data_id_references="{{{$chat->id_chat}}}">
                     <img src="https://randomuser.me/api/portraits/men/50.jpg" class="person-img" />
                     <div class="chat-inner d-flex flex-column align-items-start">
                         @if($chat->chat_references!=null)
                         <div class="reply-preview" data-references="{{{$chat->chat_references}}}">
-                            <span class="reply-text">{{{$chat->content_references}}}</span>
+                            <span class="reply-text">{{{$chat->body_chat_references}}}</span>
                         </div>
                         @endif
                         <div class="preview d-flex flex-column gap-1">
                             @if($chat->file_json!=null)
+                            @if((in_array(strtolower($chat->extension), $imageExtensions)))
+                            <img class="w-50 h-auto rounded-3"
+                                src="{{{$chat->file_json==null?'https://randomuser.me/api/portraits/men/12.jpg':asset($chat->file_json)}}}"
+                                alt=""
+                                onclick="window.open('{{{$chat->file_json==null?null:asset($chat->file_json)}}}')">
+
+                            @else
                             <div class="previewFile d-flex mb-2">
                                 <div
                                     class="bg-primary bg-opacity-10 rounded-3 p-3 d-inline-flex align-items-center shadow-sm">
-                                    <i class="bi bi-file-earmark-pdf text-danger fs-3 me-3"></i>
+                                    <i class="bi bi-file-earmark text-danger fs-3 me-3"></i>
                                     <div>
-                                        <div class="fw-semibold text-primary mb-2">Ariana.pdf</div>
+                                        <div class="fw-semibold text-primary mb-2">{{{$chat->nama_file}}}</div>
                                         <div class="d-flex gap-2">
-                                            <a href="{{ asset('Dewa/file/beri kerja.pdf') }}" target="_blank"
-                                                class="btn btn-sm btn-outline-secondary">
+                                            <a href="{{{$chat->file_json==null?'https://randomuser.me/api/portraits/men/12.jpg':asset($chat->file_json)}}}"
+                                                target="_blank" class="btn btn-sm btn-outline-secondary">
                                                 <i class="bi bi-eye me-1"></i> Preview
                                             </a>
-                                            <a href="{{ asset('Dewa/file/beri kerja.pdf') }}" download
-                                                class="btn btn-sm btn-outline-primary">
+                                            <a href="{{{$chat->file_json==null?'https://randomuser.me/api/portraits/men/12.jpg':asset($chat->file_json)}}}"
+                                                download class="btn btn-sm btn-outline-primary">
                                                 <i class="bi bi-download me-1"></i> Download
                                             </a>
                                         </div>
                                     </div>
                                 </div>
                             </div>
-                            <img class="w-50 h-auto rounded-3" src="/Dewa/img/f4030acf172260f3241cad5f4527a7d8.jpg"
-                                alt="">
+                            @endif
                             @endif
                             @if($chat->contents!=null)
+
                             <div class="msg">{{{$chat->contents}}}</div>
                             @endif
                         </div>
@@ -703,128 +723,6 @@
                 </div>
                 @endif
                 @endforeach
-                <!-- <div class="chat-message other">
-                    <img src="https://randomuser.me/api/portraits/men/12.jpg" class="person-img" />
-                    <div>
-                        <div class="msg">Alhamdulillah, sudah hampir selesai kak 🙏</div>
-                    </div>
-                </div>
-                <div class="chat-message user">
-                    <img src="https://randomuser.me/api/portraits/men/50.jpg" class="person-img" />
-                    <div>
-                        <div class="msg">Baik, nanti saya update lagi kalau sudah fix.</div>
-                    </div>
-                </div>
-                <div class="chat-message other">
-                    <img src="https://randomuser.me/api/portraits/men/12.jpg" class="person-img" />
-                    <div>
-                        <div class="msg">Oke siap, terima kasih yaa!</div>
-                    </div>
-                </div>
-                <div class="chat-message user">
-                    <img src="https://randomuser.me/api/portraits/men/50.jpg" class="person-img" />
-                    <div>
-                        <div class="msg">🙏🙏🙏</div>
-                    </div>
-                </div>
-                <div class="chat-message user">
-                    <img src="https://randomuser.me/api/portraits/men/50.jpg" class="person-img" />
-                    <div>
-                        <div class="msg">Baik, nanti saya update lagi kalau sudah fix.</div>
-                    </div>
-                </div>
-                <div class="chat-message other">
-                    <img src="https://randomuser.me/api/portraits/men/12.jpg" class="person-img" />
-                    <div>
-                        <div class="msg">Oke siap, terima kasih yaa!</div>
-                    </div>
-                </div>
-                <div class="chat-message user">
-                    <img src="https://randomuser.me/api/portraits/men/50.jpg" class="person-img" />
-                    <div>
-                        <div class="msg">🙏🙏🙏</div>
-                    </div>
-                </div>
-                <div class="chat-message user">
-                    <img src="https://randomuser.me/api/portraits/men/50.jpg" class="person-img" />
-                    <div>
-                        <div class="msg">Baik, nanti saya update lagi kalau sudah fix.</div>
-                    </div>
-                </div>
-                <div class="chat-message other">
-                    <img src="https://randomuser.me/api/portraits/men/12.jpg" class="person-img" />
-                    <div>
-                        <div class="msg">Oke siap, terima kasih yaa!</div>
-                    </div>
-                </div>
-                <div class="chat-message user">
-                    <img src="https://randomuser.me/api/portraits/men/50.jpg" class="person-img" />
-                    <div>
-                        <div class="msg">🙏🙏🙏</div>
-                    </div>
-                </div>
-                <div class="alert alert-info d-flex flex-column justify-content-center align-items-center mb-3 rounded-3 border-0 py-2"
-                    role="alert" style="background-color: #e7f3fe;">
-                    <span class="fw-semibold text-primary small">Topik: </span>
-                    <span class="fw-semibold text-primary small">Pekerjaan Menanam Padi (Lamaran)</span>
-                </div>
-
-
-
-
-                <div class="chat-message user">
-                    <img src="https://randomuser.me/api/portraits/men/50.jpg" class="person-img" />
-                    <div class="d-flex flex-column align-items-start">
-                        <div class="reply-preview">
-                            <span class="reply-text">Saya sudah kirim file-nya tadi pagi.</span>
-                        </div>
-                        <div class="d-flex flex-column justify-content-end">
-                            <div class="msg">
-                                Baik, nanti saya update lagi kalau sudah fix.
-                            </div>
-                        </div>
-                    </div>
-                </div>
-
-                <div class="chat-message other">
-                    <img src="https://randomuser.me/api/portraits/men/12.jpg" class="person-img" />
-                    <div class="d-flex flex-column align-items-start">
-                        <div class="msg">Oke siap, terima kasih yaa!</div>
-                    </div>
-                </div>
-                <div class="chat-message user">
-                    <img src="https://randomuser.me/api/portraits/men/50.jpg" class="person-img" />
-                    <div class="chat-inner d-flex flex-column align-items-start">
-                        <div class="reply-preview">
-                            <span class="reply-text">Saya sudah kirim file-nya tadi pagi.</span>
-                        </div>
-                        <div class="d-flex flex-column gap-1 align-items-end">
-                            <div class="d-flex justify-content-end mb-2">
-                                <div
-                                    class="bg-primary bg-opacity-10 rounded-3 p-3 d-inline-flex align-items-center shadow-sm">
-                                    <i class="bi bi-file-earmark-pdf text-danger fs-3 me-3"></i>
-                                    <div>
-                                        <div class="fw-semibold text-primary mb-2">Ariana.pdf</div>
-                                        <div class="d-flex gap-2">
-                                            <a href="{{ asset('Dewa/file/beri kerja.pdf') }}" target="_blank"
-                                                class="btn btn-sm btn-outline-secondary">
-                                                <i class="bi bi-eye me-1"></i> Preview
-                                            </a>
-                                            <a href="{{ asset('Dewa/file/beri kerja.pdf') }}" download
-                                                class="btn btn-sm btn-outline-primary">
-                                                <i class="bi bi-download me-1"></i> Download
-                                            </a>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-
-                            <img class="w-50 h-auto rounded-3" src="/Dewa/img/f4030acf172260f3241cad5f4527a7d8.jpg"
-                                alt="">
-                            <div class="msg">🙏🙏🙏</div>
-                        </div>
-                    </div>
-                </div>-->
             </div>
 
             <form class="chat-footer w-100" id="chat-footer">
@@ -845,7 +743,7 @@
                 </div>
                 <div class="w-100">
                     <!-- Preview area (di atas input) -->
-                    <div class="reference_chat d-none align-items-center mb-2">
+                    <div class="reference_chat d-none align-items-center mb-2" data-references="">
                         <div class="border-start border-4 border-primary ps-2 me-2 small text-secondary"
                             style="min-width: 0;">
                             <span id="referencePreview" class="d-block text-truncate" style="max-width: 250px;">
@@ -889,9 +787,6 @@
                 reply(this);
             });
         });
-        function scrollToTarget(idElemen) {
-            document.getElementById(idElemen).scrollIntoView({ behavior: 'smooth' });
-        }
         document.getElementById('chatInput').addEventListener('keydown', function (event) {
             // Cek jika tombol yang ditekan adalah Enter, dan bukan Shift+Enter
             if (event.key === 'Enter' && !event.shiftKey) {
@@ -909,6 +804,8 @@
             let text = msg.innerText.trim();
             let fileName = "";
             let isFile = false;
+
+
 
             const imgInMsg = msg.querySelector('img');
             const fileIcon = msg.querySelector('.bi-paperclip, .bi-image');
@@ -938,10 +835,14 @@
 
             // Tampilkan di reference_chat
             let reference = document.querySelector('.reference_chat');
+            reference.setAttribute('data-references', msgWrap.getAttribute('data_id_references').toString())
+            // console.log('is true: ',)
+            // console.log('isi', msgWrap.getAttribute('data_id_references'), msgWrap, 'ini : ' + msgWrap.querySelector('.reply-preview').getAttribute('data-references'))
             let previewElem = document.getElementById('referencePreview');
             previewElem.innerHTML = previewText;
             reference.classList.remove('d-none');
             reference.classList.add('d-flex');
+            console.log('isi references: ', reference.getAttribute('data-references'))
         }
 
 
@@ -1012,11 +913,12 @@
             if (text === "" && !selectedFile) return;
             let reference = null;
             let referensi_chat = cek_references();
+            // console.log(referensi_chat)
             if (referensi_chat != null) {
                 ;
                 reference = `
-               <div class="reply-preview">
-                            <span class="reply-text" onclick="scrollToTarget(1)">${referensi_chat[0]}</span>
+               <div class="reply-preview" data-references="${cek_references()[1]}">
+                            <span class="reply-text">${referensi_chat[0]}</span>
                         </div>
                `;
             }
@@ -1040,11 +942,11 @@
                                 <div>
                                     <div class="fw-semibold text-primary mb-2">${selectedFile.name}</div>
                                     <div class="d-flex gap-2">
-                                        <a href="{{ asset('Dewa/file/beri kerja.pdf') }}" target="_blank"
+                                        <a href="${URL.createObjectURL(selectedFile)}" target="_blank"
                                             class="btn btn-sm btn-outline-secondary">
                                             <i class="bi bi-eye me-1"></i> Preview
                                         </a>
-                                        <a href="{{ asset('Dewa/file/beri kerja.pdf') }}" download
+                                        <a href="${URL.createObjectURL(selectedFile)}" download
                                             class="btn btn-sm btn-outline-primary">
                                             <i class="bi bi-download me-1"></i> Download
                                         </a>
@@ -1057,92 +959,63 @@
             }
 
             const csrfToken = document.querySelector('meta[name="csrf-token"]').getAttribute('content');
+            let file_get = document.querySelector('#fileInput').files[0];
 
-            // const csrfToken = document.querySelector('meta[name="csrf-token"]').getAttribute('content');
-            // const formData = new FormData();
-            // formData.append('contents', (chatInput.value.trim() == '') ? null : chatInput.value.trim());
-            // formData.append('file_json', selectedFile);
-            // // console.log('file: ',selectedFile)
-            // formData.append('chat_references', (cek_references() == null) ? null : cek_references()[1]);
-            // formData.append('receiver', target);
-            // formData.append('_token', csrfToken);
-            // // console.log(Object.fromEntries(formData.entries()));
-            // fetch('/make_chat', {
-            //     method: 'POST',
-            //     body: formData
-            // })
-            //     .then(response => response.json())
-            //     .then(data => {
-            //         if (data) {
-            //             console.log('data controller', data)
-            //             // Berarti proses berhasil, bisa tampilkan pesan sukses
+            let formData = new FormData();
+            formData.append('_token', csrfToken);
+            formData.append('receiver', target);
+            formData.append('contents', chatInput.value.trim());
+            formData.append('file_json', file_get);
+            formData.append('chat_reference', referensi_chat == null ? '' : referensi_chat[1]);
+            formData.append('body_chat_references', referensi_chat == null ? '' : referensi_chat[0]);
 
-            //             // Atau update UI kamu sesuai kebutuhan
-            //         } else {
-            //             // Kalau butuh handle selain itu
-            //             console.log('GAgal', JSON.stringify(data))
-            //             // alert('Gagal: ' + JSON.stringify(data));
-            //         }
-            //     })
-            //     .catch(error => {
-            //         console.error('Error:', error);
-            //         // alert('Terjadi error di koneksi!');
-            //     });
-            console.log(referensi_chat);
-            fetch('/make_chat', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                    'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content'),
-                }, body: JSON.stringify({
-                    _token: csrfToken,
-                    receiver: target,
-                    contents: chatInput.value.trim(),
-                    file: selectedFile,
-                    chat_reference: referensi_chat == null ? null : referensi_chat[1]
-                }),
-                credentials: 'include'
-            }).then(response => response.json())
-                .then(data => {
-                    // console.log('Response dari server:', data);
-                    if (data.success == true) {
-                        Reset_Input()
+            if (text != null || preview != null) {
 
-                        const chatBody = document.querySelector('.chat-body');
+                fetch('/make_chat', {
+                    method: 'POST',
+                    body: formData,
+                    headers: {
+                        'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content'),
+                    },
+                    credentials: 'include'
+                }).then(response => response.json())
+                    .then(data => {
+                        console.log('Response dari server:', data);
+                        if (data.success == true) {
+                            Reset_Input()
 
-                        let referenceHTML = reference ? reference : '';
-                        let previewHTML = preview ? preview : '';
-                        let textHTML = text ? text : '';
+                            const chatBody = document.querySelector('.chat-body');
 
-                        chatBody.insertAdjacentHTML('beforeend',
-                            `
-                            <div class="chat-message user">
-                                <img src="https://randomuser.me/api/portraits/men/50.jpg" class="person-img" />
-                                <div class="chat-inner d-flex flex-column align-items-start">
-                                    ${referenceHTML}
-                                    <div class="d-flex flex-column gap-1 align-items-end">
-                                        ${previewHTML}
-                                        ${textHTML}
+                            let referenceHTML = reference ? reference : '';
+                            let previewHTML = preview ? preview : '';
+                            let textHTML = text ? text : '';
+
+                            chatBody.insertAdjacentHTML('beforeend',
+                                `
+                                <div class="chat-message user">
+                                    <img src="https://randomuser.me/api/portraits/men/50.jpg" class="person-img" />
+                                    <div class="chat-inner d-flex flex-column align-items-start">
+                                        ${referenceHTML}
+                                        <div class="d-flex flex-column gap-1 align-items-end">
+                                            ${previewHTML}
+                                            ${textHTML}
+                                        </div>
                                     </div>
                                 </div>
-                            </div>
-                        `
-                        );
-                        bubbleMenuBind();
-                        newest_chat();
+                            `
+                            );
+                            bubbleMenuBind();
+                            newest_chat();
 
-                    }
-                    else {
-                        fail('Gagal Mengirim', data.success)
-                    }
-                })
-                .catch(error => {
-                    console.error('Error:', error);
-                });
-
-
-
-
+                        }
+                        else {
+                            fail('Gagal Mengirim', data.success)
+                        }
+                    })
+                    .catch(error => {
+                        console.error('Error:', error);
+                    });
+            }
         });
 
         const sidebar = document.querySelector('.sidebar');
@@ -1163,7 +1036,6 @@
             person.addEventListener('click', function () {
                 sidebar.classList.remove('open');
                 backdrop.style.display = 'none';
-                // Logic ganti chat bisa ditaruh di sini
             });
         });
 
@@ -1172,12 +1044,11 @@
         newest_chat();
         function newest_chat() {
             const chatBodies = document.querySelectorAll('.chat-message');
-            const newest = chatBodies[chatBodies.length - 1]; // Elemen .chat-body terakhir
+            const newest = chatBodies[chatBodies.length - 1];
             if (newest) {
                 console.log('msuk')
                 newest.scrollIntoView({ behavior: "smooth" });
             }
-            // console.log('newest', newest);
         }
 
 
@@ -1202,8 +1073,6 @@
       <button class="bubble-menu-btn text-danger" onclick="bubbleDeleteMsg(this)">Delete</button>
     `;
             msgElem.parentElement.appendChild(bubble);
-
-            // Close if click outside
             setTimeout(function () {
                 window.addEventListener('click', removeBubbleMenu, { once: true });
             }, 50);
@@ -1215,7 +1084,7 @@
         function cek_references() {
             let reference = document.querySelector('.reference_chat')
             if (reference.classList.contains('d-flex')) {
-                return [reference.querySelector('#referencePreview').textContent, 1];
+                return [reference.querySelector('#referencePreview').textContent, reference.getAttribute('data-references')];
             }
             else {
                 return null;
@@ -1239,16 +1108,14 @@
             })
         }
         function bubbleDeleteMsg(btn) {
-            // Hapus bubble dan chat message parent
             const msgWrap = btn.closest('.chat-message');
             msgWrap.remove();
             removeBubbleMenu();
         }
-        // Init on load
         bubbleMenuBind();
 
-        function refresh_chat(){
-            
+        function refresh_chat() {
+
         }
     </script>
 </body>

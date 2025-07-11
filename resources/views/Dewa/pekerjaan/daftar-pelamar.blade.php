@@ -241,7 +241,7 @@
                         </td>
                         <td class="text-center">
                             @if(!(in_array($pelamar->status_job, ['ditolak','Gagal'])))
-                            <button class="btn btn-toolbar">
+                            <button class="btn btn-toolbar" onclick="window.open('/chat/{{{$pelamar->id_pelamar}}}')">
                                 <i class="bi bi-envelope text-center"></i>
                             </button>
                             @endif

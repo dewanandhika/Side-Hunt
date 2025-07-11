@@ -17,7 +17,10 @@ return new class extends Migration
             $table->bigInteger('receiver')->unsigned();
             $table->longText('contents')->nullable();
             $table->string('file_json')->nullable();
+            $table->string('extension')->nullable();
+            $table->string('nama_file')->nullable();
             $table->bigInteger('chat_references')->unsigned()->nullable();
+            $table->string('body_chat_references')->nullable();
             $table->bigInteger('pekerjaan_id')->unsigned()->nullable();
             $table->string('Lamaran_status')->nullable();
             // $table->string('is_active_job')->nullable();

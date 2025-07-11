@@ -18,7 +18,6 @@ class PelamarController extends Controller
     {
         try {
             $cekJob = Pekerjaan::where('id', $idPekerjaan)->first();
-
             if ($cekJob != null) {
                 try {
                     $cek = Pelamar::where('user_id', session('account')['id'])
@@ -57,7 +56,9 @@ class PelamarController extends Controller
 
                     if ($save_attemp_job) {
                         try {
-                            if ((new ChatController())->lamaran_diterima($save_attemp_job->id)) {
+                            $job = Pekerjaan::where('id', $idPekerjaan)->first();
+
+                            if ((new ChatController())->update_lamaran($save_attemp_job->id,$job->pembuat, session('account')['id'])) {
                                 return response()->json([
                                     'success' => true,
                                     'message' => $req->data
@@ -153,6 +154,7 @@ class PelamarController extends Controller
             $find->status = 'interview';
             // dd($find);;
             if ($find->save()) {
+                (new ChatController())->update_lamaran($find->id,session('account')['id'],$find->user_id);
                 $user = Users::where('id', $find->user_id)->first();
                 $Pekerjaan = Pekerjaan::where('id', $find->job_id)->first();
                 $email = ($user->email);
@@ -174,6 +176,8 @@ class PelamarController extends Controller
             $find->link_Interview = null;
             $find->status = $request->status;
             if ($find->save()) {
+                (new ChatController())->update_lamaran($find->id,session('account')['id'],$find->user_id);
+
                 $user = Users::where('id', $find->user_id)->first();
                 $Pekerjaan = Pekerjaan::where('id', $find->job_id)->first();
                 $email = ($user->email);
@@ -196,6 +200,8 @@ class PelamarController extends Controller
             $find->status = $request->status;
             $find->alasan = $request->alasan;
             if ($find->save()) {
+                (new ChatController())->update_lamaran($find->id,session('account')['id'],$find->user_id);
+
                 $user = Users::where('id', $find->user_id)->first();
                 $Pekerjaan = Pekerjaan::where('id', $find->job_id)->first();
                 $email = ($user->email);

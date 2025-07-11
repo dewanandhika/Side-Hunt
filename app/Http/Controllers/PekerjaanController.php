@@ -52,6 +52,7 @@ class PekerjaanController extends Controller
             'users.preferensi_user',
             'pelamars.status as status_job',
             'pelamars.id as id_pelamars',
+            'pelamars.user_id as id_pelamar',
             'pelamars.link_Interview as link',
             'pelamars.jadwal_interview as jadwal',
         )->get();
