@@ -62,8 +62,8 @@
                             <div class="rounded-start-2 justify-content-start align-items-center"
                                 style="width: 40%; min-width: 40%; height: 100%;">
                                 <img class="rounded-start-2"
-                                    src="{{ auto_asset('Dewa/img/f4030acf172260f3241cad5f4527a7d8.jpg') }}"
-                                    style="width: 100%; height: 100%;  object-fit: cover;" alt="">
+                                    src="{{ $pekerjaan['foto_job']==null?auto_asset('Dewa/img/default_jobs.jpg'):auto_asset($pekerjaan['foto_job']) }}"
+                                    style="width: 100%; height: 100%; max-height: 65px;  object-fit: cover;" alt="">
                             </div>
                             <div class="d-flex flex-column justify-content-center text-truncate align-items-start gap-0 flex-grow-1 h-100 p-2"
                                 style=" max-width: 100%;">

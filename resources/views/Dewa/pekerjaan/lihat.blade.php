@@ -100,8 +100,9 @@
             <h4 class="clear-p fw-bolder text-truncate w-100 text-center text-wrap" style="color: #2E2D2C;">
                 {{{$data_pekerjaan[0]->nama}}}</h4>
             <div class="w-100 flex-grow-1 rounded-2 justify-content-start align-items-center" style="">
-                <img class="rounded-2" src="{{ auto_asset('Dewa/img/f4030acf172260f3241cad5f4527a7d8.jpg') }}"
-                    style="width: 100%; height: 100%;  object-fit: cover;" alt="">
+                <img class="rounded-2"
+                    src="{{ $data_pekerjaan[0]->foto_job==null?auto_asset('Dewa/img/default_jobs.jpg'):auto_asset($data_pekerjaan[0]->foto_job) }}"
+                    style="width: 100%; height: 100%; object-fit: cover;" alt="">
             </div>
             <div class="h-25 w-100 gap-2 d-flex flex-column justify-content-start align-items-start">
                 <div class="d-flex flex-row gap-2 justify-content-center align-items-center">

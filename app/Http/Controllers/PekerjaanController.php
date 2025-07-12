@@ -193,8 +193,8 @@ class PekerjaanController extends Controller
             if ($request->hasFile('foto_job')) {
                 $file = $request->file('foto_job');
                 $filename = $request->nama . "." . $file->getClientOriginalExtension();
-                $path = $file->storeAs('job', $filename, 'public');
-                $data['foto_job'] = $filename;
+                $path = 'storage/'.$file->storeAs('job', $filename, 'public');
+                $data['foto_job'] = $path;
             }
             if (Pekerjaan::create($data)) {
                 return redirect()->back()->with('success', ['Berhasil', 'Pekerjaan Berhasil didaftarkan']);

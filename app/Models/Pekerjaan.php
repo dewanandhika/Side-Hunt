@@ -24,7 +24,9 @@ class Pekerjaan extends Model
         'pembuat',
         'start_job',
         'end_job',
+        'deadline_job',
         'kriteria',
+        'foto_job'
     ];
     protected $casts = [
         'nama' => 'string',

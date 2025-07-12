@@ -584,13 +584,13 @@ $imageExtensions = ['jpg', 'jpeg', 'png', 'gif', 'bmp', 'webp', 'svg'];
             </div>
 
             <div class="sidebar-search">
-                <input type="text" class="form-control" placeholder="Cari orang...">
+                <input type="text" class="form-control" oninput="search(this)" placeholder="Cari orang...">
             </div>
             <div class="sidebar-people">
                 @if(count($all)>0)
                 @forEach($all as $person)
                 @if($person->counterpart_id!=session('account')->id)
-                <div class="person" onclick="window.location.href='/chat/{{{$person->counterpart_id}}}'">
+                <div class="person the_person" onclick="window.location.href='/chat/{{{$person->counterpart_id}}}'">
                     @if($person->avatar_url!=null)
                     <img src="" class="person-img" />
                     @else
@@ -602,7 +602,7 @@ $imageExtensions = ['jpg', 'jpeg', 'png', 'gif', 'bmp', 'webp', 'svg'];
                     </svg>
                     @endif
                     <div class="person-details">
-                        <strong>{{{$person->nama_user}}}</strong>
+                        <strong class="person_nama">{{{$person->nama_user}}}</strong>
                         @if($person->contents!=null)
                         @if($person->sender==session('account')->id)
                         <small>me: {{{$person->contents}}}</small>
@@ -862,18 +862,25 @@ $imageExtensions = ['jpg', 'jpeg', 'png', 'gif', 'bmp', 'webp', 'svg'];
     </div>
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
     <script>
+
+        function search(elemen){
+            document.querySelectorAll('.person.the_person').forEach(person=>{
+                // console.log(person.querySelector('.person_nama').textContent.toLowerCase().includes(elemen.value.toLowerCase()),person.querySelector('.person_nama').textContent);
+                if(person.querySelector('.person_nama').textContent.toLowerCase().includes(elemen.value.toLowerCase())){
+                    person.style.display = ''
+                }
+                else{
+                    
+                    person.style.display = 'none'
+                }
+            })
+        }
+
         const target = @json($target);
         document.querySelectorAll('.chat-message').forEach(function (item) {
             item.addEventListener('dblclick', function () {
                 reply(this);
             });
-        });
-        document.getElementById('chatInput').addEventListener('keydown', function (event) {
-            // Cek jika tombol yang ditekan adalah Enter, dan bukan Shift+Enter
-            if (event.key === 'Enter' && !event.shiftKey) {
-                event.preventDefault(); // Stop default behaviour (misal form double submit)
-                document.getElementById('sendBtn').click(); // Trigger tombol Kirim
-            }
         });
         let currentReference = null; // Untuk menyimpan referensi pesan yang sedang di-reply
 

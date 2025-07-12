@@ -18,8 +18,8 @@ class PekerjaanFactory extends Factory
     {
         return [
             "kriteria" => "",
-            'latitude' => $this->faker->latitude(-7.35, -7.15),      // kisaran Surabaya
-            'longitude' => $this->faker->longitude(112.60, 112.90),  // kisaran Surabaya
+            'latitude' => $this->faker->latitude(-7.38, -7.21),      // hanya daratan Surabaya
+            'longitude' => $this->faker->longitude(112.65, 112.84),  // kisaran Surabaya
             'koordinat' => function (array $attributes) {
                 return $attributes['latitude'] . ',' . $attributes['longitude'];
             },

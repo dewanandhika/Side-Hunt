@@ -64,7 +64,7 @@ Route::middleware(['role:user|mitra'])->group(function () {
     Route::get('/daftar-lamaran/', action: [PekerjaanController::class, 'Daftar_Lamaran']);
     Route::post('/user/preferensi/save', action: [UsersController::class, 'save_preverensi']);
     Route::post('/kerja/add', action: [PekerjaanController::class, 'store']);
-    Route::post('/kerja/add', action: [PekerjaanController::class, 'store']);
+    // Route::post('/kerja/add', action: [PekerjaanController::class, 'store']);
     Route::post('/Profile/Edit', [UsersController::class, 'Profile_Edit']);
     Route::get('/transaksi', [TransaksiController::class, 'index'])->name('user.transaksi');
     Route::post('/Lamar/{idPekerjaan}', action: [PelamarController::class, 'store']);
