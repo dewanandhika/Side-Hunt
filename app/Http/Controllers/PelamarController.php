@@ -58,7 +58,7 @@ class PelamarController extends Controller
                         try {
                             $job = Pekerjaan::where('id', $idPekerjaan)->first();
 
-                            if ((new ChatController())->update_lamaran($save_attemp_job->id,$job->pembuat, session('account')['id'])) {
+                            if ((new ChatController())->update_lamaran($save_attemp_job->id, $job->pembuat, session('account')['id'])) {
                                 return response()->json([
                                     'success' => true,
                                     'message' => $req->data
@@ -152,9 +152,10 @@ class PelamarController extends Controller
             $find->jadwal_interview = $request->tanggal_interview;
             $find->link_Interview = $request->link_interview;
             $find->status = 'interview';
+            $this->tolak_selain($find->user_id, $find->id, $find->job_id);
             // dd($find);;
             if ($find->save()) {
-                (new ChatController())->update_lamaran($find->id,session('account')['id'],$find->user_id);
+                (new ChatController())->update_lamaran($find->id, session('account')['id'], $find->user_id);
                 $user = Users::where('id', $find->user_id)->first();
                 $Pekerjaan = Pekerjaan::where('id', $find->job_id)->first();
                 $email = ($user->email);
@@ -176,13 +177,36 @@ class PelamarController extends Controller
             $find->link_Interview = null;
             $find->status = $request->status;
             if ($find->save()) {
-                (new ChatController())->update_lamaran($find->id,session('account')['id'],$find->user_id);
+                (new ChatController())->update_lamaran($find->id, session('account')['id'], $find->user_id);
 
                 $user = Users::where('id', $find->user_id)->first();
                 $Pekerjaan = Pekerjaan::where('id', $find->job_id)->first();
                 $email = ($user->email);
                 Mail::to($email)->send(new Notify_Applications([$find, $user, $Pekerjaan, session('account')], 'Menunggu Pekerjaan'));
                 return redirect('/daftar-Pelamar/all')->with('success', ['Berhasil!', 'User Sudah Menerima Informasi Ini Lewat Email Mereka']);
+            } else {
+                return redirect()->back()->with('fail', ['Gagal!', 'Ada yang salah, coba beberapa saat lagi!']);
+            }
+        }
+    }
+
+
+    public function delete($id_lamaran)
+    {
+        // dd($request->idLamaran);
+        $find = Pelamar::findOrFail($id_lamaran);
+        // dd($find);
+        if ($find) {
+            $find->jadwal_interview = null;
+            $find->link_Interview = null;
+            $find->is_delete = true;
+            if ($find->save()) {
+                (new ChatController())->delete_lamaran($find->id, session('account')['id'], $find->user_id);
+                $user = Users::where('id', $find->user_id)->first();
+                $Pekerjaan = Pekerjaan::where('id', $find->job_id)->first();
+                $email = ($user->email);
+                Mail::to($email)->send(new Notify_Applications([$find, $user, $Pekerjaan, session('account')], 'Menunggu Pekerjaan'));
+                return redirect('/daftar-Pelamar/all')->with('success', ['Berhasil!', 'Lamaran Berhasil DIhapus']);
             } else {
                 return redirect()->back()->with('fail', ['Gagal!', 'Ada yang salah, coba beberapa saat lagi!']);
             }
@@ -200,7 +224,7 @@ class PelamarController extends Controller
             $find->status = $request->status;
             $find->alasan = $request->alasan;
             if ($find->save()) {
-                (new ChatController())->update_lamaran($find->id,session('account')['id'],$find->user_id);
+                (new ChatController())->update_lamaran($find->id, session('account')['id'], $find->user_id);
 
                 $user = Users::where('id', $find->user_id)->first();
                 $Pekerjaan = Pekerjaan::where('id', $find->job_id)->first();
@@ -213,6 +237,26 @@ class PelamarController extends Controller
                 return redirect('/daftar-Pelamar/all')->with('success', ['Sedih Mendengarnya!', 'User Sudah Menerima Informasi Ini Lewat Email Mereka']);
             } else {
                 return redirect()->back()->with('fail', ['Gagal!', 'Ada yang salah, coba beberapa saat lagi!']);
+            }
+        }
+    }
+
+    public function tolak_selain($id_pelamar, $lamaran_diterima, $id_pekerjaan)
+    {
+
+        $all = Pelamar::join('pekerjaans', 'pelamars.job_id', '=', 'pekerjaans.id')
+            ->where('pelamars.user_id', $id_pelamar)
+            ->where('pekerjaans.pembuat', session('account')['id'])
+            ->select('*', 'pelamars.id as id_lamaran')
+            ->get();
+
+        foreach ($all as $lamaran) {
+            if ($lamaran->id_lamaran != $lamaran_diterima) {
+                $the_lamaran = Pelamar::where('id', $lamaran->id_lamaran)->first();
+                $the_lamaran->status = 'ditolak';
+                $the_lamaran->alasan = 'sudah ada lamaran lain yang lanjut interview';
+                $the_lamaran->save();
+                (new ChatController())->update_lamaran($lamaran->id_lamaran, session('account')['id'], $lamaran->user_id);
             }
         }
     }

@@ -17,8 +17,8 @@
             <div class="col-lg-6">
                 <h1 class="container m-md-flex hero-heading mb-3">Temukan pekerjaan yang kamu inginkan!</h1>
                 <div class="container-button d-grid gap-5  d-md-flex justify-content-md-start">
-                        <button type="submit" onclick="click_Button('/cari')" class="btn btn-warning">Cari Pekerjaan</button>
-                        <button type="submit" class="btn btn-warning">Lokasi Anda</button>
+                        <button type="submit" onclick="click_Button('/kerja/')" class="btn btn-warning">Cari Pekerjaan</button>
+                        <!-- <button type="submit" class="btn btn-warning">Lokasi Anda</button> -->
                 </div>
             </div>
         </div>
@@ -41,7 +41,7 @@
                         <tr>
                             <td>{{ $job->nama }}</td>
                             <td>{{ $job->alamat }}</td>
-                            <td><a href=""
+                            <td><a href="/Pekerjaan/{{{$job->id}}}"
                                     class="btn btn-sm btn-dark">SHOW</a></td>
                         </tr>
                     @empty

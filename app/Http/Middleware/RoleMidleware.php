@@ -19,6 +19,7 @@ class RoleMidleware
         $roles = explode("|", $statuses[0]);
         // dd($roles);
         $user = $request->user();
+        // dd($request->user(),$roles,!$user,!in_array($request->user()->role, $roles),session('account')['role']!='admin' && (!in_array($request->path(), ['user/preferensi/save', 'question-new-user'])));
         if (!$user) {
             return redirect('/Login')->with('fail', ['Akses Ditolak', 'Anda Belum Login, Silahkan login terlebih dahulu!']);
             // abort(403, 'Anda belum login.');

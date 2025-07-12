@@ -49,7 +49,7 @@ class HomeController extends Controller
         // return view('pekerjaan.list', compact('sidejob'));
         if (session()->has('account')) {
             // dd(session('account')->preferensi_user);
-            if (session('account')->preferensi_user == null) {
+            if (session('account')->preferensi_user == null && session('account')['role']!='admin') {
                 return redirect('/question-new-user')->with('success', ['Isi Data Terlebih Dahulu', 'Izin Mengganggu waktunya sebentar']);
             }
             else{
@@ -76,7 +76,7 @@ class HomeController extends Controller
             $nama_halaman = 'Register';
             return view('Dewa.non_auth.register', compact('active_navbar', 'nama_halaman'));
         } else {
-            return redirect('/Index')->with('success', ['Anda Sedang Login', 'Logout terlebih dahulu']);
+            return redirect('/Index')->with('fail', ['Anda Sedang Login', 'Logout terlebih dahulu']);
         }
     }
     public function Login()

@@ -10,6 +10,7 @@ use App\Http\Controllers\SideJobController;
 use App\Http\Controllers\TransaksiController;
 use App\Http\Controllers\ManagementPageController;
 use App\Http\Controllers\TopUpController;
+use App\Models\Pelamar;
 use App\Models\Users;
 use Illuminate\Support\Facades\Auth;
 
@@ -40,7 +41,6 @@ Route::post('/reset-new-password', action: [UsersController::class, 'reset_passw
 
 Route::get('/Register', [HomeController::class, 'Register']);
 Route::get('/Logout', [UsersController::class, 'logout']);
-Route::get('/chat/{id_target}', [ChatController::class, 'index']);
 Route::get('/Pekerjaan/{id}', [PekerjaanController::class, 'view_pekerjaan']);
 
 Route::get('/NotAllowed', function () {
@@ -54,14 +54,14 @@ Route::get('/NotAllowed', function () {
 Route::post('/Login_account', [UsersController::class, 'Login_Account']);
 Route::post('/Register_account', action: [UsersController::class, 'create']);
 Route::get('/kerja/', action: [PekerjaanController::class, 'index']);
-Route::get('/daftar-lamaran/', action: [PekerjaanController::class, 'Daftar_Lamaran']);
-Route::get('/daftar-Pekerjaan/', action: [PekerjaanController::class, 'Daftar_Pekerjaan']);
-Route::get('/daftar-Pelamar/{id}', action: [PekerjaanController::class, 'Daftar_Pelamar']);
-Route::get('/Pelamar/Profile/{idPelamar}', [PelamarController::class, 'Profile_Pelamar']);
 
 
+Route::middleware(['role:user|mitra|admin'])->group(function () {
+    Route::get('/chat/{id_target}', [ChatController::class, 'index']);
+
+});
 Route::middleware(['role:user|mitra'])->group(function () {
-
+    Route::get('/daftar-lamaran/', action: [PekerjaanController::class, 'Daftar_Lamaran']);
     Route::post('/user/preferensi/save', action: [UsersController::class, 'save_preverensi']);
     Route::post('/kerja/add', action: [PekerjaanController::class, 'store']);
     Route::post('/kerja/add', action: [PekerjaanController::class, 'store']);
@@ -69,12 +69,12 @@ Route::middleware(['role:user|mitra'])->group(function () {
     Route::get('/transaksi', [TransaksiController::class, 'index'])->name('user.transaksi');
     Route::post('/Lamar/{idPekerjaan}', action: [PelamarController::class, 'store']);
     Route::get('/Chat/Kerja/{idPekerjaan}', action: [ChatController::class, 'Lamaran']);
-    Route::get('/Chat/{id_target}', action: [ChatController::class, 'index']);
+
+    // Route::get('/Chat/{id_target}', action: [ChatController::class, 'index']);
     Route::post('/make_chat', action: [ChatController::class, 'store']);
 
     //Kerja
     Route::get('/question-new-user', action: [HomeController::class, 'new_user']);
-    Route::get('/kerja/create', action: [PekerjaanController::class, 'create']);
 
     //NewUser
 
@@ -83,10 +83,17 @@ Route::middleware(['role:user|mitra'])->group(function () {
     Route::get('/profile/{id}', [UsersController::class, 'show'])->name('user.profile');
 
     Route::middleware(['role:mitra'])->group(function () {
+        Route::get('/kerja/create', action: [PekerjaanController::class, 'create']);
+        Route::post('/lamaran/delete/{id_lamaran}', action: [PelamarController::class, 'delete']);
+        Route::get('/daftar-Pekerjaan/', action: [PekerjaanController::class, 'Daftar_Pekerjaan']);
+
+        Route::get('/daftar-Pelamar/{id}', action: [PekerjaanController::class, 'Daftar_Pelamar']);
+        Route::get('/Pelamar/Profile/{idPelamar}', [PelamarController::class, 'Profile_Pelamar']);
+
         Route::post('/pelamar/tolak', action: [PelamarController::class, 'tolak']);
         Route::post('/pelamar/terima', action: [PelamarController::class, 'terima']);
         Route::post('/pelamar/interview', action: [PelamarController::class, 'interview_pelamar']);
-        
+
 
         Route::prefix('management')->name('manajemen.')->group(function () {
             Route::get('/', [ManagementPageController::class, 'dashboard'])->name('dashboard');
@@ -156,8 +163,6 @@ Route::middleware(['role:user|mitra'])->group(function () {
             // Route::patch('/users/{user}/deactivate', [ManagementPageController::class, 'usersDeactivateAdmin'])->name('users.deactivate');
             // });
         });
-
-
     });
 });
 

@@ -56,7 +56,7 @@
                 <div class="d-flex flex-row gap-2">
                     <div class="d-flex d-md-none">
                         <button type="button" class="btn bg-transparent" data-bs-toggle="offcanvas"
-                            data-bs-target="#staticBackdropChat" onclick="window.location.href='/chats'"
+                            data-bs-target="#staticBackdropChat" onclick="window.location.href='/chat/all'"
                             aria-controls="staticBackdropChat">
                             <i class="bi bi-chat-right-text-fill text-white"></i>
                         </button>
@@ -118,7 +118,7 @@
                             <button type="button" class="btn bg-transparent" data-bs-toggle="offcanvas"
                                 data-bs-target="#staticBackdropChat" aria-controls="staticBackdropChat">
                                 <i class="bi bi-chat-left-text-fill text-white"
-                                    onclick="window.location.href='/chats'"></i>
+                                    onclick="window.location.href='/chat/all'"></i>
                             </button>
                         </div>
 

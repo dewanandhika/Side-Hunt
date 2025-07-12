@@ -17,7 +17,15 @@ class PekerjaanFactory extends Factory
     public function definition(): array
     {
         return [
-            //
+            "kriteria" => "",
+            'latitude' => $this->faker->latitude(-7.35, -7.15),      // kisaran Surabaya
+            'longitude' => $this->faker->longitude(112.60, 112.90),  // kisaran Surabaya
+            'koordinat' => function (array $attributes) {
+                return $attributes['latitude'] . ',' . $attributes['longitude'];
+            },
+            "start_job" => now()->addDays(7)->toDateTimeString(),
+            "end_job" => now()->addDays(fake()->numberBetween(5, 15))->toDateTimeString(),
+            "deadline_job" => now()->addDays(3)->toDateTimeString(),
         ];
     }
 }

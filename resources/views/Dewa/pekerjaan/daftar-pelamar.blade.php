@@ -86,14 +86,27 @@
     .fs-12 {
         font-size: 12px !important;
     }
+
+    .setengahFull {
+        width: fit-content;
+    }
+
+    @media (max-width: 768px) {
+        .setengahFull {
+            width: 100% !important;
+        }
+    }
 </style>
 @endsection
 @section('add-onn')
+<form id="formDelete" action="/lamaran/delete/" method="POST" style="display:none;">
+    @csrf
+</form>
 <form action="" class="form_picked d-flex" method="post">
     @csrf
-    <input type="text" name="idLamaran" class="idLamaran" id="">
-    <input type="text" name="status" id="" class="status">
-    <input type="text" name="alasan" id="" class="alasan">
+    <input type="text" name="idLamaran" class="idLamaran d-none" id="">
+    <input type="text" name="status" id="" class="status d-none">
+    <input type="text" name="alasan" id="" class="alasan d-none">
 </form>
 <div class="offcanvas to_reject offcanvas-start" data-bs-backdrop="static" tabindex="-1" id="form_Reject"
     aria-labelledby="staticBackdropLabel">
@@ -110,8 +123,7 @@
                     Alasan Tidak Lolos <span class="text-danger">*</span>
                 </label>
                 <input type="text" class="form-control" oninput="fill_alasan(this)" id="alasan" name="alasan"
-                    placeholder="Tuliskan alasan penolakan" value="{{ old('alasan') }}"
-                    required>
+                    placeholder="Tuliskan alasan penolakan" value="{{ old('alasan') }}" required>
                 <div class="invalid-feedback">
                     Alasan penolakan wajib diisi.
                 </div>
@@ -186,15 +198,25 @@
     <div class="table-bg">
         <div
             class="d-flex justify-content-md-between justify-content-start  flex-column-reverse flex-md-row gap-2 align-items-md-center align-items-start mb-4">
-            <div class="col-3 justify-content-start align-items-start">
+            <div class="col-3 justify-content-start align-items-start setengahFull">
                 <select class="form-select" onclick="set_to_status(this)">
-                    <option>Status</option>
-                    <option>Active</option>
-                    <option>Finished</option>
-                    <option>Delayed</option>
+                    <option value="all" selected>Semua</option>
+                    <option value="tunda">Lamaran Masuk</option>
+                    <option value="interview">Dalam Interview</option>
+                    <option value="Menunggu Pekerjaan">Menunggu Bekerja</option>
+                    <option value="Sedang Bekerja">Sedang Bekerja</option>
+                    <option value="Menuggu Pembayaran">Menuggu Pembayaran</option>
+                    <option value="selesai">Lamaran Selesai</option>
+                    <option value="ditolak">Lamaran Ditolak</option>
+                    <option value="Gagal">Lamaran Gagal</option>
                 </select>
             </div>
-            <h3 class="text-center w-100 flex-grow-1 mb-0 fw-bold" style="color: #2c2c2c;">Daftar Pelamar (Semua)</h3>
+            <div class="text-center flex-column justify-content-center align-items-center w-100 flex-grow-1 mb-0 fw-bold"
+                style="color: #2c2c2c;">
+                <h3>Daftar Pelamar</h3>
+                <h3>{{{$direction=='all'?'Semua Pekerjaan Yang Terdaftar':$pekerjaan->nama}}}</h3>
+
+            </div>
             <div class="col-3"></div>
         </div>
         <div class="table-responsive" style="min-height: 45vh;">
@@ -215,7 +237,8 @@
                 <tbody>
                     @if(!count($pelamars)==0)
                     @foreach($pelamars as $pelamar)
-                    <tr class="@if(in_array($pelamar->status_job, ['ditolak','Gagal'])) opacity-50 @endif">
+                    <tr class="the_job @if(in_array($pelamar->status_job, ['ditolak','Gagal'])) opacity-50 @endif"
+                        data-status="{{{$pelamar->status_job}}}">
                         <td class="fs-12">{{{$pelamar->daftar}}}</td>
                         <td onclick="window.location.href='/Pelamar/Profile/{{{$pelamar->id}}}'">
                             {{{$pelamar->nama}}}
@@ -262,16 +285,16 @@
                                 <button class="btn btn-danger rounded-5"
                                     onclick="interview_gagal('{{{$pelamar->id_pelamars}}}', alasan)">Gagal</button>
                                 @elseif($pelamar->status_job=='ditolak')
-                                <button class="btn btn-disabled">Ditolak (alasan)</button>
+                                <button class="btn btn-disabled">Ditolak {{{$pelamar->alasan==null?'':'('.$pelamar->alasan.')'}}}</button>
                                 @elseif($pelamar->status_job=='Gagal')
-                                <button class="btn btn-disabled">Tidak Lolos Interview (alasan)</button>
+                                <button class="btn btn-disabled">Tidak Lolos Interview {{{$pelamar->alasan==null?'':'('.$pelamar->alasan.')'}}}</button>
 
                                 @else
                                 <button class="btn btn-disabled">Diterima: {{{$pelamar->status_job}}}</button>
                                 @endif
 
                                 @if(in_array($pelamar->status_job, ['tunda', 'interview','ditolak','Gagal']))
-                                <button class="btn btn-toolbar">
+                                <button class="btn btn-toolbar" onclick="delete_lamaran('{{{$pelamar->id_pelamars}}}')">
                                     <i class="bi bi-trash text-black"></i>
                                 </button>
                                 @endif
@@ -290,6 +313,7 @@
             </div>
             @endif
         </div>
+
         <!-- Pagination -->
         <!-- <div class="d-flex justify-content-center mt-4">
             <nav>
@@ -314,9 +338,36 @@
 
 @section('script')
 <script>
-    @if ($errors -> any())
+    @if ($errors->any())
         show_form_interview()
     @endif
+
+    function delete_lamaran(id_lamaran){
+        let form = document.querySelector('#formDelete')
+        form.setAttribute('action', `/lamaran/delete/${id_lamaran}`);
+        form.submit()
+    }
+
+    function set_to_status(elemen) {
+        let value = elemen.value;
+        let all_the_jobs = document.querySelectorAll('.the_job')
+        all_the_jobs.forEach(job => {
+            if (value == 'all') {
+                job.style.display = "";
+            }
+            else {
+                // job.style.display="none";
+                if (job.getAttribute('data-status') == value) {
+                    job.style.display = "";
+                }
+                else {
+                    job.style.display = "none";
+                }
+            }
+            // console.log('out: ',job.getAttribute('data-status'))
+
+        })
+    }
 
     function show_form_interview() {
         var offcanvasElement = document.getElementById('formBackdrop');
@@ -344,7 +395,7 @@
         form.querySelector('.idLamaran').value = idLamaran
         form.querySelector('.status').value = status
         form.querySelector('.alasan').value = alasan
-        if (status != 'ditolak'||status !='Gagal') {
+        if (status != 'ditolak' || status != 'Gagal') {
             form.submit();
         }
         else {
@@ -354,10 +405,10 @@
         }
     }
 
-    function fill_alasan(elemen){
+    function fill_alasan(elemen) {
         document.querySelector('.form_picked .alasan').value = elemen.value;
     }
-    function submit_form(){
+    function submit_form() {
         document.querySelector('.form_picked').submit();
     }
 </script>

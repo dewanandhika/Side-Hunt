@@ -8,7 +8,7 @@ use App\Models\Pekerjaan;
 use App\Models\Pelamar;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
-
+use Illuminate\Support\Facades\Redirect;
 
 class PekerjaanController extends Controller
 {
@@ -36,15 +36,23 @@ class PekerjaanController extends Controller
     }
     public function Daftar_Pelamar($id)
     {
-        // $id = 50;
+        $pekerjaan =Pekerjaan::where('id', $id)
+        ->where('pembuat', session('account')['id'])
+        ->first();
+        $back = null;
+        if($id!='all'&&$pekerjaan==null){
+            return Redirect()->back()->with('fail',['Akses Ditolak','Pekerjaan Ini tidak termasuk Milik Anda!']);
+        }
         $active_navbar = 'Pekerjaan';
         $nama_halaman = 'Daftar Pelamar Pekerjaan';
         $pelamars = Pekerjaan::join('pelamars', 'pekerjaans.id', '=', 'pelamars.job_id')
             ->join('users', 'pelamars.user_id', '=', 'users.id')
-            ->where('pekerjaans.pembuat', session('account')['id']);
+            ->where('pekerjaans.pembuat', session('account')['id'])
+            ->where('pelamars.is_delete', false);
         if ($id != 'all') {
             $pelamars->where('pelamars.job_id', $id);
         }
+
         $pelamars = $pelamars->select(
             'pekerjaans.*',
             'pelamars.created_at as daftar',
@@ -55,6 +63,7 @@ class PekerjaanController extends Controller
             'pelamars.user_id as id_pelamar',
             'pelamars.link_Interview as link',
             'pelamars.jadwal_interview as jadwal',
+            'pelamars.alasan as alasan',
         )->get();
 
         foreach($pelamars as $pelamar){
@@ -71,10 +80,13 @@ class PekerjaanController extends Controller
             }
             $pelamar->preferensi_user=(implode(", ", $skills));;
         }
+
+        $direction = $id;
         // dd($pelamars);
+        // dd($pekerjaan);
+        // dd($back);
+            return view('Dewa.pekerjaan.daftar-pelamar', compact("active_navbar", 'nama_halaman', 'pelamars','pekerjaan','direction'));
 
-
-        return view('Dewa.pekerjaan.daftar-pelamar', compact("active_navbar", 'nama_halaman', 'pelamars'));
     }
 
     public function view_pekerjaan($id)

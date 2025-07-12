@@ -24,6 +24,18 @@ class ChatController extends Controller
         return $chat->save();
     }
 
+    public function delete_lamaran($idLamaran, $sender, $receiver)
+    {
+        $Lamaran = Pelamar::where('id', $idLamaran)->first();
+        $job = Pekerjaan::where('id', $Lamaran->job_id)->first();
+        $chat = new chat();
+        $chat->sender = $sender;
+        $chat->receiver = $receiver;
+        $chat->pekerjaan_id = $job->id;
+        $chat->Lamaran_status = 'Lamaran Dihapus';
+        return $chat->save();
+    }
+
 
 
 
@@ -58,44 +70,44 @@ class ChatController extends Controller
                             ->orWhere('sender', $session_account_id);
                     })
             );
-        $results =  DB::table(DB::raw('(SELECT *, 
-                ROW_NUMBER() OVER (PARTITION BY counterpart_id ORDER BY created_at DESC) AS rn
-                FROM (
-                    SELECT 
-                        CASE 
-                            WHEN sender = 4 THEN receiver
-                            ELSE sender
-                        END AS counterpart_id,
-                        chats.*
-                    FROM chats
-                    WHERE sender = ' . $session_account_id . ' OR receiver = ' . $session_account_id . '
-                ) AS combined_chats
-            ) AS ranked_chats'))
-            ->leftJoin('users', 'ranked_chats.counterpart_id', '=', 'users.id')
-            ->where('rn', 1)
-            ->select(
-                'ranked_chats.*',
-                'users.id AS id_from_user',
-                'users.nama AS nama_user',
-                'users.avatar_url AS avatar_url',
-            )
-            ->get();
-            
+        $results =  "
+            SELECT
+                t.counterpart_id,
+                c.*,
+                d.*,
+                d.nama as nama_user
+            FROM (
+                SELECT
+                    CASE
+                        WHEN sender = ? THEN receiver
+                        ELSE sender
+                    END AS counterpart_id,
+                    MAX(id) AS last_chat_id
+                FROM chats
+                WHERE sender = ? OR receiver = ?
+                GROUP BY counterpart_id
+            ) AS t
+            JOIN chats c ON c.id = t.last_chat_id
+            join users d on d.id=t.counterpart_id
+            ";
 
-            
-            // dd($results);
+        $chats = DB::select($results, [$session_account_id, $session_account_id, $session_account_id]);
+
+
+
+        // dd($results);
 
         // Query utama: join subquery ke users
         $to_text = DB::query()
-                    ->fromSub($subQuery, 'a')
-                    ->join('users as b', 'a.user_id', '=', 'b.id')
-                    ->select('a.*', 'b.*')
-                    ->get();
-                // dd($to_text);
-                // dd(session('account')['id']);
+            ->fromSub($subQuery, 'a')
+            ->join('users as b', 'a.user_id', '=', 'b.id')
+            ->select('a.*', 'b.*')
+            ->get();
+        // dd($to_text);
+        // dd(session('account')['id']);
 
-                $all_chats = DB::table('chats as c')
-                    ->selectRaw('
+        $all_chats = DB::table('chats as c')
+            ->selectRaw('
                 c.id AS id_chat,
                 c.*,
                 a.*,
@@ -114,13 +126,22 @@ class ChatController extends Controller
                 });
             })
             ->get();
+        $active = DB::table('pelamars as a')
+            ->join('pekerjaans as b', 'a.job_id', '=', 'b.id')
+            ->select('a.*', 'b.pembuat')
+            ->where('a.user_id', $id_target)
+            ->where('b.pembuat', $session_account_id)
+            ->whereNotIn('a.status', ['ditolak', 'Gagal', 'Lamaran Dihapus', 'Selesai'])
+            ->whereNot('is_delete',true)
+            ->get();
         $target = $id_target;
-        $all = $results;
+        $all = $chats;
+        // dd($active);
         // dd('id gw: '.session('account')['id'],'id lawan: '.$id_target,$all_chats);
         // dd($all);
 
 
-        return view('Dewa.need_auth.chat', compact('to_text', 'all_chats', 'target', 'all','user'));
+        return view('Dewa.need_auth.chat', compact('to_text', 'all_chats', 'target', 'all', 'user', 'active'));
     }
 
     public function store(Request $request)

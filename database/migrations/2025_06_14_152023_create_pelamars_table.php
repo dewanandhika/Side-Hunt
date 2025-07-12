@@ -21,6 +21,7 @@ return new class extends Migration
             $table->integer('gaji_deals')->nullable();
             $table->enum('status', ['tunda', 'interview', 'ditolak','Menunggu Pekerjaan','Sedang Bekerja','Menuggu Pembayaran','Gagal','selesai'])->default('tunda');
             $table->enum('Tipe_Group', ['Sendiri', 'Team'])->default('Sendiri');
+            $table->boolean('is_delete')->default(false);
             $table->json('Data_Team')->nullable();
             $table->timestamps();
             $table->foreign('user_id')->references('id')->on('users')->onDelete('cascade');

@@ -36,7 +36,7 @@
 @endsection
 
 @section('content')
-<div class="container w-100 h-auto gap-5 d-flex my-5 flex-column justify-content-center align-items-center">
+<div class="container w-100 h-auto gap-3 d-flex my-5 flex-column justify-content-center align-items-center">
     <div class="w-100 d-flex mt-5 mb-2 flex-column justify-content-center align-items-center">
         <p class="fw-bolder" style="font-size: 30px;">Cari Pekerjaan</p>
         <div
@@ -47,44 +47,14 @@
                 maxlength="150" name="searchBox" oninput="SearchBox(this)" value="{{ old('nama') }}" placeholder="">
         </div>
     </div>
-    <div class="newest d-none w-100 d-flex mt-5 flex-column row">
-        Pekerjaan Terbaru Nih,
-        <div class="w-100 justify-content-center align-items-center d-flex ">
-            <div class="row g-3 border-3 border-black shadow mt-0 rounded-4 p-3 pt-0 row d-flex flex-wrap justify-content-start justify-content-md-between align-items-start"
-                style="min-height: 43vh; width: fit-content; max-width: fit-content; min-width: 100%;">
-                @for($i=5;$i>1;$i--)
-                <div class="col-12 col-md-6 col-lg-3">
-                    <a href="/Pekerjaan/{id}"
-                        class=" w-100 h-100 job text-decoration-none d-flex flex-row p-0 gap-0 rounded-2 align-items-center justify-content-between"
-                        style="">
-                        <div class="rounded-start-2 justify-content-start align-items-center"
-                            style="width: 40%; min-width: 40%; height: 100%;">
-                            <img class="rounded-start-2"
-                                src="{{ auto_asset('Dewa/img/f4030acf172260f3241cad5f4527a7d8.jpg') }}"
-                                style="width: 100%; height: 100%;  object-fit: cover;" alt="">
-                        </div>
-                        <div class="d-flex flex-column justify-content-center text-truncate align-items-start gap-0 flex-grow-1 h-100 p-2"
-                            style=" max-width: 100%;">
-                            <p class="clear-p fw-bolder text-truncate w-100" style="font-size: 12px; color: #2E2D2C;">
-                                Potong
-                                Rumput ksdaksjdkjasbdkjasbdkmasbndmanb</p>
-                            <p class="clear-p  opacity-50" style="font-size: 10px; color: #2E2D2C;">5 Jam yang lalu</p>
-                            <p class="clear-p opacity-50" style="font-size: 10px; color: #2E2D2C;"></p>
-                        </div>
-                    </a>
-                </div>
-                @endfor
-            </div>
-        </div>
-    </div>
     @if(session('account'))
 
-    <div class="result Newest w-100 mt-5 flex-column row" id="Rekomendation" style="display: flex;">
+    <div class="result Newest w-100 mt-5 mb-3 flex-column row" id="Rekomendation" style="display: flex;">
         @if(count($match)!=0)
         Pekerjaan Disarankan,
-        <div class="w-100 justify-content-center align-items-center d-flex ">
+        <div class="w-100 justify-content-center align-items-center d-flex shadow rounded-2">
             <div class="g-3 border-3 border-black mt-0 rounded-4 p-3 pt-0 row d-flex gy-4 flex-wrap justify-content-start flex-grow-1 align-items-start"
-                style="min-height: 43vh; width: fit-content; max-width: fit-content; min-width: 100%;">
+                style="min-height: 20vh; max-height: fit-content; width: fit-content; max-width: fit-content; min-width: 100%;">
                 @foreach($match as $key => $value)
                 <div class="col-12 col-md-6 col-lg-3">
                     <a href="/Pekerjaan/{{{$key}}}"
@@ -112,43 +82,11 @@
             </div>
         </div>
         @else
-        <h5>
-            Berdasarkan data yang kamu isi di preferensi user, Belum ada Pekerjaan yang cocok untukmu
-        </h5>
-        <p>tapi jangan sedih berikut pekerjaan yang sedang diminati oleh kebanyakan user</p>
-
-        <div class="w-100 justify-content-center align-items-center d-flex ">
-            <div class="g-3 border-3 border-black mt-0 rounded-4 p-3 pt-0 row d-flex gy-4 flex-wrap justify-content-start flex-grow-1 align-items-start"
-                style="min-height: 43vh; width: fit-content; max-width: fit-content; min-width: 100%;">
-                @foreach($match as $key => $value)
-                <div class="col-12 col-md-6 col-lg-3">
-                    <a href="{{{$key}}}"
-                        class=" w-100 h-100 job text-decoration-none d-flex flex-row p-0 gap-0 rounded-2 align-items-center justify-content-between"
-                        style="">
-                        <div class="rounded-start-2 justify-content-start align-items-center"
-                            style="width: 40%; min-width: 40%; height: 100%;">
-                            <img class="rounded-start-2"
-                                src="{{ auto_asset('Dewa/img/f4030acf172260f3241cad5f4527a7d8.jpg') }}"
-                                style="width: 100%; height: 100%;  object-fit: cover;" alt="">
-                        </div>
-                        <div class="d-flex flex-column justify-content-center text-truncate align-items-start gap-0 flex-grow-1 h-100 p-2"
-                            style=" max-width: 100%;">
-                            <p class="clear-p fw-bolder text-truncate w-100" style="font-size: 12px; color: #2E2D2C;">
-                                {{{$all[$key-1]['nama']}}}</p>
-                            <p class="clear-p  opacity-50" style="font-size: 10px; color: #2E2D2C;">5 Jam yang lalu</p>
-                            @if(session)
-                            <p class="clear-p opacity-50" style="font-size: 10px; color: #2E2D2C;">
-                                {{{hitungJarak($all[$key-1]['longitude'], $all[$key-1]['langitude'],
-                                session('account')['longitude'], session('account')['langitude'])}}}</p>
-
-                            @else
-                            <p class="clear-p  opacity-50" style="font-size: 10px; color: #2E2D2C;">Jarak</p>
-                            @endif
-                        </div>
-                    </a>
-                </div>
-                @endforeach
-            </div>
+        <div class="d-flex justify-content-center align-items-center w-100 flex-column">
+            <h5>
+                Berdasarkan data yang kamu isi di preferensi user, Belum ada Pekerjaan yang cocok untukmu
+            </h5>
+            <p>tapi jangan sedih masih banyak pekerjaan lain yang mungkin dapat kamu telusuri</p>
         </div>
         @endif
     </div>
@@ -156,8 +94,8 @@
 
     <div class="result d-flex w-100 d-flex mt-0 flex-column row">
         Semua Pekerjaan,
-        <div class="w-100 p-3 mt-2 border-3 border-black shadow rounded-3">
-            <div class="card bg-transparent border-0 mb-0">
+        <div class="w-100 p-0 mt-2 border-3 border-black shadow rounded-3">
+            <!-- <div class="card bg-transparent border-0 mb-0">
                 <div class="card-body">
                     <div class="row g-3 align-items-end">
                         <div class="col-md-2">
@@ -178,7 +116,7 @@
                         </div>
                     </div>
                 </div>
-            </div>
+            </div> -->
 
             <div class="w-100 justify-content-center align-items-center d-flex ">
                 <div class="g-3 border-3 border-black mt-0 rounded-4 p-3 pt-0 row d-flex gy-4 flex-wrap justify-content-start flex-grow-1 align-items-start"

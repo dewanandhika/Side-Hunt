@@ -587,6 +587,7 @@ $imageExtensions = ['jpg', 'jpeg', 'png', 'gif', 'bmp', 'webp', 'svg'];
                 <input type="text" class="form-control" placeholder="Cari orang...">
             </div>
             <div class="sidebar-people">
+                @if(count($all)>0)
                 @forEach($all as $person)
                 @if($person->counterpart_id!=session('account')->id)
                 <div class="person" onclick="window.location.href='/chat/{{{$person->counterpart_id}}}'">
@@ -620,6 +621,13 @@ $imageExtensions = ['jpg', 'jpeg', 'png', 'gif', 'bmp', 'webp', 'svg'];
                 @else
                 @endif
                 @endforeach
+                @else
+                <div class="no chat w-100 h-100 d-flex justify-content-center align-content-center">
+                <div class="d-flex align-items-center gap-2 mb-2">
+                    <span class="badge bg-primary">Belum ada history chat</span>
+                </div>
+            </div>
+                @endif
             </div>
         </div>
         <div class="sidebar-backdrop"></div>
@@ -671,27 +679,42 @@ $imageExtensions = ['jpg', 'jpeg', 'png', 'gif', 'bmp', 'webp', 'svg'];
                 @if($chat->Lamaran_status!=null)
                 <div class="alert {{{$chat->Lamaran_status == 'Gagal'?'alert-dark':'alert-info'}}} d-flex flex-column justify-content-center align-items-center mb-3 rounded-3 border-0 py-2"
                     role="alert" style="background-color: #e7f3fe;">
-                    @if($chat->Lamaran_status == 'Gagal')
-                    <span class="fw-semibold text-primary small">Chat Berakhir</span>
+                    @if($chat->Lamaran_status == 'Gagal'||$chat->Lamaran_status == 'Gagal'||$chat->Lamaran_status ==
+                    'ditolak'||$chat->Lamaran_status =='Lamaran Dihapus')
+                    <span class="fw-semibold text-dark opacity-50 small">Chat Berakhir</span>
+                    @else
+                    @if($chat->Lamaran_status == 'Gagal'||$chat->Lamaran_status == 'ditolak'||$chat->Lamaran_status
+                    =='Lamaran Dihapus')
+                    <span class="fw-semibold text-dark opacity-50 small">Topik: </span>
                     @else
                     <span class="fw-semibold text-primary small">Topik: </span>
                     @endif
-                    <span class="fw-semibold text-primary small">
-                        {{{ $chat->nama }}}
-                        (
-                        {{{
-                        $chat->Lamaran_status == 'tunda' ? 'Lamaran Masuk' :
-                        ($chat->Lamaran_status == 'interview' ? 'Dalam masa Interview' :
-                        ($chat->Lamaran_status == 'Menunggu Pekerjaan' ? 'Menunggu Bekerja' :
-                        ($chat->Lamaran_status == 'Gagal' ? 'Lamaran Gagal' : $chat->Lamaran_status)))
+                    @endif
+                    @if($chat->Lamaran_status == 'Gagal'||$chat->Lamaran_status == 'ditolak'||$chat->Lamaran_status
+                    =='Lamaran Dihapus')
+                    <span class="fw-semibold text-dark opacity-50 small">
+                        @else
+                        <span class="fw-semibold text-primary small">
+                            @endif
+                            {{{ $chat->nama }}}
+                            (
+                            {{{
+                            $chat->Lamaran_status == 'tunda' ? 'Lamaran Masuk' :
+                            ($chat->Lamaran_status == 'interview' ? 'Dalam masa Interview' :
+                            ($chat->Lamaran_status == 'Menunggu Pekerjaan' ? 'Menunggu Bekerja' :
+                            ($chat->Lamaran_status == 'Gagal' ? 'Lamaran Gagal' : $chat->Lamaran_status)))
+                            }}}
+                            )
+                        </span>
 
-                        }}}
-                        )
-                    </span>
-
-                    <span>
-                        <p class="fw-semibold text-primary small">{{{$chat->sent}}}</p>
-                    </span>
+                        <span>
+                            @if($chat->Lamaran_status == 'Gagal'||$chat->Lamaran_status ==
+                            'Gagal'||$chat->Lamaran_status == 'ditolak'||$chat->Lamaran_status =='Lamaran Dihapus')
+                            <p class="fw-semibold text-dark opacity-50 small">{{{$chat->sent}}}</p>
+                            @else
+                            <p class="fw-semibold text-primary small">{{{$chat->sent}}}</p>
+                            @endif
+                        </span>
 
                 </div>
                 @else
@@ -767,8 +790,8 @@ $imageExtensions = ['jpg', 'jpeg', 'png', 'gif', 'bmp', 'webp', 'svg'];
                 @endif
                 @endforeach
             </div>
-
             <form class="chat-footer w-100 position-relative" id="chat-footer">
+                @if(count($active)!=0)
                 <div id="filePreviewArea" class="mb-2 d-none position-absolute" style="top: -70px;">
                     <div class="d-flex align-items-center gap-2 bg-light border rounded-3 px-3 py-2 position-relative"
                         style="max-width:360px;">
@@ -818,12 +841,20 @@ $imageExtensions = ['jpg', 'jpeg', 'png', 'gif', 'bmp', 'webp', 'svg'];
                         <!-- INPUT FILE -->
                     </div>
                 </div>
+                @else
+                <div class="w-100 d-flex justify-content-center align-items-center">
+                    <p>Anda tidak bisa berkomunikasi dengan user ini karena tidak ada lamaran atau pekerjaan yang sedang
+                        aktif </p>
+
+                </div>
+                @endif
             </form>
 
             @else
             <div class="no chat w-100 h-100 d-flex justify-content-center align-content-center">
                 <div class="d-flex align-items-center gap-2 mb-2">
-                    <span class="badge bg-warning text-black">Tidak ada lamaran yang aktif, jadi anda belum bisa berkomunikasi dengan user ini</span>
+                    <span class="badge bg-warning text-black">Tidak ada lamaran yang aktif, jadi anda belum bisa
+                        berkomunikasi dengan user ini</span>
                 </div>
             </div>
             @endif

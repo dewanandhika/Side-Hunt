@@ -20,6 +20,8 @@ return new class extends Migration
             $table->string('telpon')->unique()->nullable();
             $table->integer('dompet')->default('0');
             $table->boolean('isAdmin')->default('0');
+            $table->boolean('is_ban')->default(false);
+
             $table->string('VerificationCode')->nullable();
             $table->timestamp('email_verified_at')->nullable();
             $table->longText('preferensi_user')->nullable();

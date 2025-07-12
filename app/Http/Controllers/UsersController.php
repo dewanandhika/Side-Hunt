@@ -142,6 +142,12 @@ class UsersController extends Controller
         $credentials = $req->validate([
             'email' => 'required|email',
             'password' => 'required'
+        ],[
+
+            'email.required' => 'Email wajib diisi.',
+            'email.email' => 'Format email tidak valid.',
+
+            'password.required' => 'Password wajib diisi.',
         ]);
 
         $user = Users::where('email', $req->email)->first();
@@ -150,16 +156,21 @@ class UsersController extends Controller
         if ($user) {
             if ($user && Hash::check($req->password, $user->password)) {
                 if ($user->email_verified_at != null) {
-                    if (Auth::attempt($credentials)) {
-                        session(['account' => $user]);
-                        // dd(session('account'));
-
-                        // dd('masuk');
-                        if (session('account')->preferensi_user == null) {
-                            return redirect('/question-new-user')->with('success', ['Izin Mengganggu waktunya sebentar', 'Isi Data Terlebih Dahulu']);
-                        } else {
-                            return redirect('/Index')->with('success', ['Sukses', 'Login Berhasil']);
+                    if($user->is_ban!=true){
+                        if (Auth::attempt($credentials)) {
+                            session(['account' => $user]);
+                            // dd(session('account'));
+    
+                            // dd('masuk');
+                            if (session('account')->preferensi_user == null && session('account')['role']!='admin') {
+                                return redirect('/question-new-user')->with('success', ['Izin Mengganggu waktunya sebentar', 'Isi Data Terlebih Dahulu']);
+                            } else {
+                                return redirect('/Index')->with('success', ['Sukses', 'Login Berhasil']);
+                            }
                         }
+                    }
+                    else{
+                        return redirect()->back()->with('fail',['Login Gagal', 'Akun anda sedang ditangguhkan']);
                     }
                 } else {
                     return redirect('/Verify-Email')->with([

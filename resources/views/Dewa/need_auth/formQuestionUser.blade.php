@@ -83,6 +83,13 @@
         <form method="POST" action="/user/preferensi/save">
 
             @csrf
+            @php
+            $questions = [
+            
+
+            ];
+            @endphp
+
             <div class="form-group d-flex flex-column">
 
 
@@ -91,10 +98,29 @@
                     placeholder="Beri gambaran kepada kami anda orang yang seperti apa, bisa kebiasaan, pekerjaan, dan hal yang disukai"></textarea>
             </div>
 
-            <div class="form-group">
-                <div class="row justify-content-center w-100">
+            @foreach ($questions as $name => $q)
+            <div class="form-section">
+                <label for="{{ $name }}" class="form-label">{{ $q['label'] }}</label>
+                <select id="{{ $name }}" name="{{ $name }}"
+                    class="form-select shadow-sm @error($name) is-invalid @enderror" data-style="btn-outline-primary"
+                    data-width="100%">
+                    <option value="-" selected>Pilih jawaban...</option>
+                    @foreach ($q['options'] as $key => $desc)
+                    <option value="{{ $key.' '.$desc }}" {{old($name)==(string)$key?'selected':''}}>
+                        {{ $desc }}
+                    </option>
+                    @endforeach
+                </select>
+                @error($name)
+                <div class="invalid-feedback d-block">{{ $message }}</div>
+                @enderror
+            </div>
+            @endforeach
+
+            <div class="form-group mt-2">
+                <div class="justify-content-center w-100 m-0">
                     <div class="w-100 d-flex justify-content-center p-0 m-0 align-items-center">
-                        <div class="dropdown-container w-100" style="height: 60vh; min-height: 60vh; max-height: 60vh;">
+                        <div class="w-100" style="min-width: 100%; height: 60vh; min-height: 60vh; max-height: 60vh;">
                             <div class="dropdown-button noselect w-100 mb-2">
                                 <label class="form-label fw-semibold text-dark">Kriteria Pekerjaan (pilih minimal
                                     3)</label>

@@ -2,6 +2,8 @@
 
 namespace Database\Seeders;
 
+use App\Http\Controllers\ChatController;
+use App\Models\chat;
 use App\Models\excel;
 use App\Models\to_excel;
 use Illuminate\Support\Facades\Hash;
@@ -21,13 +23,24 @@ class DatabaseSeeder extends Seeder
      */
     public function run(): void
     {
+        $user = Users::factory()->count(40)->create(
+            ['role' => 'user']
+        );
+
+
+
+        // dd($user[0]);
+
+        $mitra = Users::factory()->count(10)->create(
+            ['role' => 'mitra']
+        );
         // $this->call([
         //     UserSeeder::class,
         //     SideJobSeeder::class,
         // ]);
 
         // Create admin user
-        Users::factory()->count(40)->create();
+        // Users::factory()->count(40)->create();
         Users::create([
             'nama' => 'admin',
             'email' => 'admin@example.com',
@@ -112,36 +125,66 @@ class DatabaseSeeder extends Seeder
             "membuat makanan fermentasi tradisional"
         ];
 
-        // foreach($hobi_offline as $i){
-        //     KriteriaJob::factory()->create([
-        //         'nama' => ucwords($i)
-        //     ]);
-        // }
-        $path = database_path('seeders/sql/dummy_Pekerjaans_2.sql');
+        $data_pekerjaan = json_decode(
+            file_get_contents(public_path('Dewa/json/data_pekerjaan.json')),
+            true
+        );
 
-        // Read the SQL content
-        $sqlContent = File::get($path);
+        // dd($data_pekerjaan);
 
-        // Replace invalid user IDs with valid ones (1-7)
-        // This ensures foreign key constraints are satisfied
-        $validUserIds = [1, 2, 3, 4, 5, 6, 7];
 
-        // Use regex to find and replace the pembuat column values
-        $sqlContent = preg_replace_callback('/(\', )(\d+)(, NOW\(\), NOW\(\)\))/', function ($matches) use ($validUserIds) {
-            $randomUserId = $validUserIds[array_rand($validUserIds)];
-            return $matches[1] . $randomUserId . $matches[3];
-        }, $sqlContent);
-
-        DB::unprepared($sqlContent);
-
-        $all_pekerjaan = Pekerjaan::all();
-        foreach ($all_pekerjaan as $pekerjaan) {
-            Pelamar::factory()->count(1)->create([
-                'job_id' => $pekerjaan['id']
+        foreach ($data_pekerjaan as $data) {
+            Pekerjaan::factory()->count(1)->create([
+                "nama" => $data['nama'],
+                "deskripsi" => $data['deskripsi'],
+                "alamat" => $data['alamat'],
+                "min_gaji" => $data['min_gaji'],
+                "max_gaji" => $data['max_gaji'],
+                "max_pekerja" => $data['max_pekerja'],
+                "jumlah_pelamar_diterima" => $data['jumlah_pelamar_diterima'],
+                "is_active" => $data['is_active'],
+                "petunjuk_alamat" => $data['petunjuk_alamat'],
+                "foto_job" => $data['foto_job'],
+                "pembuat" => $mitra[fake()->numberBetween(0, 9)]->id
             ]);
         }
 
-        excel::factory()->count(2500)->create();
+
+
+
+        $all_pekerjaan = Pekerjaan::all();
+        foreach ($all_pekerjaan as $pekerjaan) {
+            $users = collect(range(0, 39))->shuffle()->take(8)->all();
+            // dd($users);
+            // dd($pekerjaan);
+            foreach ($users as $s) {
+                // dd($user[$s]->id);
+                $pelamar = Pelamar::factory()->create([
+                    'job_id' => $pekerjaan['id'],
+                    'user_id' => $user[$s]->id,
+                    'status' => 'tunda'
+                ]);
+                (new ChatController())->update_lamaran($pelamar->id, $user[$s]->id, $pekerjaan['pembuat']);
+            }
+        }
+
+        $user = Users::factory()->count(1)->create(
+            [
+                'role' => 'user',
+                'email' => 'userban@gmail.com',
+                'is_ban' => true
+            
+            ]
+        );
+
+        $user = Users::factory()->count(1)->create(
+            [
+                'role' => 'user',
+                'email' => 'mitraban@gmail.com',
+                'is_ban' => false
+            
+            ]
+        );
     }
     public function is_own_id($id)
     {
