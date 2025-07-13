@@ -105,43 +105,90 @@ class ChatController extends Controller
             ->get();
         // dd($to_text);
         // dd(session('account')['id']);
-
-        $all_chats = DB::table('chats as c')
-            ->selectRaw('
+        $all_chats = null;
+        if (session('account')['role'] != 'admin') {
+            $all_chats = DB::table('chats as c')
+                ->selectRaw('
                 c.id AS id_chat,
                 c.*,
                 a.*,
                 d.contents AS content_references,
                 c.created_at AS sent
             ')
-            ->leftJoin('pekerjaans as a', 'a.id', '=', 'c.pekerjaan_id')
-            ->leftJoin('chats as d', 'd.chat_references', '=', 'c.id')
-            ->where(function ($query) use ($session_account_id, $id_target) {
-                $query->where(function ($q) use ($session_account_id, $id_target) {
-                    $q->where('c.sender', $session_account_id)
-                        ->where('c.receiver', $id_target);
-                })->orWhere(function ($q) use ($session_account_id, $id_target) {
-                    $q->where('c.receiver', $session_account_id)
-                        ->where('c.sender', $id_target);
-                });
-            })
-            ->get();
-        $active = DB::table('pelamars as a')
-            ->join('pekerjaans as b', 'a.job_id', '=', 'b.id')
-            ->select('a.*', 'b.pembuat')
-            ->where('a.user_id', $id_target)
-            ->where('b.pembuat', $session_account_id)
-            ->whereNotIn('a.status', ['ditolak', 'Gagal', 'Lamaran Dihapus', 'Selesai'])
-            ->whereNot('is_delete',true)
-            ->get();
+                ->leftJoin('pekerjaans as a', 'a.id', '=', 'c.pekerjaan_id')
+                ->leftJoin('chats as d', 'd.chat_references', '=', 'c.id')
+                ->where(function ($query) use ($session_account_id, $id_target) {
+                    $query->where(function ($q) use ($session_account_id, $id_target) {
+                        $q->where('c.sender', $session_account_id)
+                            ->where('c.receiver', $id_target);
+                    })->orWhere(function ($q) use ($session_account_id, $id_target) {
+                        $q->where('c.receiver', $session_account_id)
+                            ->where('c.sender', $id_target);
+                    });
+                })
+                ->get();
+        } else {
+            $all_chats = DB::table('chats as c')
+                ->selectRaw('
+                c.id AS id_chat,
+                c.*,
+                a.*,
+                d.contents AS content_references,
+                c.created_at AS sent
+            ')
+                ->leftJoin('pekerjaans as a', 'a.id', '=', 'c.pekerjaan_id')
+                ->leftJoin('chats as d', 'd.chat_references', '=', 'c.id')
+                ->where(function ($query) use ($session_account_id, $id_target) {
+                    $query->where(function ($q) use ($session_account_id, $id_target) {
+                        $q->where('c.sender', $session_account_id)
+                            ->where('c.receiver', $id_target);
+                    })->orWhere(function ($q) use ($session_account_id, $id_target) {
+                        $q->where('c.receiver', $session_account_id)
+                            ->where('c.sender', $id_target);
+                    });
+                })
+                ->get();
+
+            if (count($all_chats) < 1) {
+                $all_chats = [true];
+            }
+        }
+
+        $active = null;
+        if (session('account')['role'] == 'mitra') {
+            $active = DB::table('pelamars as a')
+                ->join('pekerjaans as b', 'a.job_id', '=', 'b.id')
+                ->select('a.*', 'b.pembuat')
+                ->where('a.user_id', $id_target)
+                ->where('b.pembuat', $session_account_id)
+                ->whereNotIn('a.status', ['ditolak', 'Gagal', 'Lamaran Dihapus', 'Selesai'])
+                ->whereNot('is_delete', true)
+                ->get();
+        } elseif (session('account')['role'] == 'user') {
+            $active = DB::table('pelamars as a')
+                ->join('pekerjaans as b', 'a.job_id', '=', 'b.id')
+                ->select('a.*', 'b.pembuat')
+                ->where('a.user_id', $session_account_id)
+                ->where('b.pembuat', $id_target)
+                ->whereNotIn('a.status', ['ditolak', 'Gagal', 'Lamaran Dihapus', 'Selesai'])
+                ->whereNot('is_delete', true)
+                ->get();
+        } else {
+            $active = true;
+        }
+
+        $all_users = null;
+        if(session('account')['role'] == 'admin') {
+            $all_users = Users::all();
+        }
         $target = $id_target;
         $all = $chats;
-        // dd($active);
+        // dd($active, $all_chats);
         // dd('id gw: '.session('account')['id'],'id lawan: '.$id_target,$all_chats);
         // dd($all);
 
 
-        return view('Dewa.need_auth.chat', compact('to_text', 'all_chats', 'target', 'all', 'user', 'active'));
+        return view('Dewa.need_auth.chat', compact('to_text', 'all_chats', 'target', 'all', 'user', 'active','all_users'));
     }
 
     public function store(Request $request)

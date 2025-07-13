@@ -675,6 +675,7 @@ $imageExtensions = ['jpg', 'jpeg', 'png', 'gif', 'bmp', 'webp', 'svg'];
                 <input type="text" class="form-control" placeholder="Cari isi chat...">
             </div>
             <div class="chat-body">
+                @if((count($all_chats)>0 && ($all_chats[0]!=true || isset($all_chats[0]->id_chat))) || session('account')['role']!='admin')
                 @forEach($all_chats as $chat)
                 @if($chat->Lamaran_status!=null)
                 <div class="alert {{{$chat->Lamaran_status == 'Gagal'?'alert-dark':'alert-info'}}} d-flex flex-column justify-content-center align-items-center mb-3 rounded-3 border-0 py-2"
@@ -789,9 +790,12 @@ $imageExtensions = ['jpg', 'jpeg', 'png', 'gif', 'bmp', 'webp', 'svg'];
                 </div>
                 @endif
                 @endforeach
+                @else
+
+                @endif
             </div>
             <form class="chat-footer w-100 position-relative" id="chat-footer">
-                @if(count($active)!=0)
+                @if($active==true||count($active)!=0)
                 <div id="filePreviewArea" class="mb-2 d-none position-absolute" style="top: -70px;">
                     <div class="d-flex align-items-center gap-2 bg-light border rounded-3 px-3 py-2 position-relative"
                         style="max-width:360px;">
@@ -849,7 +853,6 @@ $imageExtensions = ['jpg', 'jpeg', 'png', 'gif', 'bmp', 'webp', 'svg'];
                 </div>
                 @endif
             </form>
-
             @else
             <div class="no chat w-100 h-100 d-flex justify-content-center align-content-center">
                 <div class="d-flex align-items-center gap-2 mb-2">
@@ -870,7 +873,7 @@ $imageExtensions = ['jpg', 'jpeg', 'png', 'gif', 'bmp', 'webp', 'svg'];
                     person.style.display = ''
                 }
                 else{
-                    
+
                     person.style.display = 'none'
                 }
             })
@@ -1024,7 +1027,7 @@ $imageExtensions = ['jpg', 'jpeg', 'png', 'gif', 'bmp', 'webp', 'svg'];
                 `;
                 } else {
                     preview = `
-                    
+
                     <div class="d-flex justify-content-end mb-2">
                             <div
                                 class="bg-primary bg-opacity-10 rounded-3 p-3 d-inline-flex align-items-center shadow-sm">
@@ -1058,7 +1061,7 @@ $imageExtensions = ['jpg', 'jpeg', 'png', 'gif', 'bmp', 'webp', 'svg'];
             formData.append('file_json', file_get);
             formData.append('chat_reference', referensi_chat == null ? '' : referensi_chat[1]);
             formData.append('body_chat_references', referensi_chat == null ? '' : referensi_chat[0]);
-
+            console.log(formData)
             if (text != null || preview != null) {
 
                 fetch('/make_chat', {
@@ -1104,7 +1107,7 @@ $imageExtensions = ['jpg', 'jpeg', 'png', 'gif', 'bmp', 'webp', 'svg'];
                         }
                     })
                     .catch(error => {
-                        console.error('Error:', error);
+                        console.error('ini eror:', error);
                     });
             }
         });
@@ -1130,7 +1133,7 @@ $imageExtensions = ['jpg', 'jpeg', 'png', 'gif', 'bmp', 'webp', 'svg'];
             });
         });
 
-        //     
+        //
 
         newest_chat();
         function newest_chat() {

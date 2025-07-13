@@ -58,7 +58,7 @@ Route::get('/kerja/', action: [PekerjaanController::class, 'index']);
 
 Route::middleware(['role:user|mitra|admin'])->group(function () {
     Route::get('/chat/{id_target}', [ChatController::class, 'index']);
-
+    Route::post('/make_chat', action: [ChatController::class, 'store']);
 });
 Route::middleware(['role:user|mitra'])->group(function () {
     Route::get('/daftar-lamaran/', action: [PekerjaanController::class, 'Daftar_Lamaran']);
@@ -71,7 +71,6 @@ Route::middleware(['role:user|mitra'])->group(function () {
     Route::get('/Chat/Kerja/{idPekerjaan}', action: [ChatController::class, 'Lamaran']);
 
     // Route::get('/Chat/{id_target}', action: [ChatController::class, 'index']);
-    Route::post('/make_chat', action: [ChatController::class, 'store']);
 
     //Kerja
     Route::get('/question-new-user', action: [HomeController::class, 'new_user']);

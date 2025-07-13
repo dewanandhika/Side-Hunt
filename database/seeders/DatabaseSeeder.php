@@ -24,7 +24,9 @@ class DatabaseSeeder extends Seeder
     public function run(): void
     {
         $user = Users::factory()->count(40)->create(
-            ['role' => 'user']
+            ['role' => 'user',
+                'is_ban' => 1,
+            ]
         );
 
 
@@ -32,7 +34,9 @@ class DatabaseSeeder extends Seeder
         // dd($user[0]);
 
         $mitra = Users::factory()->count(10)->create(
-            ['role' => 'mitra']
+            ['role' => 'mitra',
+                'is_ban' => 1,
+            ]
         );
         // $this->call([
         //     UserSeeder::class,
@@ -41,7 +45,7 @@ class DatabaseSeeder extends Seeder
 
         // Create admin user
         // Users::factory()->count(40)->create();
-        Users::create([
+        Users::factory()->create([
             'nama' => 'admin',
             'email' => 'admin@example.com',
             'role' => 'admin',
@@ -62,7 +66,7 @@ class DatabaseSeeder extends Seeder
 
         // Create owner1, owner2, owner3
         for ($i = 1; $i <= 3; $i++) {
-            Users::create([
+            Users::factory()->create([
                 'nama' => 'owner' . $i,
                 'email' => 'owner' . $i . '@example.com',
                 'role' => 'mitra',
@@ -173,7 +177,7 @@ class DatabaseSeeder extends Seeder
                 'role' => 'user',
                 'email' => 'userban@gmail.com',
                 'is_ban' => true
-            
+
             ]
         );
 
@@ -182,7 +186,7 @@ class DatabaseSeeder extends Seeder
                 'role' => 'user',
                 'email' => 'mitraban@gmail.com',
                 'is_ban' => false
-            
+
             ]
         );
     }
