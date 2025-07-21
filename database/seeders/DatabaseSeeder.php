@@ -25,7 +25,7 @@ class DatabaseSeeder extends Seeder
     {
         $user = Users::factory()->count(40)->create(
             ['role' => 'user',
-                'is_ban' => 1,
+                'is_ban' => 0,
             ]
         );
 
@@ -35,7 +35,7 @@ class DatabaseSeeder extends Seeder
 
         $mitra = Users::factory()->count(10)->create(
             ['role' => 'mitra',
-                'is_ban' => 1,
+                'is_ban' => 0,
             ]
         );
         // $this->call([
@@ -176,7 +176,7 @@ class DatabaseSeeder extends Seeder
             [
                 'role' => 'user',
                 'email' => 'userban@gmail.com',
-                'is_ban' => true
+                'is_ban' => 1
 
             ]
         );
@@ -185,7 +185,7 @@ class DatabaseSeeder extends Seeder
             [
                 'role' => 'user',
                 'email' => 'mitraban@gmail.com',
-                'is_ban' => false
+                'is_ban' => 1
 
             ]
         );

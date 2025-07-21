@@ -106,11 +106,20 @@ class PelamarController extends Controller
     public function Profile_Pelamar($idPelamar)
     {
         // dD()
-        $cek = (new PekerjaanController())->is_own_pelamar((Pelamar::findOrFail($idPelamar)['id']));
+        // dd($idPelamar);
+        $job = Pelamar::where("id",$idPelamar)->first();
+        $cek = (new PekerjaanController())->is_own_pelamar(($job->job_id));
+        // dd($cek);
+        // dd($cek);
         if ($cek) {
+            // dd($job);
             $data = Pelamar::join('users', 'pelamars.user_id', '=', 'users.id')
-                ->select('users.*')
-                ->get();
+                ->select('users.*','pelamars.status as status')
+                // ->select('users.*','pelamars.*')
+                ->where('pelamars.id',$idPelamar)
+                ->get()->first();
+                // dd($data);
+                // dd($data,$idPelamar  );
             $nama_halaman = 'Profil Pelamar';
             $active_navbar = 'Pekerjaan';
             return view('Dewa.pekerjaan.show_profile_pelamar', compact('data', 'nama_halaman', 'active_navbar'));

@@ -96,6 +96,11 @@
             width: 100% !important;
         }
     }
+    .hover_this:hover{
+        background-color: #232323 !important;
+        color: white !important;
+        cursor: pointer;
+    }
 </style>
 @endsection
 @section('add-onn')
@@ -228,6 +233,7 @@
                         <th class="text-center">Pekerjaan yang dilamar</th class="text-center">
                         <th class="text-center">Nama Pelamar</th class="text-center">
                         <th class="text-center">Keahlian</th class="text-center">
+                        <th class="text-center">No Telepon</th class="text-center">
                         <th class="text-center">Interview</th class="text-center">
                         <th class="text-center">Jadwal Interview</th class="text-center">
                         <th class="text-center">Message</th class="text-center">
@@ -237,20 +243,24 @@
                 <tbody>
                     @if(!count($pelamars)==0)
                     @foreach($pelamars as $pelamar)
+                    
                     <tr class="the_job @if(in_array($pelamar->status_job, ['ditolak','Gagal'])) opacity-50 @endif"
                         data-status="{{{$pelamar->status_job}}}">
                         <td class="fs-12">{{{$pelamar->daftar}}}</td>
-                        <td onclick="window.location.href='/Pelamar/Profile/{{{$pelamar->id}}}'">
+                        <td >
                             {{{$pelamar->nama}}}
 
                         </td>
-                        <td>
+                        <td class="hover_this" onclick="window.location.href='/Pelamar/Profile/{{{$pelamar->id_pelamars}}}'">
                             <div class="d-flex flex-row gap-2">
                                 <p class="clear-p text-truncate">{{{$pelamar->nama_pelamar}}}</p>
 
                             </div>
                         </td>
                         <td style="font-size: 10px;">{{{$pelamar->preferensi_user}}}</td>
+                        <td >
+                            {{{$pelamar->telpon}}}
+                        </td>
                         <td>
                             @if($pelamar->link!=null)
                             <a href="{{{$pelamar->link}}}">klik</a>

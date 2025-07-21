@@ -58,6 +58,7 @@ class PekerjaanController extends Controller
             'pelamars.created_at as daftar',
             'users.nama as nama_pelamar',
             'users.preferensi_user',
+            'users.telpon as telpon',
             'pelamars.status as status_job',
             'pelamars.id as id_pelamars',
             'pelamars.user_id as id_pelamar',

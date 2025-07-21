@@ -73,30 +73,40 @@ padding: 0;
     <div class="d-flex justify-content-between pe-3 align-items-start flex-row w-100 h-100">
         <h1 class="text-black fw-bolder">Profil Pelamar</h1>
         <div>
-            <button class="btn btn-toolbar">Diterima</button>
+            @if($data->status=='tunda')
+            <button class="btn btn-toolbar">Lamaran Baru</button>
+            @elseif($pelamar->status_job=='interview')
+            <button class="btn btn-toolbar">Tahap Interview</button>
+            @elseif($data->status=='ditolak')
+            <button class="btn btn-toolbar">Lamaran Ditolak</button>
+            @elseif($pelamar->status_job=='Gagal')
+            <button class="btn btn-toolbar">Lamaran Gagal</button>
+            @else
+            <button class="btn btn-toolbar">$data->status</button>
+            @endif
         </div>
     </div>
     <div class="d-flex flex-column w-100 h-100">
         <div class="rounded-3 d-flex flex-row bg-prim-me p-5 justify-content-between align-items-center w-100"
             style="height: 30vh;">
             <div class="d-flex flex-column contText gap-1">
-                <h2 class="ps-5 clear-p">{{{session('account')->nama}}}</h2>
+                <h2 class="ps-5 clear-p">{{{$data->nama}}}</h2>
                 <div class="d-flex gap-3 flex-row">
                     <i class="bi bi-geo-fill text-white"></i>
                     <p class="text-white clear-p">
-                        {{ session('account')->alamat == null ? 'Belum Diisi' : session('account')->alamat }}
+                        {{ $data->alamat == null ? 'Belum Diisi' : $data->alamat }}
                     </p>
                 </div>
                 <div class="d-flex gap-3 flex-row">
                     <i class="bi bi-envelope text-white"></i>
                     <p class="text-white clear-p">
-                        {{ session('account')->email == null ? 'Belum Diisi' : session('account')->email }}
+                        {{ $data->email == null ? 'Belum Diisi' : $data->email }}
                     </p>
                 </div>
                 <div class="d-flex gap-3 flex-row">
                     <i class="bi bi-telephone text-white"></i>
                     <p class="text-white clear-p">
-                        {{ session('account')->telpon == null ? 'Belum Diisi' : session('account')->telpon }}
+                        {{ $data->telpon == null ? 'Belum Diisi' : $data->telpon }}
                     </p>
                 </div>
             </div>
@@ -121,15 +131,24 @@ padding: 0;
             <div class="mb-4">
                 <h5 class="mb-2">Deskripsi</h5>
                 <p class="card-text">
-                    {{{json_decode(session('account')->preferensi_user)->deskripsi}}}
+                    @if($data->preferensi_user!=null)
+                    {{{json_decode($data->preferensi_user)->deskripsi}}}
+                    @else 
+                    User ini belum menambahkan Deskripsi
+                    @endif
                 </p>
             </div>
             <div>
+                
                 <h5 class="mb-3">Keahlian</h5>
                 <div class="d-flex flex-wrap gap-2">
-                    @foreach(json_decode(session('account')->preferensi_user)->kriteria as $kriteria)
+                    @if($data->preferensi_user!=null)
+                    @foreach(json_decode($data->preferensi_user)->kriteria as $kriteria)
                     <span class="badge w-auto text-wrap text-start fs-5 bg-prim-me">{{{ucwords($kriteria)}}}</span>
                     @endforeach
+                    @else 
+                    <p>User ini belum menambahkan Keahlian</p>
+                    @endif
                 </div>
             </div>
         </div>
